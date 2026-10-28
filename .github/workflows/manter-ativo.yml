@@ -1,0 +1,35 @@
+# Mantém o Supabase acordado.
+# O plano grátis pausa o projeto depois de uns 7 dias sem uso, e aí o site para.
+# Isto faz uma consulta simples todo dia, sozinho, pelo GitHub.
+#
+# Precisa de 2 segredos no repositório (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL           → a mesma Project URL do js/config.js
+#   SUPABASE_CHAVE_PUBLICA → a mesma Publishable key do js/config.js
+
+name: Manter Supabase ativo
+
+on:
+  schedule:
+    - cron: "17 12 * * *"   # todo dia às 09:17 de Brasília
+  workflow_dispatch:         # botão "Run workflow" para testar na hora
+
+jobs:
+  cutucar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consulta simples no banco
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_CHAVE_PUBLICA: ${{ secrets.SUPABASE_CHAVE_PUBLICA }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_CHAVE_PUBLICA" ]; then
+            echo "Faltam os segredos SUPABASE_URL e SUPABASE_CHAVE_PUBLICA."
+            exit 1
+          fi
+          codigo=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL%/}/rest/v1/configuracao?select=id" \
+            -H "apikey: ${SUPABASE_CHAVE_PUBLICA}")
+          echo "Resposta do Supabase: $codigo"
+          if [ "$codigo" != "200" ]; then
+            exit 1
+          fi

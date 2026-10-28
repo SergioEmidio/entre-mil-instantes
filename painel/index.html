@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1222">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel · Entre Mil Instantes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/base.css">
+  <style>
+    body { background: var(--painel-fundo); }
+    .diag { gap: 18px; }
+    .diag-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+    .diag-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; }
+    .diag-sinal { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--linha-2); margin-top: 1px; }
+    .diag-item[data-estado="ok"] .diag-sinal { background: var(--certo); border-color: var(--certo); }
+    .diag-item[data-estado="erro"] .diag-sinal { background: var(--erro); border-color: var(--erro); }
+    .diag-item[data-estado="testando"] .diag-sinal { border-color: var(--champanhe); }
+    .diag-nome { font-weight: 600; font-size: 15px; }
+    .diag-detalhe { font-size: 13px; color: var(--texto-2); margin-top: 2px; word-break: break-word; }
+    .diag-form { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+  </style>
+</head>
+<body>
+  <!-- Fase 0: página de teste da instalação. Na fase 2 vira o painel de verdade. -->
+  <main class="tela diag">
+    <div>
+      <p class="rotulo">Painel · fase 0</p>
+      <h1 class="titulo titulo-m" style="margin-top: 8px">Teste da instalação</h1>
+      <p class="texto-2 texto-p" style="margin-top: 8px">Se os 4 itens ficarem verdes, a base está pronta.</p>
+    </div>
+
+    <ul class="diag-lista">
+      <li class="diag-item cartao" id="d-config">
+        <span class="diag-sinal" aria-hidden="true"></span>
+        <div><p class="diag-nome">1. config.js preenchido</p><p class="diag-detalhe">Esperando…</p></div>
+      </li>
+      <li class="diag-item cartao" id="d-banco">
+        <span class="diag-sinal" aria-hidden="true"></span>
+        <div><p class="diag-nome">2. Conexão com o banco</p><p class="diag-detalhe">Esperando…</p></div>
+      </li>
+      <li class="diag-item cartao" id="d-admin">
+        <span class="diag-sinal" aria-hidden="true"></span>
+        <div><p class="diag-nome">3. Tua conta de admin</p><p class="diag-detalhe">Entra abaixo para testar.</p></div>
+      </li>
+      <li class="diag-item cartao" id="d-convidada">
+        <span class="diag-sinal" aria-hidden="true"></span>
+        <div><p class="diag-nome">4. A conta dela (senha = data)</p><p class="diag-detalhe">Testa abaixo com os 8 números.</p></div>
+      </li>
+    </ul>
+
+    <form class="cartao diag-form" id="form-admin" novalidate>
+      <p class="diag-nome">Testar a tua conta</p>
+      <div class="campo-grupo">
+        <label class="campo-rotulo" for="admin-email">E-mail</label>
+        <input class="campo" id="admin-email" type="email" autocomplete="username" required>
+      </div>
+      <div class="campo-grupo">
+        <label class="campo-rotulo" for="admin-senha">Senha</label>
+        <input class="campo" id="admin-senha" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="botao botao--primario" type="submit">Testar admin</button>
+    </form>
+
+    <form class="cartao diag-form" id="form-convidada" novalidate>
+      <p class="diag-nome">Testar a conta dela</p>
+      <div class="campo-grupo">
+        <label class="campo-rotulo" for="convidada-senha">Só os 8 números da data (ddmmaaaa)</label>
+        <input class="campo" id="convidada-senha" type="password" inputmode="numeric" maxlength="8" autocomplete="off" required>
+      </div>
+      <button class="botao botao--fantasma" type="submit">Testar conta dela</button>
+    </form>
+  </main>
+
+  <script type="module" src="../js/painel/diagnostico.js"></script>
+</body>
+</html>

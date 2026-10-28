@@ -1,0 +1,15 @@
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+
+# Nunca subir: anotações com senhas ou e-mails
+segredos*.txt
+anotacoes-privadas*
