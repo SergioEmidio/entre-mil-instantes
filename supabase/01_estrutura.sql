@@ -218,7 +218,10 @@ begin
     raise exception 'sem_acesso' using errcode = '42501';
   end if;
 
-  select publicado into dados from public.conteudo where id = 1;
+  -- Enquanto nada foi publicado ainda, usa o rascunho (evita site vazio).
+  select case when publicado is null or publicado = '{}'::jsonb then rascunho else publicado end
+    into dados
+    from public.conteudo where id = 1;
 
   select coalesce(jsonb_agg(
            case

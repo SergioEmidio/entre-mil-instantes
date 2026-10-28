@@ -3,8 +3,8 @@
 # Isto faz uma consulta simples todo dia, sozinho, pelo GitHub.
 #
 # Precisa de 2 segredos no repositório (Settings → Secrets and variables → Actions):
-#   SUPABASE_URL           → a mesma Project URL do js/config.js
-#   SUPABASE_CHAVE_PUBLICA → a mesma Publishable key do js/config.js
+#   SUPABASE_URL           → a mesma Project URL do js/config.js (sem aspas)
+#   SUPABASE_CHAVE_PUBLICA → a mesma Publishable key do js/config.js (sem aspas)
 
 name: Manter Supabase ativo
 
@@ -22,14 +22,30 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_CHAVE_PUBLICA: ${{ secrets.SUPABASE_CHAVE_PUBLICA }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_CHAVE_PUBLICA" ]; then
-            echo "Faltam os segredos SUPABASE_URL e SUPABASE_CHAVE_PUBLICA."
+          # Limpa aspas, espaços e quebras de linha que vêm junto ao colar.
+          URL=$(printf '%s' "$SUPABASE_URL" | tr -d "\"' \r\n")
+          CHAVE=$(printf '%s' "$SUPABASE_CHAVE_PUBLICA" | tr -d "\"' \r\n")
+          URL="${URL%/}"
+
+          if [ -z "$URL" ] || [ -z "$CHAVE" ]; then
+            echo "::error::Faltam os segredos SUPABASE_URL e SUPABASE_CHAVE_PUBLICA."
             exit 1
           fi
+
+          case "$URL" in
+            https://*.supabase.co) ;;
+            *)
+              echo "::error::O segredo SUPABASE_URL está no formato errado. Tem que ser assim: https://xxxx.supabase.co"
+              exit 1
+              ;;
+          esac
+
           codigo=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${SUPABASE_URL%/}/rest/v1/configuracao?select=id" \
-            -H "apikey: ${SUPABASE_CHAVE_PUBLICA}")
+            "$URL/rest/v1/configuracao?select=id" \
+            -H "apikey: $CHAVE") || codigo="sem_conexao"
+
           echo "Resposta do Supabase: $codigo"
           if [ "$codigo" != "200" ]; then
+            echo "::error::O Supabase não respondeu 200. Confere a chave (SUPABASE_CHAVE_PUBLICA) e se o projeto não está pausado."
             exit 1
           fi

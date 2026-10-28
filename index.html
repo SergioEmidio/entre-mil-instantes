@@ -7,24 +7,176 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Entre Mil Instantes</title>
 
+  <!-- Como o link aparece quando for mandado no WhatsApp -->
+  <meta name="description" content="Tem uma coisa sendo preparada pra ti.">
+  <meta property="og:title" content="Entre Mil Instantes">
+  <meta property="og:description" content="Tem uma coisa sendo preparada pra ti.">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/site.css">
 </head>
 <body>
-  <!-- Fase 0: página provisória. Na fase 1 entra a contagem, a senha e o carregamento. -->
-  <main class="tela tela--centro">
-    <div class="estrelas" aria-hidden="true">
-      <span class="estrela" style="top: 12%; left: 16%"></span>
-      <span class="estrela" style="top: 20%; left: 78%; animation-delay: 1.2s"></span>
-      <span class="estrela" style="top: 34%; left: 40%; animation-delay: 2.1s"></span>
-      <span class="estrela" style="top: 72%; left: 20%; animation-delay: 0.6s"></span>
-      <span class="estrela" style="top: 82%; left: 84%; animation-delay: 1.7s"></span>
-    </div>
+  <!-- Céu de fundo, comum a todas as telas (as estrelas são criadas pelo JS) -->
+  <div class="ceu" id="ceu" aria-hidden="true"></div>
 
-    <p class="rotulo">Em breve</p>
-    <h1 class="titulo titulo--italico titulo-g" style="margin-top: 14px">Tem uma coisa sendo preparada.</h1>
-  </main>
+  <!-- ================================================================
+       ESPERA: aparece por um instante enquanto o site descobre o que mostrar
+       ================================================================ -->
+  <section class="cena cena--ativa" id="tela-espera" aria-label="Carregando">
+    <div class="tela tela--centro">
+      <div class="pontinhos" role="status" aria-label="Carregando">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       ERRO DE CONEXÃO
+       ================================================================ -->
+  <section class="cena" id="tela-erro" aria-labelledby="erro-titulo" hidden>
+    <div class="tela tela--centro pilha pilha--g">
+      <p class="rotulo">Ops</p>
+      <h1 class="titulo titulo--italico titulo-m" id="erro-titulo">Não consegui abrir agora.</h1>
+      <p class="texto-2" id="erro-texto">Confere a internet e tenta de novo.</p>
+      <button class="botao botao--primario" type="button" id="erro-tentar">Tentar de novo</button>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       00 · CONTAGEM (antes do dia 3)
+       ================================================================ -->
+  <section class="cena" id="tela-contagem" aria-labelledby="contagem-titulo" hidden>
+    <div class="tela tela--centro contagem">
+      <div class="pilha pilha--m">
+        <p class="rotulo" id="contagem-rotulo">Ainda não</p>
+        <h1 class="titulo titulo--italico titulo-g" id="contagem-titulo">Tem uma coisa sendo preparada pra ti.</h1>
+        <p class="texto-2">Abre à meia-noite do dia 3 de novembro.</p>
+      </div>
+
+      <div class="contagem-grade" role="timer" aria-live="off" aria-label="Tempo que falta">
+        <div class="contagem-casa"><span class="contagem-numero" id="cont-dias">00</span><span class="contagem-unidade">dias</span></div>
+        <div class="contagem-casa"><span class="contagem-numero" id="cont-horas">00</span><span class="contagem-unidade">horas</span></div>
+        <div class="contagem-casa"><span class="contagem-numero" id="cont-min">00</span><span class="contagem-unidade">min</span></div>
+        <div class="contagem-casa"><span class="contagem-numero" id="cont-seg">00</span><span class="contagem-unidade">seg</span></div>
+      </div>
+
+      <p class="texto-3 texto-p">Guarda este link. Ele muda sozinho na hora certa.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       01 · SENHA (a data em que se conheceram)
+       ================================================================ -->
+  <section class="cena" id="tela-senha" aria-labelledby="senha-titulo" hidden>
+    <div class="tela senha">
+      <form class="senha-form pilha pilha--g" id="senha-form" novalidate autocomplete="off">
+        <div class="pilha pilha--m">
+          <p class="rotulo">Antes de entrar</p>
+          <h1 class="titulo titulo--italico titulo-g" id="senha-titulo">Quando a nossa história começou?</h1>
+          <p class="texto-2">Só quem estava lá sabe a resposta.</p>
+        </div>
+
+        <div class="campo-grupo">
+          <label class="campo-rotulo" for="senha-campo">Data (dia/mês/ano)</label>
+          <input
+            class="campo senha-campo"
+            id="senha-campo"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9/]*"
+            maxlength="10"
+            placeholder="dd/mm/aaaa"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="go"
+            aria-describedby="senha-aviso"
+          >
+          <p class="senha-aviso" id="senha-aviso" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       02 · CARREGAMENTO (senha certa)
+       ================================================================ -->
+  <section class="cena" id="tela-carregamento" aria-labelledby="carga-frase" hidden>
+    <div class="tela tela--centro carga">
+      <div class="carga-anel">
+        <svg class="carga-svg" viewBox="0 0 220 220" aria-hidden="true">
+          <circle class="carga-trilho" cx="110" cy="110" r="100"></circle>
+          <circle class="carga-progresso" id="carga-progresso" cx="110" cy="110" r="100"></circle>
+        </svg>
+
+        <div class="carga-centro" id="carga-data">
+          <p class="carga-data" id="carga-data-texto"></p>
+          <p class="rotulo carga-rotulo">Tu lembraste</p>
+        </div>
+
+        <div class="carga-centro" id="carga-contador" hidden>
+          <p class="carga-numero" id="carga-numero">0</p>
+          <p class="rotulo carga-rotulo texto-2">dias desde aquele dia</p>
+        </div>
+
+        <div class="carga-centro" id="carga-pronto" hidden>
+          <svg class="carga-check" viewBox="0 0 24 24" role="img" aria-label="Pronto">
+            <path d="m5 12 5 5 9-10"></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="carga-textos">
+        <p class="titulo titulo--italico carga-frase" id="carga-frase" aria-live="polite">É essa. Senha certa.</p>
+        <p class="texto-2 carga-sub" id="carga-sub">Abrindo a nossa história…</p>
+      </div>
+
+      <div class="carga-barra">
+        <div class="carga-barra-trilho"><div class="carga-barra-cheia" id="carga-barra"></div></div>
+        <p class="carga-porcento" id="carga-porcento">0%</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================================================================
+       03 · ABERTURA (provisória: a de verdade chega na fase 3)
+       ================================================================ -->
+  <section class="cena" id="tela-abertura" aria-labelledby="abertura-nome" hidden>
+    <div class="tela tela--centro pilha pilha--g">
+      <p class="rotulo">03 · 11 · 2026</p>
+      <h1 class="titulo abertura-nome" id="abertura-nome">Feliz aniversário</h1>
+      <p class="texto-2">(As próximas telas chegam na fase 3.)</p>
+    </div>
+  </section>
+
+  <noscript>
+    <div class="tela tela--centro"><p>Para ver esta página, ativa o JavaScript do navegador.</p></div>
+  </noscript>
+
+  <!-- Vigia: se o site não começar em 20s (arquivo faltando, erro, internet travada),
+       troca os "…" pela tela de erro em vez de ficar carregando para sempre. -->
+  <script>
+    window.addEventListener("error", function (e) {
+      console.error("[Entre Mil Instantes] Erro ao carregar:", e.message || e);
+    });
+    setTimeout(function () {
+      if (window.__siteComecou) return;
+      var espera = document.getElementById("tela-espera");
+      var erro = document.getElementById("tela-erro");
+      if (espera && erro && !espera.hidden) {
+        espera.hidden = true;
+        erro.hidden = false;
+        console.error("[Entre Mil Instantes] O site não terminou de abrir em 20s. Veja os erros acima.");
+      }
+    }, 20000);
+  </script>
+  <script type="module" src="./js/site/app.js"></script>
 </body>
 </html>

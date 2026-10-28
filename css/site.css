@@ -1,0 +1,400 @@
+/* =====================================================================
+   Entre Mil Instantes · site.css
+   Telas do site dela. Pensado primeiro para celular e ajustado para
+   celulares pequenos, celular deitado, tablet e computador.
+   ===================================================================== */
+
+/* ---------- Céu de fundo (fixo atrás de todas as telas) ---------- */
+.ceu {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--meia-noite);
+}
+
+/* ---------- Cenas (cada tela do site) ---------- */
+.cena .tela {
+  overflow: visible;   /* o céu agora fica no fundo fixo; nada é cortado */
+}
+
+.cena {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.cena--entrando {
+  animation: cena-entra var(--lento) var(--suave) both;
+}
+
+.cena--saindo {
+  animation: cena-sai var(--medio) ease both;
+  pointer-events: none;
+}
+
+@keyframes cena-entra {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes cena-sai {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ---------- Pilhas (colunas com espaçamento) ---------- */
+.pilha {
+  display: flex;
+  flex-direction: column;
+}
+
+.pilha--m { gap: 12px; }
+.pilha--g { gap: clamp(22px, 5vh, 32px); }
+
+.tela--centro .pilha {
+  align-items: center;
+}
+
+/* ---------- Espera (três pontinhos) ---------- */
+.pontinhos {
+  display: flex;
+  gap: 8px;
+}
+
+.pontinhos span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--champanhe);
+  animation: pontinho 1.2s ease-in-out infinite;
+}
+
+.pontinhos span:nth-child(2) { animation-delay: 0.15s; }
+.pontinhos span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes pontinho {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50%      { opacity: 1;    transform: translateY(-4px); }
+}
+
+/* =====================================================================
+   00 · CONTAGEM
+   ===================================================================== */
+.contagem {
+  gap: clamp(28px, 6vh, 44px);
+}
+
+.contagem-grade {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(6px, 2.4vw, 12px);
+  width: 100%;
+}
+
+.contagem-casa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: clamp(12px, 3.5vw, 18px) 0 clamp(10px, 3vw, 14px);
+  border: 1px solid #263150;
+  border-radius: var(--raio);
+  background: rgba(20, 28, 48, 0.85);
+}
+
+.contagem-numero {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: clamp(30px, 10.5vw, 46px);
+  line-height: 1;
+  color: var(--champanhe);
+  font-variant-numeric: tabular-nums;
+}
+
+.contagem-unidade {
+  font-size: clamp(10px, 2.8vw, 11px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+
+/* =====================================================================
+   01 · SENHA
+   ===================================================================== */
+.senha {
+  justify-content: center;
+}
+
+.senha-form {
+  width: 100%;
+}
+
+.senha-campo {
+  height: 60px;
+  font-size: clamp(20px, 6vw, 24px);
+  letter-spacing: 0.16em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.senha-campo:disabled {
+  opacity: 0.6;
+}
+
+.senha-campo--treme {
+  animation: tremer 0.42s ease;
+}
+
+@keyframes tremer {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+
+.senha-aviso {
+  min-height: 1.5em;   /* reserva o espaço: a tela não pula quando aparece aviso */
+  font-size: 14px;
+  color: var(--erro);
+}
+
+.senha-aviso--dica {
+  color: var(--champanhe);
+}
+
+.senha-aviso--neutro {
+  color: var(--texto-2);
+}
+
+/* =====================================================================
+   02 · CARREGAMENTO
+   ===================================================================== */
+.carga {
+  gap: clamp(26px, 5vh, 40px);
+}
+
+.carga-anel {
+  --tamanho: clamp(176px, 56vw, 230px);
+  position: relative;
+  width: var(--tamanho);
+  height: var(--tamanho);
+  flex-shrink: 0;
+}
+
+.carga-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.carga-trilho,
+.carga-progresso {
+  fill: none;
+  stroke-width: 2;
+}
+
+.carga-trilho {
+  stroke: #1e2842;
+}
+
+.carga-progresso {
+  stroke: var(--champanhe);
+  stroke-linecap: round;
+  stroke-dasharray: 628.32;
+  stroke-dashoffset: 628.32;
+  transition: stroke-dashoffset 0.2s linear;
+}
+
+.carga-centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  animation: cena-entra var(--medio) var(--suave) both;
+}
+
+.carga-data {
+  font-family: var(--fonte-titulo);
+  font-weight: 500;
+  font-size: clamp(30px, 9.5vw, 40px);
+  letter-spacing: 0.04em;
+  color: var(--champanhe);
+}
+
+.carga-numero {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: clamp(58px, 18vw, 76px);
+  line-height: 1;
+  color: var(--champanhe);
+  font-variant-numeric: tabular-nums;
+}
+
+.carga-rotulo {
+  font-size: 11px;
+  max-width: 82%;
+  text-wrap: balance;   /* quebra a linha de forma equilibrada */
+}
+
+.carga-check {
+  width: 56px;
+  height: 56px;
+  fill: none;
+  stroke: var(--champanhe);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.carga-textos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-height: 96px;   /* reserva espaço: as frases trocam sem a tela pular */
+}
+
+.carga-frase {
+  font-size: clamp(24px, 7.2vw, 28px);
+  line-height: 1.2;
+}
+
+.carga-frase--troca {
+  animation: cena-entra var(--medio) var(--suave) both;
+}
+
+.carga-sub {
+  font-size: 14px;
+  min-height: 1.5em;
+}
+
+.carga-barra {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.carga-barra-trilho {
+  position: relative;
+  height: 2px;
+  border-radius: 1px;
+  background: #1e2842;
+  overflow: hidden;
+}
+
+.carga-barra-cheia {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--champanhe);
+  transition: width 0.2s linear;
+}
+
+.carga-porcento {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================================
+   03 · ABERTURA (provisória)
+   ===================================================================== */
+.abertura-nome {
+  font-size: clamp(56px, 18vw, 96px);
+  color: var(--champanhe);
+}
+
+/* =====================================================================
+   RESPONSIVO
+   ===================================================================== */
+
+/* Celulares bem pequenos (iPhone SE 1ª geração, Androids de 320px) */
+@media (max-width: 359px) {
+  .tela {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .contagem-grade {
+    gap: 5px;
+  }
+}
+
+/* Tablet e computador: mais espaço, letras um pouco maiores */
+@media (min-width: 768px) {
+  :root {
+    --largura-tela: 560px;
+  }
+  .titulo-g {
+    font-size: 52px;
+  }
+  .contagem-numero {
+    font-size: 56px;
+  }
+  .carga-anel {
+    --tamanho: 250px;
+  }
+}
+
+/* Celular deitado ou telas baixas: tudo mais compacto e com rolagem */
+@media (max-height: 560px) and (orientation: landscape) {
+  .tela {
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .tela--centro {
+    justify-content: flex-start;
+  }
+  .titulo-g {
+    font-size: 30px;
+  }
+  .contagem {
+    gap: 18px;
+  }
+  .contagem-casa {
+    padding: 8px 0;
+  }
+  .contagem-numero {
+    font-size: 30px;
+  }
+  .carga {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "anel textos"
+      "anel barra";
+    align-items: center;
+    column-gap: 28px;
+    row-gap: 12px;
+    text-align: left;
+  }
+  .carga-anel {
+    --tamanho: min(150px, 60vh);
+    grid-area: anel;
+  }
+  .carga-textos {
+    grid-area: textos;
+    align-items: flex-start;
+    min-height: 0;
+  }
+  .carga-barra {
+    grid-area: barra;
+  }
+  .carga-numero {
+    font-size: 48px;
+  }
+  .carga-data {
+    font-size: 24px;
+  }
+}

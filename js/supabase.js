@@ -75,6 +75,25 @@ export async function obterLiberacao() {
   return new Date(data.liberar_em);
 }
 
+// Hora de abrir + diferença entre o relógio do celular e o do servidor.
+// Assim a contagem fica certa mesmo se o celular estiver com a hora errada.
+// Devolve { liberarEm: Date, agora: () => Date (hora do servidor) }.
+export async function obterSituacao() {
+  const antes = Date.now();
+  const { data, error } = await supabase.rpc("situacao_publica");
+  falhouSe(error);
+  const depois = Date.now();
+
+  const horaServidor = new Date(data.agora).getTime();
+  const meioDoCaminho = antes + (depois - antes) / 2;
+  const diferenca = horaServidor - meioDoCaminho;
+
+  return {
+    liberarEm: new Date(data.liberar_em),
+    agora: () => new Date(Date.now() + diferenca),
+  };
+}
+
 // ---------------------------------------------------------------------
 // Entrar e sair
 // ---------------------------------------------------------------------
@@ -105,7 +124,7 @@ export async function meuPapel() {
   if (!sessao.session) return null;
   const { data, error } = await supabase.rpc("meu_papel");
   falhouSe(error);
-  return data ?? null;
+  return data == null ? null : data;
 }
 
 // ---------------------------------------------------------------------

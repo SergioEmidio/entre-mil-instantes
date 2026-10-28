@@ -111,6 +111,11 @@ a {
   outline-offset: 3px;
 }
 
+/* Títulos recebem foco só para leitores de tela: sem contorno visível. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 /* ---------- Tela: uma "tela de celular" centralizada ---------- */
 .tela {
   position: relative;
