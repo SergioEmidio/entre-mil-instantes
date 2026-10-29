@@ -221,6 +221,12 @@ export function tocarStories(lista, comecarEm = 0) {
     const cheias = [...el.barras.querySelectorAll(".stories-barra-cheia")];
 
     const pausado = () => pausadoPorToque || pausadoPorBotao || pausadoPorAba;
+    let inicioToque = 0;
+    // Para o som: um toque rápido (passar de story) não conta como pausa,
+    // senão a música corta de uma vez em vez de sumir devagar.
+    const pausadoParaSom = () =>
+      pausadoPorBotao || pausadoPorAba ||
+      (pausadoPorToque && performance.now() - inicioToque > TOQUE_MAXIMO);
 
     function desenharBarras() {
       const fracao = Math.min(1, decorrido / lista[atual].duracao);
@@ -258,7 +264,7 @@ export function tocarStories(lista, comecarEm = 0) {
       desenharBarras();
       estavaPausado = false;
       avisarItem(item, "aoEntrar");
-      if (pausado()) {
+      if (pausadoParaSom()) {
         estavaPausado = true;
         avisarItem(item, "aoPausar");
       }
@@ -287,9 +293,10 @@ export function tocarStories(lista, comecarEm = 0) {
       const passo = ultimoQuadro ? agora - ultimoQuadro : 0;
       ultimoQuadro = agora;
       const agoraPausado = pausado();
-      if (agoraPausado !== estavaPausado) {
-        estavaPausado = agoraPausado;
-        avisarItem(lista[atual], agoraPausado ? "aoPausar" : "aoContinuar");
+      const somPausado = pausadoParaSom();
+      if (somPausado !== estavaPausado) {
+        estavaPausado = somPausado;
+        avisarItem(lista[atual], somPausado ? "aoPausar" : "aoContinuar");
       }
       if (!agoraPausado) {
         decorrido += Math.min(passo, 100);   // se a aba travar, não pula vários stories
@@ -304,7 +311,6 @@ export function tocarStories(lista, comecarEm = 0) {
     }
 
     // ---- toques ----
-    let inicioToque = 0;
     let xInicio = 0;
     let yInicio = 0;
 

@@ -113,7 +113,7 @@ export function entrarNoStoryDaMusica() {
 export function sairDoStoryDaMusica() {
   noStory = false;
   if (!temMusica || musica.paused) return;
-  volumeAte(0, 600).then(() => {
+  volumeAte(0, 900).then(() => {
     if (!noStory) musica.pause();
   });
 }
@@ -124,6 +124,7 @@ export function pausarMusica() {
 
 export function continuarMusica() {
   if (noStory && temMusica && !mudo && musica.paused) {
+    cancelAnimationFrame(animacao);
     try {
       musica.volume = 1;
     } catch {

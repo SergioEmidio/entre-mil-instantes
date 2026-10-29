@@ -35,7 +35,7 @@ export function campoAudio(opcoes) {
   const idArquivo = novoId("audio");
   const entrada = h("input", {
     type: "file",
-    accept: "audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus",
+    accept: "audio/*,video/mp4,video/quicktime,.mp3,.m4a,.aac,.wav,.ogg,.opus,.mp4,.mov,.m4v",
     id: idArquivo,
     class: "sr-only",
     onChange: aoEscolherArquivo,

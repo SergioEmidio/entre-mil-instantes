@@ -8,7 +8,8 @@
 //    são convertidos para WAV aqui mesmo, antes de enviar.
 // =====================================================================
 
-const TAXA_WAV = 22050;               // qualidade boa para voz, arquivo leve
+const TAXA_MINIMA = 22050;            // qualidade boa para voz, arquivo leve
+const TAXAS = [44100, 32000, 22050];  // tenta a melhor que caiba no limite
 export const LIMITE_MB = 15;          // limite do armazenamento por arquivo
 export const MAX_GRAVACAO_SEG = 180;  // 3 minutos por gravação
 
@@ -26,6 +27,10 @@ const UNIVERSAIS = {
 };
 
 const EXTENSOES = { mp3: "audio/mpeg", m4a: "audio/mp4", aac: "audio/aac", wav: "audio/wav" };
+
+// Vídeos (.mp4/.mov): o <audio> toca o som deles direto.
+const VIDEOS = ["video/mp4", "video/quicktime", "video/x-m4v"];
+const EXTENSOES_VIDEO = ["mp4", "mov", "m4v"];
 
 function erro(codigo) {
   const e = new Error(codigo);
@@ -75,11 +80,18 @@ function decodificar(contexto, dados) {
   });
 }
 
-async function paraMono22k(buffer) {
+// Escolhe a melhor qualidade em que o arquivo ainda cabe no limite.
+function escolherTaxa(duracao) {
+  const maximo = LIMITE_MB * 1024 * 1024 - 1024;
+  for (const taxa of TAXAS) if (duracao * taxa * 2 <= maximo) return taxa;
+  return TAXA_MINIMA;
+}
+
+async function paraMono(buffer, taxa) {
   const duracao = Math.min(buffer.duration, 60 * 10);
-  const amostras = Math.max(1, Math.ceil(duracao * TAXA_WAV));
+  const amostras = Math.max(1, Math.ceil(duracao * taxa));
   const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-  const offline = new Offline(1, amostras, TAXA_WAV);
+  const offline = new Offline(1, amostras, taxa);
   const fonte = offline.createBufferSource();
   fonte.buffer = buffer;
   fonte.connect(offline.destination);
@@ -88,7 +100,7 @@ async function paraMono22k(buffer) {
   return pronto.getChannelData(0);
 }
 
-function montarWav(amostras) {
+function montarWav(amostras, taxa) {
   const bytes = amostras.length * 2;
   const vista = new DataView(new ArrayBuffer(44 + bytes));
   const escrever = (pos, texto) => {
@@ -101,8 +113,8 @@ function montarWav(amostras) {
   vista.setUint32(16, 16, true);
   vista.setUint16(20, 1, true);            // PCM
   vista.setUint16(22, 1, true);            // mono
-  vista.setUint32(24, TAXA_WAV, true);
-  vista.setUint32(28, TAXA_WAV * 2, true);
+  vista.setUint32(24, taxa, true);
+  vista.setUint32(28, taxa * 2, true);
   vista.setUint16(32, 2, true);
   vista.setUint16(34, 16, true);
   escrever(36, "data");
@@ -128,8 +140,9 @@ export async function converterParaWav(arquivo) {
     const dados = await arquivo.arrayBuffer();
     const buffer = await decodificar(contexto, dados);
     if (!buffer || !buffer.duration) throw erro("audio_vazio");
-    const amostras = await paraMono22k(buffer);
-    return { blob: montarWav(amostras), duracao: Math.round(amostras.length / TAXA_WAV) };
+    const taxa = escolherTaxa(Math.min(buffer.duration, 60 * 10));
+    const amostras = await paraMono(buffer, taxa);
+    return { blob: montarWav(amostras, taxa), duracao: Math.round(amostras.length / taxa) };
   } finally {
     if (typeof contexto.close === "function") contexto.close().catch(() => {});
   }
@@ -151,7 +164,14 @@ export async function prepararAudio(arquivo) {
     return { blob: arquivo, tipo, extensao: UNIVERSAIS[tipo], duracao: await duracaoDe(arquivo) };
   }
 
-  if (!tipo.startsWith("audio/") && !tipo.startsWith("video/") && !["ogg", "opus", "oga", "webm", "weba", "amr", "3gp", "flac"].includes(extensao)) {
+  // Vídeo .mp4/.mov: se couber, vai como está (mantém a qualidade do som).
+  const ehVideo = VIDEOS.indexOf(tipo) >= 0 || EXTENSOES_VIDEO.indexOf(extensao) >= 0;
+  if (ehVideo && arquivo.size <= LIMITE_MB * 1024 * 1024) {
+    const duracao = await duracaoDe(arquivo);
+    if (duracao) return { blob: arquivo, tipo: "audio/mp4", extensao: "m4a", duracao };
+  }
+
+  if (!tipo.startsWith("audio/") && !tipo.startsWith("video/") && !ehVideo && !["ogg", "opus", "oga", "webm", "weba", "amr", "3gp", "flac"].includes(extensao)) {
     throw erro("nao_e_audio");
   }
 

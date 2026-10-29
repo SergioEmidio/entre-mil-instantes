@@ -95,7 +95,7 @@ export function desenharRetrospectiva(area) {
       }),
       campoAudio({
         rotulo: "A música (toca no story)",
-        dica: "Pode enviar a música inteira (MP3 ou M4A). No story toca um trecho de até 30 segundos, a partir do segundo que escolheres abaixo.",
+        dica: "Pode enviar a música inteira (MP3, M4A ou MP4). No story toca um trecho de até 30 segundos, a partir do segundo que escolheres abaixo.",
         caminho: r.retrospectiva.musica.audio,
         duracao: r.retrospectiva.musica.duracao,
         pasta: "musica",
