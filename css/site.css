@@ -962,9 +962,549 @@
   flex: 1;
 }
 
+/* Botão de som (topo dos stories) */
+.stories-cabeca-direita {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stories-som {
+  pointer-events: auto;
+  width: 36px;
+  height: 36px;
+  margin: -6px -6px -6px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(16, 24, 43, 0.25);
+  color: var(--tinta);
+}
+
+.stories-palco[data-tema="champanhe"] .stories-som {
+  background: rgba(16, 24, 43, 0.08);
+}
+
+.stories-som .som-desligado { display: none; }
+.stories-som[data-mudo="true"] .som-ligado { display: none; }
+.stories-som[data-mudo="true"] .som-desligado { display: block; }
+
+/* =====================================================================
+   09 · A RÁDIO (playlist)
+   ===================================================================== */
+#tela-radio {
+  background: var(--meia-noite);
+}
+
+.radio {
+  width: 100%;
+  max-width: var(--largura-tela);
+  margin: 0 auto;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-topo {
+  display: flex;
+  justify-content: center;
+  padding: calc(28px + env(safe-area-inset-top)) 20px 22px;
+  background: linear-gradient(to bottom, var(--vinho), var(--meia-noite));
+}
+
+.radio-capa {
+  width: min(56vw, 220px);
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--meia-noite-3);
+  background-image: repeating-linear-gradient(135deg, rgba(232, 211, 162, 0.1) 0 8px, transparent 8px 16px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
+.radio-capa img,
+.radio-faixa-capa img,
+.radio-mini-capa img,
+.tocando-capa img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.radio-info {
+  padding: 4px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.radio-titulo {
+  margin: 0;
+  font-size: clamp(24px, 7vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.radio-sub {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.radio-acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 6px 20px;
+}
+
+.radio-espaco { flex: 1; }
+
+.radio-icone {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--texto-2);
+}
+
+.radio-icone--g {
+  width: 52px;
+  height: 52px;
+  color: var(--marfim);
+}
+
+.radio-icone[aria-pressed="true"] {
+  color: var(--champanhe);
+}
+
+.radio-ponto {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+
+.radio-icone[aria-pressed="true"] .radio-ponto {
+  opacity: 1;
+}
+
+.radio-play {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--champanhe);
+  color: var(--meia-noite);
+  transition: transform var(--rapido);
+}
+
+.radio-play:active { transform: scale(0.95); }
+
+.radio-lista {
+  list-style: none;
+  margin: 0;
+  padding: 4px 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-faixa {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--marfim);
+  text-align: left;
+}
+
+.radio-faixa:hover { background: rgba(255, 255, 255, 0.04); }
+
+.radio-faixa-capa {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: var(--meia-noite-3);
+  background-image: repeating-linear-gradient(135deg, rgba(232, 211, 162, 0.1) 0 6px, transparent 6px 12px);
+}
+
+.radio-faixa-textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.radio-faixa-titulo {
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-faixa--atual .radio-faixa-titulo { color: var(--champanhe); }
+
+.radio-faixa-artista {
+  font-size: 13px;
+  color: var(--texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-faixa-tempo {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--texto-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.radio-continuar {
+  margin: 8px 20px 0;
+  width: auto;
+}
+
+/* Mini player */
+.radio-mini {
+  position: fixed;
+  left: 50%;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 10;
+  width: calc(min(100vw, var(--largura-tela)) - 16px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 8px 8px;
+  border-radius: 10px;
+  background: #2b2234;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.radio-mini-abrir {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--marfim);
+  text-align: left;
+}
+
+.radio-mini-capa {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--meia-noite-3);
+}
+
+.radio-mini-textos {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.radio-mini-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-mini-artista {
+  font-size: 12px;
+  color: var(--texto-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-mini .radio-icone { color: var(--marfim); }
+
+.radio-mini-trilho {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(242, 232, 216, 0.2);
+  overflow: hidden;
+}
+
+.radio-mini-barra {
+  display: block;
+  height: 100%;
+  background: var(--marfim);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* =====================================================================
+   10 · TOCANDO AGORA
+   ===================================================================== */
+#tela-tocando {
+  background: var(--meia-noite);
+}
+
+.tocando {
+  --cor-faixa: var(--vinho);
+  width: 100%;
+  max-width: var(--largura-tela);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: calc(14px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.6vh, 22px);
+  background: linear-gradient(to bottom, var(--cor-faixa) 0%, var(--cor-faixa) 55%, var(--meia-noite) 100%);
+  transition: background var(--lento) ease;
+}
+
+.tocando-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tocando-topo .radio-icone { color: var(--marfim); }
+
+.tocando-de {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.tocando-de span {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d8d2c6;
+}
+
+.tocando-de strong {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tocando-vazio { width: 44px; flex-shrink: 0; }
+
+.tocando-capa {
+  width: 100%;
+  max-width: min(100%, 46vh);
+  max-width: min(100%, 46dvh);
+  align-self: center;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: rgba(16, 24, 43, 0.35);
+  background-image: repeating-linear-gradient(135deg, rgba(232, 211, 162, 0.1) 0 12px, transparent 12px 24px);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4);
+}
+
+.tocando-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tocando-textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tocando-titulo {
+  margin: 0;
+  font-size: clamp(19px, 5.6vw, 22px);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tocando-artista {
+  font-size: 15px;
+  color: #d8d2c6;
+}
+
+.tocando-curtir svg { fill: none; }
+.tocando-curtir[aria-pressed="true"] { color: var(--champanhe); }
+.tocando-curtir[aria-pressed="true"] svg { fill: currentColor; }
+
+.tocando-tempo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tocando-barra {
+  --p: 0%;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.tocando-barra::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--marfim) var(--p), rgba(242, 232, 216, 0.25) var(--p));
+}
+
+.tocando-barra::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--marfim);
+  border: 0;
+}
+
+.tocando-barra::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(242, 232, 216, 0.25);
+}
+
+.tocando-barra::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--marfim);
+}
+
+.tocando-barra::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--marfim);
+  border: 0;
+}
+
+.tocando-tempos {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #d8d2c6;
+  font-variant-numeric: tabular-nums;
+}
+
+.tocando-controles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tocando-controles .radio-icone { color: #d8d2c6; }
+.tocando-controles .radio-icone--g { color: var(--marfim); }
+.tocando-controles .radio-icone[aria-pressed="true"] { color: var(--champanhe); }
+
+.tocando-play {
+  width: 68px;
+  height: 68px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--marfim);
+  color: var(--meia-noite);
+  transition: transform var(--rapido);
+}
+
+.tocando-play:active { transform: scale(0.95); }
+
+.tocando-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(16, 24, 43, 0.45);
+}
+
+.tocando-fila-rotulo {
+  font-size: 12px;
+  color: #d8d2c6;
+}
+
+.tocando-fila-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tocando-fila-lista li {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocando-fila-lista .tocando-fila-fim {
+  font-weight: 400;
+  color: #d8d2c6;
+}
+
 /* =====================================================================
    RESPONSIVO
    ===================================================================== */
+
+/* Celulares baixinhos em pé (iPhone SE e parecidos): capa menor no player */
+@media (max-height: 700px) and (orientation: portrait) {
+  .tocando { gap: 12px; }
+  .tocando-capa { max-width: min(100%, 36vh); max-width: min(100%, 36dvh); }
+  .tocando-play { width: 60px; height: 60px; }
+  .tocando-fila { padding: 10px 14px; }
+}
 
 /* Celulares bem pequenos (iPhone SE 1ª geração, Androids de 320px) */
 @media (max-width: 359px) {
@@ -1064,4 +1604,26 @@
   .st-legenda { padding: 10px 14px; margin-bottom: 10px; }
   .st-legenda-frase { font-size: 18px; }
   .aa-quadro { max-height: 70vh; max-height: 70dvh; aspect-ratio: 4 / 3; }
+  .radio-topo { padding-top: calc(14px + env(safe-area-inset-top)); padding-bottom: 12px; }
+  .radio-capa { width: 120px; }
+  .tocando {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-areas:
+      "topo topo"
+      "capa linha"
+      "capa tempo"
+      "capa controles"
+      "continuar continuar";
+    column-gap: 24px;
+    row-gap: 8px;
+    align-content: start;
+  }
+  .tocando-topo { grid-area: topo; }
+  .tocando-capa { grid-area: capa; max-width: min(100%, 64vh); max-width: min(100%, 64dvh); }
+  .tocando-linha { grid-area: linha; }
+  .tocando-tempo { grid-area: tempo; }
+  .tocando-controles { grid-area: controles; }
+  .tocando-fila { display: none; }
+  #toc-continuar { grid-area: continuar; }
 }

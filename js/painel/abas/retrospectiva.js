@@ -5,6 +5,7 @@
 
 import { h, campo, bloco } from "../ui.js";
 import { campoFoto } from "../campo-foto.js";
+import { campoAudio } from "../campo-audio.js";
 import { rascunho, alterar } from "../estado.js";
 
 export function desenharRetrospectiva(area) {
@@ -91,6 +92,31 @@ export function desenharRetrospectiva(area) {
         linhas: 2,
         max: 140,
         aoMudar: (v) => alterar((d) => { d.retrospectiva.musica.frase = v; }),
+      }),
+      campoAudio({
+        rotulo: "A música (toca no story)",
+        dica: "Pode enviar a música inteira (MP3 ou M4A). No story toca um trecho de até 30 segundos, a partir do segundo que escolheres abaixo.",
+        caminho: r.retrospectiva.musica.audio,
+        duracao: r.retrospectiva.musica.duracao,
+        pasta: "musica",
+        gravar: false,
+        aoMudar: (c, d) =>
+          alterar((x) => {
+            x.retrospectiva.musica.audio = c;
+            x.retrospectiva.musica.duracao = d;
+          }),
+      }),
+      campo({
+        rotulo: "Começar a música no segundo",
+        tipo: "number",
+        inputmode: "numeric",
+        valor: String(r.retrospectiva.musica.inicio || 0),
+        dica: "Ex.: 45 = começa em 0:45 (o refrão). Deixa 0 para começar do início.",
+        aoMudar: (v) =>
+          alterar((d) => {
+            const n = Math.max(0, Math.floor(Number(v) || 0));
+            d.retrospectiva.musica.inicio = n;
+          }),
       })
     ),
 

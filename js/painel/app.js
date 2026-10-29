@@ -13,16 +13,12 @@ import { desenharCartas } from "./abas/cartas.js";
 import { desenharVales } from "./abas/vales.js";
 import { desenharPresente } from "./abas/presente.js";
 import { desenharEmBreve } from "./abas/em-breve.js";
+import { desenharRadio } from "./abas/radio.js";
 
 const ABAS = [
   { id: "retrospectiva", nome: "Retrospectiva", desenhar: desenharRetrospectiva },
   { id: "stories", nome: "Stories", desenhar: desenharStories },
-  {
-    id: "radio",
-    nome: "Rádio",
-    marca: "fase 4",
-    desenhar: desenharEmBreve("A Rádio dela", 4, "Aqui tu vais montar as faixas: capa, título e a tua voz gravada direto pelo celular."),
-  },
+  { id: "radio", nome: "Rádio", desenhar: desenharRadio },
   { id: "cartas", nome: "Cartas", desenhar: desenharCartas },
   { id: "vales", nome: "Vales", desenhar: desenharVales },
   {
@@ -178,9 +174,12 @@ function caminhosDasFotos() {
   const r = rascunho();
   return [
     r.retrospectiva.musica.capa,
+    r.retrospectiva.musica.audio,
     r.antes_agora.antes,
     r.antes_agora.agora,
     ...r.stories.map((s) => s.foto),
+    ...r.radio.faixas.map((f) => f.capa),
+    ...r.radio.faixas.map((f) => f.audio),
   ].filter(Boolean);
 }
 

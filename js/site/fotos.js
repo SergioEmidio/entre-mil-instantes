@@ -23,7 +23,22 @@ export function fotosDoConteudo(conteudo) {
   const musica = retro.musica || {};
   const antesAgora = c.antes_agora || {};
   const stories = Array.isArray(c.stories) ? c.stories : [];
-  return [musica.capa, ...stories.map((s) => s && s.foto), antesAgora.antes, antesAgora.agora].filter(
+  const faixas = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
+  return [
+    musica.capa,
+    ...stories.map((s) => s && s.foto),
+    antesAgora.antes,
+    antesAgora.agora,
+    ...faixas.map((f) => f && f.capa),
+  ].filter((caminho) => typeof caminho === "string" && caminho);
+}
+
+// Áudios (música do story e faixas da rádio): só pega o link, não baixa antes.
+export function audiosDoConteudo(conteudo) {
+  const c = conteudo || {};
+  const musica = (c.retrospectiva && c.retrospectiva.musica) || {};
+  const faixas = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
+  return [musica.audio, ...faixas.map((f) => f && f.audio)].filter(
     (caminho) => typeof caminho === "string" && caminho
   );
 }
@@ -44,14 +59,15 @@ function baixar(url) {
 // Pede os links e baixa as fotos. Nunca dá erro: no pior caso, a foto
 // aparece um pouco depois.
 export async function prepararFotos(conteudo) {
-  const caminhos = [...new Set(fotosDoConteudo(conteudo))].filter((c) => !links.has(c));
+  const fotos = [...new Set(fotosDoConteudo(conteudo))];
+  const caminhos = [...new Set([...fotos, ...audiosDoConteudo(conteudo)])].filter((c) => !links.has(c));
   if (!caminhos.length) return;
 
   const trabalho = (async () => {
     try {
       const mapa = await linksDosArquivos("midia", caminhos, VALIDADE);
       for (const [caminho, link] of Object.entries(mapa)) links.set(caminho, link);
-      await Promise.all(caminhos.map((c) => (links.has(c) ? baixar(links.get(c)) : null)));
+      await Promise.all(fotos.map((c) => (links.has(c) ? baixar(links.get(c)) : null)));
     } catch (erro) {
       console.error("[Entre Mil Instantes] Não consegui preparar as fotos:", (erro && erro.original) || erro);
     }

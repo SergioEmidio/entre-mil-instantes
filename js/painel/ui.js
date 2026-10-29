@@ -99,6 +99,7 @@ export function campo(opcoes) {
     placeholder,
     maxlength: max,
     inputmode,
+    min: tipo === "number" ? "0" : null,
     "aria-describedby": idDica,
     onInput: (evento) => {
       atualizarContador(evento.target.value);

@@ -20,7 +20,7 @@ const MODELO = {
     segredo: "",
   },
   retrospectiva: {
-    musica: { nome: "", artista: "", frase: "", capa: null },
+    musica: { nome: "", artista: "", frase: "", capa: null, audio: null, duracao: null, inicio: 0 },
     apelido: "",
     lugar: "",
     frase_dela: "",

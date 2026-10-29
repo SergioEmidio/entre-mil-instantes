@@ -165,7 +165,7 @@
       </div>
       <div class="abertura-pe">
         <button class="botao botao--primario botao--largo" type="button" id="abertura-entrar">Entrar na nossa história</button>
-        <p class="texto-3 texto-p">Toca na tela para avançar os stories.</p>
+        <p class="texto-3 texto-p" id="abertura-dica">Toca na tela para avançar os stories.</p>
       </div>
     </div>
 
@@ -188,7 +188,13 @@
         <div class="stories-barras" id="stories-barras" aria-hidden="true"></div>
         <div class="stories-cabeca">
           <h1 class="stories-secao" id="stories-secao">Nossa retrospectiva</h1>
-          <p class="stories-conta" id="stories-conta" aria-live="polite"></p>
+          <div class="stories-cabeca-direita">
+            <p class="stories-conta" id="stories-conta" aria-live="polite"></p>
+            <button class="stories-som" type="button" id="stories-som" aria-pressed="true" aria-label="Desligar o som" hidden>
+              <svg class="som-ligado" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+              <svg class="som-desligado" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -242,13 +248,125 @@
   </section>
 
   <!-- ================================================================
-       CONTINUA (provisório: a rádio chega na fase 4)
+       09 · A RÁDIO DELA (playlist)
+       ================================================================ -->
+  <section class="cena" id="tela-radio" aria-labelledby="radio-titulo" hidden>
+    <div class="radio">
+      <div class="radio-topo">
+        <div class="radio-capa" id="radio-capa"></div>
+      </div>
+
+      <div class="radio-info">
+        <p class="rotulo">FM 03.11 · no ar</p>
+        <h1 class="radio-titulo" id="radio-titulo">A Rádio</h1>
+        <p class="radio-sub" id="radio-sub"></p>
+      </div>
+
+      <div class="radio-acoes">
+        <button class="radio-icone" type="button" id="radio-aleatorio" aria-pressed="false" aria-label="Modo aleatório">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          <span class="radio-ponto" aria-hidden="true"></span>
+        </button>
+        <span class="radio-espaco"></span>
+        <button class="radio-play" type="button" id="radio-play" aria-label="Tocar">
+          <svg data-icone="play" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+
+      <ol class="radio-lista" id="radio-lista" aria-label="Faixas"></ol>
+
+      <button class="botao botao--fantasma botao--largo radio-continuar" type="button" id="radio-continuar">Continuar</button>
+    </div>
+
+    <!-- Mini player -->
+    <div class="radio-mini" id="radio-mini" hidden>
+      <button class="radio-mini-abrir" type="button" id="radio-mini-abrir" aria-label="Abrir o player">
+        <span class="radio-mini-capa" id="radio-mini-capa"></span>
+        <span class="radio-mini-textos">
+          <span class="radio-mini-titulo" id="radio-mini-titulo"></span>
+          <span class="radio-mini-artista" id="radio-mini-artista"></span>
+        </span>
+      </button>
+      <button class="radio-icone" type="button" id="radio-mini-play" aria-label="Tocar">
+        <svg data-icone="play" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <span class="radio-mini-trilho" aria-hidden="true"><span class="radio-mini-barra" id="radio-mini-barra"></span></span>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       10 · TOCANDO AGORA
+       ================================================================ -->
+  <section class="cena" id="tela-tocando" aria-labelledby="toc-titulo" hidden>
+    <div class="tocando" id="tocando">
+      <div class="tocando-topo">
+        <button class="radio-icone" type="button" id="toc-fechar" aria-label="Voltar para a lista">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="tocando-de">
+          <span>Tocando da playlist</span>
+          <strong id="toc-playlist"></strong>
+        </div>
+        <span class="tocando-vazio" aria-hidden="true"></span>
+      </div>
+
+      <div class="tocando-capa" id="toc-capa"></div>
+
+      <div class="tocando-linha">
+        <div class="tocando-textos">
+          <h1 class="tocando-titulo" id="toc-titulo"></h1>
+          <p class="tocando-artista" id="toc-artista"></p>
+        </div>
+        <button class="radio-icone tocando-curtir" type="button" id="toc-curtir" aria-pressed="false" aria-label="Curtir faixa">
+          <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.1 3.1 4.5 6.7 4.5c2 0 3.6 1.1 5.3 3 1.7-1.9 3.3-3 5.3-3 3.6 0 5.8 3.6 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>
+        </button>
+      </div>
+
+      <div class="tocando-tempo">
+        <input class="tocando-barra" id="toc-barra" type="range" min="0" max="1" step="0.1" value="0" aria-label="Escolher o momento da faixa">
+        <div class="tocando-tempos"><span id="toc-passou">0:00</span><span id="toc-falta">-0:00</span></div>
+      </div>
+
+      <div class="tocando-controles">
+        <button class="radio-icone" type="button" id="toc-aleatorio" aria-pressed="false" aria-label="Modo aleatório">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          <span class="radio-ponto" aria-hidden="true"></span>
+        </button>
+        <button class="radio-icone radio-icone--g" type="button" id="toc-anterior" aria-label="Faixa anterior">
+          <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM20 5v14L9 12z" fill="currentColor"/></svg>
+        </button>
+        <button class="tocando-play" type="button" id="toc-play" aria-label="Tocar">
+          <svg data-icone="play" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button class="radio-icone radio-icone--g" type="button" id="toc-proxima" aria-label="Próxima faixa">
+          <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5H18v14h-2.5zM4 5v14l11-7z" fill="currentColor"/></svg>
+        </button>
+        <button class="radio-icone" type="button" id="toc-repetir" aria-pressed="false" aria-label="Repetir a rádio">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>
+          <span class="radio-ponto" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="tocando-fila" id="toc-fila">
+        <p class="tocando-fila-rotulo" id="toc-fila-rotulo">A seguir na fila</p>
+        <ol class="tocando-fila-lista" id="toc-fila-lista"></ol>
+      </div>
+
+      <button class="botao botao--primario botao--largo" type="button" id="toc-continuar" hidden>A rádio acabou · continuar</button>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       CONTINUA (provisório: a surpresa final chega na fase 5)
        ================================================================ -->
   <section class="cena" id="tela-continua" aria-labelledby="continua-titulo" hidden>
     <div class="tela tela--centro pilha pilha--g">
       <p class="rotulo">Continua…</p>
-      <h1 class="titulo titulo--italico titulo-m" id="continua-titulo">A rádio e a surpresa final chegam aqui.</h1>
-      <button class="botao botao--fantasma" type="button" id="continua-de-novo">Ver os stories de novo</button>
+      <h1 class="titulo titulo--italico titulo-m" id="continua-titulo">A surpresa final chega aqui.</h1>
+      <div class="pilha pilha--m">
+        <button class="botao botao--fantasma" type="button" id="continua-de-novo">Ver os stories de novo</button>
+        <button class="botao botao--fantasma" type="button" id="continua-radio" hidden>Ouvir a rádio de novo</button>
+      </div>
     </div>
   </section>
 

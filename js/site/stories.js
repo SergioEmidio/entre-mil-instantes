@@ -11,8 +11,10 @@
 import { h, texto } from "./dom.js";
 import { diasDesde, mesesDesde, dataCurta, dataPorExtenso } from "./datas.js";
 import { linkDaFoto } from "./fotos.js";
+import { entrarNoStoryDaMusica, sairDoStoryDaMusica, pausarMusica, continuarMusica } from "./som.js";
 
 const DURACAO_RETRO = 7000;
+const TRECHO_MAXIMO = 30;      // segundos de música no story
 const DURACAO_MEMORIA = 6500;
 const TOQUE_MAXIMO = 250;      // até isso é toque; mais que isso foi "segurar"
 const AREA_VOLTAR = 0.3;       // 30% da esquerda volta
@@ -32,9 +34,19 @@ export function montarListaDeStories(conteudo) {
     lista.push({ secao: "Nossa retrospectiva", tema: "vinho", duracao: DURACAO_RETRO, montar: () => slideDias(datas) });
   }
 
-  // 2. Nossa música (só se tiver o nome)
+  // 2. Nossa música (só se tiver o nome). Com áudio, o story dura o trecho.
   if (texto(musica.nome)) {
-    lista.push({ secao: "Nossa retrospectiva", tema: "champanhe", duracao: DURACAO_RETRO, montar: () => slideMusica(musica) });
+    const item = { secao: "Nossa retrospectiva", tema: "champanhe", duracao: DURACAO_RETRO, montar: () => slideMusica(musica) };
+    if (musica.audio && linkDaFoto(musica.audio)) {
+      const total = Number(musica.duracao) || 0;
+      const restante = total ? total - (Number(musica.inicio) || 0) : TRECHO_MAXIMO;
+      item.duracao = Math.max(DURACAO_RETRO, Math.min(TRECHO_MAXIMO, restante) * 1000);
+      item.aoEntrar = entrarNoStoryDaMusica;
+      item.aoSair = sairDoStoryDaMusica;
+      item.aoPausar = pausarMusica;
+      item.aoContinuar = continuarMusica;
+    }
+    lista.push(item);
   }
 
   // 3. Detalhes (só os que estiverem preenchidos)
@@ -218,7 +230,21 @@ export function tocarStories(lista, comecarEm = 0) {
       });
     }
 
+    // Avisos opcionais de cada story (usados pela música).
+    function avisarItem(item, nome) {
+      if (item && typeof item[nome] === "function") {
+        try {
+          item[nome]();
+        } catch (erro) {
+          console.error(erro);
+        }
+      }
+    }
+
+    let estavaPausado = false;
+
     function mostrar(indice) {
+      if (lista[atual] && el.slide.childElementCount) avisarItem(lista[atual], "aoSair");
       atual = indice;
       decorrido = 0;
       const item = lista[atual];
@@ -230,6 +256,12 @@ export function tocarStories(lista, comecarEm = 0) {
       el.slide.replaceChildren(conteudo);
       animarNumeros(conteudo);
       desenharBarras();
+      estavaPausado = false;
+      avisarItem(item, "aoEntrar");
+      if (pausado()) {
+        estavaPausado = true;
+        avisarItem(item, "aoPausar");
+      }
     }
 
     function proximo() {
@@ -254,7 +286,12 @@ export function tocarStories(lista, comecarEm = 0) {
       if (encerrado) return;
       const passo = ultimoQuadro ? agora - ultimoQuadro : 0;
       ultimoQuadro = agora;
-      if (!pausado()) {
+      const agoraPausado = pausado();
+      if (agoraPausado !== estavaPausado) {
+        estavaPausado = agoraPausado;
+        avisarItem(lista[atual], agoraPausado ? "aoPausar" : "aoContinuar");
+      }
+      if (!agoraPausado) {
         decorrido += Math.min(passo, 100);   // se a aba travar, não pula vários stories
         if (decorrido >= lista[atual].duracao) {
           proximo();
@@ -345,6 +382,7 @@ export function tocarStories(lista, comecarEm = 0) {
       if (encerrado) return;
       encerrado = true;
       cancelAnimationFrame(quadro);
+      avisarItem(lista[atual], "aoSair");
       for (const [alvo, tipo, fn] of ouvintes) alvo.removeEventListener(tipo, fn);
       cheias.forEach((barra) => { barra.style.transform = "scaleX(1)"; });
       terminar();

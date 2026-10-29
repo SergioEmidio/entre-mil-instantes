@@ -101,6 +101,11 @@ export async function prepararLinks(balde, caminhos) {
   }
 }
 
+// Guarda um link já conhecido (ex.: o arquivo que acabou de ser enviado).
+export function guardarLink(balde, caminho, link) {
+  if (caminho && link) links.set(chave(balde, caminho), link);
+}
+
 export async function linkDe(balde, caminho) {
   if (!caminho) return null;
   if (!links.has(chave(balde, caminho))) await prepararLinks(balde, [caminho]);

@@ -770,3 +770,60 @@ input[type="date"].campo {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ---------- Campo de áudio ---------- */
+.audio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.audio-situacao {
+  font-size: 13px;
+  color: var(--texto-3);
+}
+
+.audio-situacao[data-tipo="pronto"] {
+  color: var(--certo);
+}
+
+.audio-situacao[data-tipo="gravando"] {
+  color: var(--erro);
+  font-variant-numeric: tabular-nums;
+}
+
+.audio-tocador {
+  width: 100%;
+  height: 44px;
+  color-scheme: dark;
+}
+
+.botao-gravar::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--erro);
+}
+
+.botao-gravar--ligado {
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.botao-gravar--ligado::before {
+  border-radius: 2px;
+  animation: piscar 1s ease-in-out infinite;
+}
+
+@keyframes piscar {
+  50% { opacity: 0.3; }
+}
+
+.campo--curto {
+  max-width: 140px;
+}
+
+.item-miniatura--quadrada {
+  height: 44px;
+}

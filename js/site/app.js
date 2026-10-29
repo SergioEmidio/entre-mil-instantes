@@ -11,7 +11,9 @@ import { desenharCeu, mostrarTela } from "./telas.js";
 import { iniciarContagem } from "./contagem.js";
 import { iniciarSenha } from "./senha.js";
 import { rodarCarregamento } from "./carregamento.js";
-import { prepararFotos } from "./fotos.js";
+import { prepararFotos, linkDaFoto } from "./fotos.js";
+import { prepararMusica, destravarSom, alternarSom, atualizarBotao, haMusica } from "./som.js";
+import { montarRadio, destravarRadio, tocarRadio, pararRadio } from "./radio.js";
 import { montarAbertura } from "./abertura.js";
 import { montarListaDeStories, tocarStories } from "./stories.js";
 import { temAntesAgora, tocarAntesAgora } from "./antes-agora.js";
@@ -122,9 +124,25 @@ async function abrirCarregamento() {
 }
 
 // Abertura (quem volta ao site depois cai direto aqui, com as fotos prontas).
+let temRadio = false;
+
 async function abrirSite() {
   await prepararSite();
-  montarAbertura(conteudo, () => irParaStories(0));
+
+  // Música do story (opção A) e Rádio
+  const musica = (conteudo && conteudo.retrospectiva && conteudo.retrospectiva.musica) || {};
+  prepararMusica(musica.audio ? linkDaFoto(musica.audio) : null, musica.inicio);
+  temRadio = montarRadio(conteudo);
+  document.getElementById("continua-radio").hidden = !temRadio;
+  document.getElementById("abertura-dica").textContent =
+    haMusica() || temRadio ? "Liga o som e, se puder, usa fone." : "Toca na tela para avançar os stories.";
+
+  montarAbertura(conteudo, () => {
+    // Precisa ser aqui, no toque: é o que libera o som no celular.
+    destravarSom();
+    destravarRadio();
+    irParaStories(0);
+  });
   await mostrarTela("tela-abertura");
 }
 
@@ -153,20 +171,35 @@ async function irParaStories(comecarEm) {
 
 async function irParaAntesAgora() {
   if (!temAntesAgora(conteudo)) {
-    await irParaContinua();
+    await irParaRadio();
     return;
   }
   await mostrarTela("tela-antes-agora");
   const escolha = await tocarAntesAgora(conteudo);
   if (escolha === "voltar") await irParaStories(-1);
-  else await irParaContinua();
+  else await irParaRadio();
+}
+
+async function irParaRadio() {
+  if (!temRadio) {
+    await irParaContinua();
+    return;
+  }
+  await tocarRadio();
+  await irParaContinua();
 }
 
 async function irParaContinua() {
   await mostrarTela("tela-continua");
 }
 
-document.getElementById("continua-de-novo").addEventListener("click", () => irParaStories(0));
+document.getElementById("continua-de-novo").addEventListener("click", () => {
+  pararRadio();
+  irParaStories(0);
+});
+document.getElementById("continua-radio").addEventListener("click", () => irParaRadio());
+document.getElementById("stories-som").addEventListener("click", alternarSom);
+atualizarBotao();
 
 // ---------------------------------------------------------------------
 // Senha
