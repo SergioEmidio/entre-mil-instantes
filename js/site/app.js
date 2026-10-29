@@ -16,6 +16,7 @@ import {
   entrarComoConvidada,
   meuPapel,
   obterConteudo,
+  obterPrevia,
   sair,
 } from "../supabase.js";
 
@@ -41,6 +42,12 @@ function comLimite(promessa, ms = 12000) {
 async function comecar() {
   desenharCeu();
 
+  // Pré-visualização (só para o admin, aberta pelo painel).
+  if (new URLSearchParams(window.location.search).get("previa") === "1") {
+    const abriu = await comLimite(abrirPrevia(), 12000).catch(() => false);
+    if (abriu) return;
+  }
+
   try {
     situacao = await comLimite(obterSituacao());
   } catch (erro) {
@@ -63,6 +70,19 @@ async function comecar() {
   }
 
   irParaSenha();
+}
+
+// Mostra o RASCUNHO, pulando contagem e senha. Só funciona logado como admin.
+async function abrirPrevia() {
+  const papel = await meuPapel().catch(() => null);
+  if (papel !== "admin") return false;
+  conteudo = await obterPrevia();
+  window.__siteComecou = true;
+  document.getElementById("faixa-previa").hidden = false;
+  await mostrarTela("tela-carregamento");
+  await rodarCarregamento(conteudo, prepararSite());
+  abrirSite();
+  return true;
 }
 
 // Ela já acertou a senha antes neste celular? (a sessão fica guardada)

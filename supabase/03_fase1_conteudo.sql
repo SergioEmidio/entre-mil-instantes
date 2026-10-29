@@ -30,8 +30,7 @@ begin
 
   select coalesce(jsonb_agg(
            case
-             when nullif(c ->> 'libera_em', '') is not null
-                  and (c ->> 'libera_em')::date > hoje
+             when coalesce(nullif(c ->> 'libera_em', '')::date > hoje, false)
              then (c - 'texto') || jsonb_build_object('trancada', true)
              else c || jsonb_build_object('trancada', false)
            end

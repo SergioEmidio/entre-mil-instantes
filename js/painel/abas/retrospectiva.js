@@ -1,0 +1,147 @@
+// =====================================================================
+// Entre Mil Instantes · aba Retrospectiva
+// Nomes, datas, abertura, nossa música, detalhes e antes e agora.
+// =====================================================================
+
+import { h, campo, bloco } from "../ui.js";
+import { campoFoto } from "../campo-foto.js";
+import { rascunho, alterar } from "../estado.js";
+
+export function desenharRetrospectiva(area) {
+  const r = rascunho();
+
+  area.append(
+    h("div", { class: "area-titulo" }, h("h2", null, "Retrospectiva")),
+    h("p", { class: "area-intro" }, "Tudo aqui salva sozinho no rascunho. Ela só vê depois que tu publicares."),
+
+    bloco(
+      "Nomes",
+      null,
+      h(
+        "div",
+        { class: "campo-grupo--linha" },
+        campo({ rotulo: "Nome dela", valor: r.nome, max: 30, aoMudar: (v) => alterar((d) => { d.nome = v; }) }),
+        campo({ rotulo: "Teu nome", valor: r.autor, max: 30, aoMudar: (v) => alterar((d) => { d.autor = v; }) })
+      )
+    ),
+
+    bloco(
+      "Datas",
+      "Os dias juntos e os meses de namoro são calculados sozinhos. A senha dela não muda por aqui: continua sendo 19052025.",
+      h(
+        "div",
+        { class: "campo-grupo--linha" },
+        campo({
+          rotulo: "A gente se conheceu",
+          tipo: "date",
+          valor: r.datas.conhecemos,
+          aoMudar: (v) => alterar((d) => { d.datas.conhecemos = v; }),
+        }),
+        campo({
+          rotulo: "Começo do namoro",
+          tipo: "date",
+          valor: r.datas.namoro,
+          aoMudar: (v) => alterar((d) => { d.datas.namoro = v; }),
+        })
+      )
+    ),
+
+    bloco(
+      "Abertura",
+      "Aparece embaixo do nome dela, logo depois do carregamento.",
+      campo({
+        rotulo: "Frase da abertura",
+        valor: r.abertura.frase,
+        multilinha: true,
+        linhas: 2,
+        max: 120,
+        aoMudar: (v) => alterar((d) => { d.abertura.frase = v; }),
+      })
+    ),
+
+    bloco(
+      "Nossa música",
+      "A música que mais tocou na história de vocês.",
+      campoFoto({
+        rotulo: "Capa (foto ou capa do álbum)",
+        caminho: r.retrospectiva.musica.capa,
+        pasta: "retrospectiva",
+        aoMudar: (c) => alterar((d) => { d.retrospectiva.musica.capa = c; }),
+      }),
+      h(
+        "div",
+        { class: "campo-grupo--linha" },
+        campo({
+          rotulo: "Nome da música",
+          valor: r.retrospectiva.musica.nome,
+          max: 60,
+          aoMudar: (v) => alterar((d) => { d.retrospectiva.musica.nome = v; }),
+        }),
+        campo({
+          rotulo: "Artista",
+          valor: r.retrospectiva.musica.artista,
+          max: 60,
+          aoMudar: (v) => alterar((d) => { d.retrospectiva.musica.artista = v; }),
+        })
+      ),
+      campo({
+        rotulo: "Por que ela é nossa",
+        valor: r.retrospectiva.musica.frase,
+        multilinha: true,
+        linhas: 2,
+        max: 140,
+        aoMudar: (v) => alterar((d) => { d.retrospectiva.musica.frase = v; }),
+      })
+    ),
+
+    bloco(
+      "Nossos detalhes",
+      "As coisas que são só de vocês.",
+      campo({
+        rotulo: "O apelido que eu mais te chamo",
+        valor: r.retrospectiva.apelido,
+        max: 40,
+        aoMudar: (v) => alterar((d) => { d.retrospectiva.apelido = v; }),
+      }),
+      campo({
+        rotulo: "Nosso lugar favorito",
+        valor: r.retrospectiva.lugar,
+        max: 60,
+        aoMudar: (v) => alterar((d) => { d.retrospectiva.lugar = v; }),
+      }),
+      campo({
+        rotulo: "A frase que tu mais falas",
+        valor: r.retrospectiva.frase_dela,
+        max: 80,
+        aoMudar: (v) => alterar((d) => { d.retrospectiva.frase_dela = v; }),
+      })
+    ),
+
+    bloco(
+      "Antes e agora",
+      "Duas fotos que ela compara arrastando uma barrinha.",
+      campoFoto({
+        rotulo: "Foto do começo (2025)",
+        caminho: r.antes_agora.antes,
+        pasta: "antes-agora",
+        alta: true,
+        aoMudar: (c) => alterar((d) => { d.antes_agora.antes = c; }),
+      }),
+      campoFoto({
+        rotulo: "Foto de agora",
+        caminho: r.antes_agora.agora,
+        pasta: "antes-agora",
+        alta: true,
+        aoMudar: (c) => alterar((d) => { d.antes_agora.agora = c; }),
+      }),
+      campo({
+        rotulo: "Frase embaixo das fotos",
+        valor: r.antes_agora.frase,
+        multilinha: true,
+        linhas: 2,
+        max: 120,
+        aoMudar: (v) => alterar((d) => { d.antes_agora.frase = v; }),
+      })
+    )
+  );
+}

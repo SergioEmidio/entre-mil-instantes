@@ -170,3 +170,52 @@ export async function linksDosArquivos(balde, caminhos, segundos = 60 * 60 * 6) 
   }
   return mapa;
 }
+
+// Envia um arquivo (foto ou áudio) e devolve o caminho onde ficou guardado.
+export async function enviarArquivo(balde, caminho, arquivo, tipo) {
+  const { data, error } = await supabase.storage.from(balde).upload(caminho, arquivo, {
+    contentType: tipo || arquivo.type || "application/octet-stream",
+    cacheControl: "31536000",
+    upsert: false,
+  });
+  falhouSe(error);
+  return data.path || caminho;
+}
+
+// ---------------------------------------------------------------------
+// Painel (só funciona para o admin)
+// ---------------------------------------------------------------------
+
+// Lê o rascunho e o publicado do conteúdo e do presente.
+export async function carregarPainel() {
+  const [conteudo, presente] = await Promise.all([
+    supabase.from("conteudo").select("rascunho, publicado, publicado_em").eq("id", 1).single(),
+    supabase.from("presente").select("rascunho, publicado, aberto_em").eq("id", 1).single(),
+  ]);
+  falhouSe(conteudo.error);
+  falhouSe(presente.error);
+  return { conteudo: conteudo.data, presente: presente.data };
+}
+
+// Guarda o rascunho (o site dela não muda).
+export async function salvarRascunho(dados, presenteDados) {
+  const { error } = await supabase.rpc("salvar_rascunho", {
+    dados,
+    presente_dados: presenteDados,
+  });
+  falhouSe(error);
+}
+
+// Publica o rascunho para ela ver. Só funciona com a palavra AUTORIZO.
+export async function publicarRascunho(confirmacao) {
+  const { data, error } = await supabase.rpc("publicar", { confirmacao });
+  falhouSe(error);
+  return data;
+}
+
+// Site em modo pré-visualização: o admin vê o rascunho.
+export async function obterPrevia() {
+  const { data, error } = await supabase.rpc("obter_previa");
+  falhouSe(error);
+  return data || {};
+}

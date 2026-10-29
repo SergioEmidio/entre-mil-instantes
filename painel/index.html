@@ -7,75 +7,116 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Painel · Entre Mil Instantes</title>
 
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/base.css">
-  <style>
-    body { background: var(--painel-fundo); }
-    .diag { gap: 18px; }
-    .diag-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-    .diag-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; }
-    .diag-sinal { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--linha-2); margin-top: 1px; }
-    .diag-item[data-estado="ok"] .diag-sinal { background: var(--certo); border-color: var(--certo); }
-    .diag-item[data-estado="erro"] .diag-sinal { background: var(--erro); border-color: var(--erro); }
-    .diag-item[data-estado="testando"] .diag-sinal { border-color: var(--champanhe); }
-    .diag-nome { font-weight: 600; font-size: 15px; }
-    .diag-detalhe { font-size: 13px; color: var(--texto-2); margin-top: 2px; word-break: break-word; }
-    .diag-form { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
-  </style>
+  <link rel="stylesheet" href="../css/painel.css">
 </head>
 <body>
-  <!-- Fase 0: página de teste da instalação. Na fase 2 vira o painel de verdade. -->
-  <main class="tela diag">
-    <div>
-      <p class="rotulo">Painel · fase 0</p>
-      <h1 class="titulo titulo-m" style="margin-top: 8px">Teste da instalação</h1>
-      <p class="texto-2 texto-p" style="margin-top: 8px">Se os 4 itens ficarem verdes, a base está pronta.</p>
-    </div>
 
-    <ul class="diag-lista">
-      <li class="diag-item cartao" id="d-config">
-        <span class="diag-sinal" aria-hidden="true"></span>
-        <div><p class="diag-nome">1. config.js preenchido</p><p class="diag-detalhe">Esperando…</p></div>
-      </li>
-      <li class="diag-item cartao" id="d-banco">
-        <span class="diag-sinal" aria-hidden="true"></span>
-        <div><p class="diag-nome">2. Conexão com o banco</p><p class="diag-detalhe">Esperando…</p></div>
-      </li>
-      <li class="diag-item cartao" id="d-admin">
-        <span class="diag-sinal" aria-hidden="true"></span>
-        <div><p class="diag-nome">3. Tua conta de admin</p><p class="diag-detalhe">Entra abaixo para testar.</p></div>
-      </li>
-      <li class="diag-item cartao" id="d-convidada">
-        <span class="diag-sinal" aria-hidden="true"></span>
-        <div><p class="diag-nome">4. A conta dela (senha = data)</p><p class="diag-detalhe">Testa abaixo com os 8 números.</p></div>
-      </li>
-    </ul>
+  <!-- Carregando -->
+  <div class="vista vista-centro" id="vista-carregando">
+    <div class="pontinhos" role="status" aria-label="Carregando"><span></span><span></span><span></span></div>
+  </div>
 
-    <form class="cartao diag-form" id="form-admin" novalidate>
-      <p class="diag-nome">Testar a tua conta</p>
-      <div class="campo-grupo">
-        <label class="campo-rotulo" for="admin-email">E-mail</label>
-        <input class="campo" id="admin-email" type="email" autocomplete="username" required>
+  <!-- ================================================================
+       LOGIN
+       ================================================================ -->
+  <main class="vista vista-centro" id="vista-login" hidden>
+    <form class="login" id="login-form" novalidate>
+      <div class="login-cabeca">
+        <p class="rotulo">Painel · Entre Mil Instantes</p>
+        <h1 class="titulo titulo-m">Entrar para editar</h1>
+        <p class="texto-2 texto-p">Só tu tens acesso. Ela nunca vê esta parte.</p>
       </div>
-      <div class="campo-grupo">
-        <label class="campo-rotulo" for="admin-senha">Senha</label>
-        <input class="campo" id="admin-senha" type="password" autocomplete="current-password" required>
-      </div>
-      <button class="botao botao--primario" type="submit">Testar admin</button>
-    </form>
 
-    <form class="cartao diag-form" id="form-convidada" novalidate>
-      <p class="diag-nome">Testar a conta dela</p>
-      <div class="campo-grupo">
-        <label class="campo-rotulo" for="convidada-senha">Só os 8 números da data (ddmmaaaa)</label>
-        <input class="campo" id="convidada-senha" type="password" inputmode="numeric" maxlength="8" autocomplete="off" required>
+      <div class="login-campos">
+        <div class="campo-grupo">
+          <label class="campo-rotulo" for="login-email">E-mail</label>
+          <input class="campo" id="login-email" type="email" autocomplete="username" inputmode="email" required>
+        </div>
+        <div class="campo-grupo">
+          <label class="campo-rotulo" for="login-senha">Senha</label>
+          <input class="campo" id="login-senha" type="password" autocomplete="current-password" required>
+        </div>
+        <label class="marcar">
+          <input type="checkbox" id="login-mostrar">
+          Mostrar senha
+        </label>
+        <p class="aviso-erro" id="login-erro" aria-live="polite"></p>
       </div>
-      <button class="botao botao--fantasma" type="submit">Testar conta dela</button>
+
+      <button class="botao botao--primario botao--quadrado botao--largo" type="submit" id="login-botao" disabled>Entrar</button>
     </form>
   </main>
 
-  <script type="module" src="../js/painel/diagnostico.js"></script>
+  <!-- ================================================================
+       PAINEL
+       ================================================================ -->
+  <div class="vista" id="vista-painel" hidden>
+    <div class="painel">
+      <header class="topo">
+        <div class="topo-linha">
+          <h1 class="topo-titulo">Painel</h1>
+          <span class="estado" id="estado" data-tipo="salvando" role="status" aria-live="polite">Carregando…</span>
+          <button class="botao-sair" type="button" id="botao-sair">Sair</button>
+        </div>
+        <p class="topo-sub" id="topo-sub"></p>
+        <nav class="abas" id="abas" role="tablist" aria-label="Seções do painel"></nav>
+      </header>
+
+      <main class="area" id="area" role="tabpanel" tabindex="-1"></main>
+
+      <footer class="barra">
+        <button class="botao botao--fantasma" type="button" id="botao-previa">Pré-visualizar</button>
+        <button class="botao botao--primario" type="button" id="botao-publicar">Publicar</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Janela: publicar (AUTORIZO) -->
+  <dialog class="janela" id="janela-publicar" aria-labelledby="publicar-titulo">
+    <form method="dialog" class="janela-corpo" id="publicar-pergunta" novalidate>
+      <h2 id="publicar-titulo">Publicar para ela?</h2>
+      <p class="janela-texto" id="publicar-texto">As alterações do rascunho vão aparecer no site dela.</p>
+      <div class="campo-grupo">
+        <label class="campo-rotulo" for="publicar-campo">Digite AUTORIZO para confirmar</label>
+        <input class="campo campo--autorizo" id="publicar-campo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AUTORIZO">
+      </div>
+      <p class="aviso-erro" id="publicar-erro" aria-live="polite"></p>
+      <div class="janela-acoes">
+        <button class="botao botao--fantasma" type="button" id="publicar-cancelar">Cancelar</button>
+        <button class="botao botao--primario" type="button" id="publicar-confirmar" disabled>Autorizar</button>
+      </div>
+    </form>
+    <div class="janela-corpo janela-ok" id="publicar-ok" hidden>
+      <span class="janela-ok-icone" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>
+      </span>
+      <h2>Publicado</h2>
+      <p class="janela-texto" id="publicar-ok-texto">O site dela já está atualizado.</p>
+      <button class="botao botao--primario botao--quadrado botao--largo" type="button" id="publicar-fechar">Voltar ao painel</button>
+    </div>
+  </dialog>
+
+  <!-- Janela: confirmar (excluir etc.) -->
+  <dialog class="janela" id="janela-confirmar" aria-labelledby="confirmar-titulo">
+    <div class="janela-corpo">
+      <h2 id="confirmar-titulo">Tem certeza?</h2>
+      <p class="janela-texto" id="confirmar-texto"></p>
+      <div class="janela-acoes">
+        <button class="botao botao--fantasma" type="button" id="confirmar-nao">Cancelar</button>
+        <button class="botao botao--perigo" type="button" id="confirmar-sim">Excluir</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="avisos" id="avisos" aria-live="polite"></div>
+
+  <noscript><p style="padding: 24px">Ativa o JavaScript para usar o painel.</p></noscript>
+
+  <script type="module" src="../js/painel/app.js"></script>
 </body>
 </html>

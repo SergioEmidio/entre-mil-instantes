@@ -14,6 +14,22 @@
   background: var(--meia-noite);
 }
 
+/* ---------- Faixa da pré-visualização ---------- */
+.faixa-previa {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: calc(6px + env(safe-area-inset-top)) 16px 6px;
+  background: var(--vinho);
+  color: var(--marfim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  pointer-events: none;
+}
+
 /* ---------- Cenas (cada tela do site) ---------- */
 .cena .tela {
   overflow: visible;   /* o céu agora fica no fundo fixo; nada é cortado */
