@@ -11,6 +11,10 @@ import { desenharCeu, mostrarTela } from "./telas.js";
 import { iniciarContagem } from "./contagem.js";
 import { iniciarSenha } from "./senha.js";
 import { rodarCarregamento } from "./carregamento.js";
+import { prepararFotos } from "./fotos.js";
+import { montarAbertura } from "./abertura.js";
+import { montarListaDeStories, tocarStories } from "./stories.js";
+import { temAntesAgora, tocarAntesAgora } from "./antes-agora.js";
 import {
   obterSituacao,
   entrarComoConvidada,
@@ -117,20 +121,52 @@ async function abrirCarregamento() {
   abrirSite();
 }
 
-function abrirSite() {
-  // Fase 3: aqui entra a abertura de verdade, com os stories.
-  const nome = ((conteudo && conteudo.nome) || "").trim();
-  document.getElementById("abertura-nome").textContent = nome
-    ? `Feliz aniversário, ${nome}`
-    : "Feliz aniversário";
-  mostrarTela("tela-abertura");
+// Abertura (quem volta ao site depois cai direto aqui, com as fotos prontas).
+async function abrirSite() {
+  await prepararSite();
+  montarAbertura(conteudo, () => irParaStories(0));
+  await mostrarTela("tela-abertura");
 }
 
-// Carrega o que o site vai precisar (fotos, áudios…) enquanto o
-// carregamento anima. Nas próximas fases isto ganha conteúdo.
+// Baixa as fotos enquanto o carregamento anima (uma vez só).
+let preparo = null;
 function prepararSite() {
-  return Promise.resolve();
+  if (!preparo) preparo = prepararFotos(conteudo);
+  return preparo;
 }
+
+// ---------------------------------------------------------------------
+// O caminho: abertura → stories → antes e agora → (fase 4: rádio)
+// ---------------------------------------------------------------------
+async function irParaStories(comecarEm) {
+  const lista = montarListaDeStories(conteudo);
+  if (!lista.length) {
+    // Sem stories: "voltar" leva à abertura; "seguir" pula para o próximo.
+    if (comecarEm < 0) await mostrarTela("tela-abertura");
+    else await irParaAntesAgora();
+    return;
+  }
+  await mostrarTela("tela-stories");
+  await tocarStories(lista, comecarEm);
+  await irParaAntesAgora();
+}
+
+async function irParaAntesAgora() {
+  if (!temAntesAgora(conteudo)) {
+    await irParaContinua();
+    return;
+  }
+  await mostrarTela("tela-antes-agora");
+  const escolha = await tocarAntesAgora(conteudo);
+  if (escolha === "voltar") await irParaStories(-1);
+  else await irParaContinua();
+}
+
+async function irParaContinua() {
+  await mostrarTela("tela-continua");
+}
+
+document.getElementById("continua-de-novo").addEventListener("click", () => irParaStories(0));
 
 // ---------------------------------------------------------------------
 // Senha

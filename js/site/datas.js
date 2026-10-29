@@ -100,3 +100,15 @@ export function numerosFormamData(numeros) {
     ano: Number(n.slice(4, 8)),
   });
 }
+
+// "2025-06-20" → "20 de junho de 2025"
+const MESES = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+];
+
+export function dataPorExtenso(iso) {
+  const data = lerDataISO(iso);
+  if (!data) return "";
+  return `${data.dia} de ${MESES[data.mes - 1]} de ${data.ano}`;
+}

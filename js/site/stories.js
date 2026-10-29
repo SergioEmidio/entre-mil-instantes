@@ -1,0 +1,360 @@
+// =====================================================================
+// Entre Mil Instantes · site/stories.js
+// Os stories (igual ao Instagram):
+//   · barrinhas no topo, passam sozinhos
+//   · toque à direita = próximo · toque à esquerda = anterior
+//   · segurar = pausa
+//   · no computador: setas do teclado e espaço
+// Ordem: Retrospectiva (dias, música, detalhes) → memórias com foto.
+// =====================================================================
+
+import { h, texto } from "./dom.js";
+import { diasDesde, mesesDesde, dataCurta, dataPorExtenso } from "./datas.js";
+import { linkDaFoto } from "./fotos.js";
+
+const DURACAO_RETRO = 7000;
+const DURACAO_MEMORIA = 6500;
+const TOQUE_MAXIMO = 250;      // até isso é toque; mais que isso foi "segurar"
+const AREA_VOLTAR = 0.3;       // 30% da esquerda volta
+
+// ---------------------------------------------------------------------
+// Monta a lista de stories a partir do conteúdo
+// ---------------------------------------------------------------------
+export function montarListaDeStories(conteudo) {
+  const c = conteudo || {};
+  const datas = c.datas || {};
+  const retro = c.retrospectiva || {};
+  const musica = retro.musica || {};
+  const lista = [];
+
+  // 1. Dias juntos (sempre que houver a data)
+  if (dataCurta(datas.conhecemos)) {
+    lista.push({ secao: "Nossa retrospectiva", tema: "vinho", duracao: DURACAO_RETRO, montar: () => slideDias(datas) });
+  }
+
+  // 2. Nossa música (só se tiver o nome)
+  if (texto(musica.nome)) {
+    lista.push({ secao: "Nossa retrospectiva", tema: "champanhe", duracao: DURACAO_RETRO, montar: () => slideMusica(musica) });
+  }
+
+  // 3. Detalhes (só os que estiverem preenchidos)
+  const detalhes = [
+    ["O apelido que eu mais te chamo", texto(retro.apelido), false],
+    ["Nosso lugar favorito", texto(retro.lugar), false],
+    ["A frase que tu mais falas", texto(retro.frase_dela), true],
+  ].filter((d) => d[1]);
+  if (detalhes.length) {
+    lista.push({ secao: "Nossa retrospectiva", tema: "azul", duracao: DURACAO_RETRO, montar: () => slideDetalhes(detalhes) });
+  }
+
+  // 4. Memórias (só as que têm foto)
+  const memorias = (Array.isArray(c.stories) ? c.stories : []).filter((s) => s && s.foto);
+  for (const story of memorias) {
+    lista.push({ secao: "Pequenos infinitos", tema: "foto", duracao: DURACAO_MEMORIA, montar: () => slideMemoria(story) });
+  }
+
+  return lista;
+}
+
+// ---------------------------------------------------------------------
+// Cada tipo de story
+// ---------------------------------------------------------------------
+function slideDias(datas) {
+  const dias = diasDesde(datas.conhecemos);
+  const meses = mesesDesde(datas.namoro);
+  const numero = h("p", { class: "st-numero", "data-contar": String(dias) }, "0");
+
+  return h(
+    "div",
+    { class: "st st--centro" },
+    h("p", { class: "st-intro" }, `Desde que a gente se conheceu, em ${dataCurta(datas.conhecemos, "/")}, foram`),
+    numero,
+    h("p", { class: "st-titulo" }, dias === 1 ? "dia ao teu lado." : "dias ao teu lado."),
+    meses >= 1 && dataPorExtenso(datas.namoro)
+      ? h(
+          "div",
+          { class: "st-caixa" },
+          h("span", { class: "st-caixa-numero" }, String(meses)),
+          h(
+            "span",
+            { class: "st-caixa-textos" },
+            h("span", { class: "st-caixa-titulo" }, meses === 1 ? "mês de namoro" : "meses de namoro"),
+            h("span", { class: "st-caixa-sub" }, `desde ${dataPorExtenso(datas.namoro)}`)
+          )
+        )
+      : null,
+    h("p", { class: "st-texto" }, "E eu lembro de muito mais deles do que tu imaginas.")
+  );
+}
+
+function slideMusica(musica) {
+  const link = linkDaFoto(musica.capa);
+  return h(
+    "div",
+    { class: "st st--centro" },
+    h("h2", { class: "st-titulo st-titulo--m" }, "A música que mais tocou na nossa história"),
+    h("div", { class: "st-capa" }, link ? h("img", { src: link, alt: "" }) : null),
+    h(
+      "div",
+      { class: "st-musica" },
+      h("p", { class: "st-musica-nome" }, texto(musica.nome)),
+      texto(musica.artista) ? h("p", { class: "st-musica-artista" }, texto(musica.artista)) : null
+    ),
+    texto(musica.frase) ? h("p", { class: "st-citacao" }, texto(musica.frase)) : null
+  );
+}
+
+function slideDetalhes(detalhes) {
+  return h(
+    "div",
+    { class: "st st--centro" },
+    h("h2", { class: "st-titulo st-titulo--m" }, "Os detalhes que são só nossos"),
+    h(
+      "ol",
+      { class: "st-lista" },
+      detalhes.map(([rotulo, valor, citacao], i) =>
+        h(
+          "li",
+          { class: "st-lista-item" },
+          h("span", { class: "st-lista-numero", "aria-hidden": "true" }, String(i + 1)),
+          h(
+            "span",
+            { class: "st-lista-textos" },
+            h("span", { class: "st-lista-rotulo" }, rotulo),
+            h("span", { class: citacao ? "st-lista-valor st-lista-valor--citacao" : "st-lista-valor" }, citacao ? `“${valor}”` : valor)
+          )
+        )
+      )
+    )
+  );
+}
+
+function slideMemoria(story) {
+  const link = linkDaFoto(story.foto);
+  const tag = texto(story.tag);
+  const frase = texto(story.frase);
+  return h(
+    "div",
+    { class: "st st--foto" },
+    h("div", { class: "st-foto" }, link ? h("img", { src: link, alt: frase || tag || "Foto de nós dois" }) : null),
+    tag || frase
+      ? h(
+          "div",
+          { class: "st-legenda" },
+          tag ? h("p", { class: "st-legenda-tag" }, tag) : null,
+          frase ? h("p", { class: "st-legenda-frase" }, `“${frase}”`) : null
+        )
+      : null
+  );
+}
+
+// Número subindo (ex.: 0 → 533) quando o story aparece.
+function animarNumeros(raiz) {
+  const menos = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (const el of raiz.querySelectorAll("[data-contar]")) {
+    const alvo = Number(el.dataset.contar) || 0;
+    if (menos || alvo === 0) {
+      el.textContent = String(alvo);
+      continue;
+    }
+    const inicio = performance.now();
+    const duracao = 1300;
+    const passo = (agora) => {
+      const f = Math.min(1, (agora - inicio) / duracao);
+      el.textContent = String(Math.round(alvo * (1 - Math.pow(1 - f, 3))));
+      if (f < 1 && el.isConnected) requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }
+}
+
+// ---------------------------------------------------------------------
+// O "tocador" de stories
+// ---------------------------------------------------------------------
+// Mostra a lista e devolve uma promessa que termina quando ela passa do último.
+// comecarEm: índice inicial (−1 = último).
+export function tocarStories(lista, comecarEm = 0) {
+  const el = {
+    palco: document.getElementById("stories-palco"),
+    barras: document.getElementById("stories-barras"),
+    secao: document.getElementById("stories-secao"),
+    conta: document.getElementById("stories-conta"),
+    slide: document.getElementById("stories-slide"),
+    toque: document.getElementById("stories-toque"),
+    dica: document.getElementById("stories-dica"),
+    anterior: document.getElementById("stories-anterior"),
+    proximo: document.getElementById("stories-proximo"),
+    pausar: document.getElementById("stories-pausar"),
+  };
+
+  return new Promise((terminar) => {
+    if (!lista.length) {
+      terminar();
+      return;
+    }
+
+    let atual = comecarEm < 0 ? lista.length - 1 : Math.min(comecarEm, lista.length - 1);
+    let decorrido = 0;
+    let ultimoQuadro = 0;
+    let pausadoPorToque = false;
+    let pausadoPorBotao = false;
+    let pausadoPorAba = false;
+    let encerrado = false;
+    let quadro = 0;
+
+    // Barrinhas
+    el.barras.replaceChildren(
+      ...lista.map(() => h("span", { class: "stories-barra" }, h("span", { class: "stories-barra-cheia" })))
+    );
+    const cheias = [...el.barras.querySelectorAll(".stories-barra-cheia")];
+
+    const pausado = () => pausadoPorToque || pausadoPorBotao || pausadoPorAba;
+
+    function desenharBarras() {
+      const fracao = Math.min(1, decorrido / lista[atual].duracao);
+      cheias.forEach((barra, i) => {
+        const valor = i < atual ? 1 : i > atual ? 0 : fracao;
+        barra.style.transform = `scaleX(${valor})`;
+      });
+    }
+
+    function mostrar(indice) {
+      atual = indice;
+      decorrido = 0;
+      const item = lista[atual];
+      el.palco.dataset.tema = item.tema;
+      el.secao.textContent = item.secao;
+      el.conta.textContent = `${atual + 1} de ${lista.length}`;
+      const conteudo = item.montar();
+      conteudo.classList.add("st--entrando");
+      el.slide.replaceChildren(conteudo);
+      animarNumeros(conteudo);
+      desenharBarras();
+    }
+
+    function proximo() {
+      if (encerrado) return;
+      if (atual >= lista.length - 1) {
+        encerrar();
+        return;
+      }
+      mostrar(atual + 1);
+    }
+
+    function anterior() {
+      if (encerrado) return;
+      if (atual === 0) {
+        mostrar(0);   // no primeiro, recomeça ele
+        return;
+      }
+      mostrar(atual - 1);
+    }
+
+    function loop(agora) {
+      if (encerrado) return;
+      const passo = ultimoQuadro ? agora - ultimoQuadro : 0;
+      ultimoQuadro = agora;
+      if (!pausado()) {
+        decorrido += Math.min(passo, 100);   // se a aba travar, não pula vários stories
+        if (decorrido >= lista[atual].duracao) {
+          proximo();
+        }
+      }
+      if (!encerrado) {
+        desenharBarras();
+        quadro = requestAnimationFrame(loop);
+      }
+    }
+
+    // ---- toques ----
+    let inicioToque = 0;
+    let xInicio = 0;
+    let yInicio = 0;
+
+    function aoApertar(evento) {
+      if (evento.button !== undefined && evento.button !== 0) return;
+      inicioToque = performance.now();
+      xInicio = evento.clientX;
+      yInicio = evento.clientY;
+      pausadoPorToque = true;
+      el.palco.classList.add("stories-palco--pausado");
+      try { el.toque.setPointerCapture(evento.pointerId); } catch { /* ok */ }
+    }
+
+    function aoSoltar(evento) {
+      if (!inicioToque) return;
+      const tempo = performance.now() - inicioToque;
+      const andou = Math.hypot(evento.clientX - xInicio, evento.clientY - yInicio);
+      inicioToque = 0;
+      pausadoPorToque = false;
+      el.palco.classList.toggle("stories-palco--pausado", pausadoPorBotao);
+      el.dica.classList.add("stories-dica--some");
+
+      if (tempo <= TOQUE_MAXIMO && andou < 12) {
+        const caixa = el.toque.getBoundingClientRect();
+        const posicao = (evento.clientX - caixa.left) / caixa.width;
+        if (posicao < AREA_VOLTAR) anterior();
+        else proximo();
+      }
+    }
+
+    function aoCancelar() {
+      inicioToque = 0;
+      pausadoPorToque = false;
+      el.palco.classList.toggle("stories-palco--pausado", pausadoPorBotao);
+    }
+
+    // ---- teclado e botões ----
+    function aoTeclar(evento) {
+      if (evento.key === "ArrowRight") {
+        evento.preventDefault();
+        proximo();
+      } else if (evento.key === "ArrowLeft") {
+        evento.preventDefault();
+        anterior();
+      } else if (evento.key === " " && !/^(BUTTON|INPUT|TEXTAREA|A)$/.test(evento.target.tagName)) {
+        evento.preventDefault();
+        alternarPausa();
+      }
+    }
+
+    function alternarPausa() {
+      pausadoPorBotao = !pausadoPorBotao;
+      el.pausar.textContent = pausadoPorBotao ? "Continuar" : "Pausar";
+      el.palco.classList.toggle("stories-palco--pausado", pausadoPorBotao);
+    }
+
+    function aoMudarAba() {
+      pausadoPorAba = document.visibilityState !== "visible";
+    }
+
+    const ouvintes = [
+      [el.toque, "pointerdown", aoApertar],
+      [el.toque, "pointerup", aoSoltar],
+      [el.toque, "pointercancel", aoCancelar],
+      [el.toque, "contextmenu", (e) => e.preventDefault()],
+      [document, "keydown", aoTeclar],
+      [document, "visibilitychange", aoMudarAba],
+      [el.anterior, "click", anterior],
+      [el.proximo, "click", proximo],
+      [el.pausar, "click", alternarPausa],
+    ];
+    for (const [alvo, tipo, fn] of ouvintes) alvo.addEventListener(tipo, fn);
+
+    function encerrar() {
+      if (encerrado) return;
+      encerrado = true;
+      cancelAnimationFrame(quadro);
+      for (const [alvo, tipo, fn] of ouvintes) alvo.removeEventListener(tipo, fn);
+      cheias.forEach((barra) => { barra.style.transform = "scaleX(1)"; });
+      terminar();
+    }
+
+    pausadoPorBotao = false;
+    el.pausar.textContent = "Pausar";
+    el.palco.classList.remove("stories-palco--pausado");
+    el.dica.classList.remove("stories-dica--some");
+    mostrar(atual);
+    quadro = requestAnimationFrame(loop);
+  });
+}

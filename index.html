@@ -151,13 +151,104 @@
   </section>
 
   <!-- ================================================================
-       03 · ABERTURA (provisória: a de verdade chega na fase 3)
+       03 · ABERTURA (5 toques no nome = mensagem secreta)
        ================================================================ -->
   <section class="cena" id="tela-abertura" aria-labelledby="abertura-nome" hidden>
+    <div class="tela tela--centro abertura">
+      <div class="abertura-meio">
+        <p class="rotulo" id="abertura-data"></p>
+        <h1 class="abertura-titulo">
+          <button class="abertura-nome" id="abertura-nome" type="button">Feliz aniversário</button>
+        </h1>
+        <p class="titulo titulo--italico abertura-parabens">Feliz aniversário</p>
+        <p class="texto-2 abertura-frase" id="abertura-frase"></p>
+      </div>
+      <div class="abertura-pe">
+        <button class="botao botao--primario botao--largo" type="button" id="abertura-entrar">Entrar na nossa história</button>
+        <p class="texto-3 texto-p">Toca na tela para avançar os stories.</p>
+      </div>
+    </div>
+
+    <div class="segredo" id="segredo" role="dialog" aria-modal="true" aria-labelledby="segredo-rotulo" hidden>
+      <div class="segredo-carta">
+        <p class="rotulo" id="segredo-rotulo">Tu achaste o segredo</p>
+        <p class="segredo-texto" id="segredo-texto"></p>
+        <p class="segredo-assinatura" id="segredo-assinatura"></p>
+        <button class="botao botao--fantasma" type="button" id="segredo-fechar">Guardar segredo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       04–07 · STORIES (retrospectiva + memórias)
+       ================================================================ -->
+  <section class="cena cena--stories" id="tela-stories" aria-label="Stories" hidden>
+    <div class="stories-palco" id="stories-palco" data-tema="vinho">
+      <div class="stories-topo">
+        <div class="stories-barras" id="stories-barras" aria-hidden="true"></div>
+        <div class="stories-cabeca">
+          <h1 class="stories-secao" id="stories-secao">Nossa retrospectiva</h1>
+          <p class="stories-conta" id="stories-conta" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="stories-slide" id="stories-slide"></div>
+
+      <!-- Camada que recebe os toques (esquerda volta, direita avança, segurar pausa) -->
+      <div class="stories-toque" id="stories-toque" aria-hidden="true"></div>
+
+      <p class="stories-dica" id="stories-dica" aria-hidden="true">Toca à direita para avançar · segura para pausar</p>
+
+      <!-- Controles para teclado e leitores de tela -->
+      <div class="stories-controles">
+        <button type="button" class="stories-controle" id="stories-anterior">Anterior</button>
+        <button type="button" class="stories-controle" id="stories-pausar">Pausar</button>
+        <button type="button" class="stories-controle" id="stories-proximo">Próximo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       08 · ANTES E AGORA
+       ================================================================ -->
+  <section class="cena" id="tela-antes-agora" aria-labelledby="aa-titulo" hidden>
+    <div class="tela aa">
+      <div class="aa-cabeca">
+        <p class="rotulo">Antes e agora</p>
+        <h1 class="titulo titulo-m" id="aa-titulo">Olha o quanto a gente mudou (e o que não mudou)</h1>
+      </div>
+
+      <div class="aa-quadro" id="aa-quadro">
+        <img class="aa-foto" id="aa-agora" alt="Nós dois hoje">
+        <img class="aa-foto aa-foto--antes" id="aa-antes" alt="Nós dois no começo">
+        <span class="aa-linha" aria-hidden="true"></span>
+        <span class="aa-alca" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6M15 6l6 6-6 6"/></svg>
+        </span>
+        <span class="aa-etiqueta aa-etiqueta--antes" aria-hidden="true">Antes</span>
+        <span class="aa-etiqueta aa-etiqueta--agora" aria-hidden="true">Hoje</span>
+      </div>
+
+      <label class="sr-only" for="aa-barra">Comparar antes e agora</label>
+      <input class="aa-barra" id="aa-barra" type="range" min="0" max="100" step="1" value="50">
+
+      <p class="titulo titulo--italico aa-frase" id="aa-frase"></p>
+
+      <div class="aa-botoes">
+        <button class="botao botao--fantasma" type="button" id="aa-voltar">Voltar</button>
+        <button class="botao botao--primario" type="button" id="aa-proximo">Próximo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       CONTINUA (provisório: a rádio chega na fase 4)
+       ================================================================ -->
+  <section class="cena" id="tela-continua" aria-labelledby="continua-titulo" hidden>
     <div class="tela tela--centro pilha pilha--g">
-      <p class="rotulo">03 · 11 · 2026</p>
-      <h1 class="titulo abertura-nome" id="abertura-nome">Feliz aniversário</h1>
-      <p class="texto-2">(As próximas telas chegam na fase 3.)</p>
+      <p class="rotulo">Continua…</p>
+      <h1 class="titulo titulo--italico titulo-m" id="continua-titulo">A rádio e a surpresa final chegam aqui.</h1>
+      <button class="botao botao--fantasma" type="button" id="continua-de-novo">Ver os stories de novo</button>
     </div>
   </section>
 
