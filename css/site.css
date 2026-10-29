@@ -4,6 +4,31 @@
    celulares pequenos, celular deitado, tablet e computador.
    ===================================================================== */
 
+/* ---------- Modo prévia: o site desce para a faixa não cobrir nada ---------- */
+:root {
+  --altura-previa: calc(30px + env(safe-area-inset-top));
+}
+
+html.modo-previa body {
+  padding-top: var(--altura-previa);
+}
+
+html.modo-previa .tela,
+html.modo-previa .cena,
+html.modo-previa .tocando {
+  min-height: calc(100vh - var(--altura-previa));
+  min-height: calc(100dvh - var(--altura-previa));
+}
+
+html.modo-previa .stories-palco {
+  height: calc(100vh - var(--altura-previa));
+  height: calc(100dvh - var(--altura-previa));
+}
+
+html.modo-previa .stories-topo {
+  padding-top: 12px;   /* a faixa já cuida do entalhe do celular */
+}
+
 /* ---------- Céu de fundo (fixo atrás de todas as telas) ---------- */
 .ceu {
   position: fixed;
@@ -21,7 +46,14 @@
   left: 0;
   right: 0;
   z-index: 20;
+  box-sizing: border-box;
+  height: var(--altura-previa);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 17px;
   padding: calc(6px + env(safe-area-inset-top)) 16px 6px;
+  border-bottom: 1px solid rgba(232, 211, 162, 0.35);
   background: var(--vinho);
   color: var(--marfim);
   font-size: 12px;
@@ -736,6 +768,7 @@
 /* Memória com foto */
 .st--foto {
   justify-content: flex-end;
+  padding-top: calc(58px + env(safe-area-inset-top));
 }
 
 .st-foto {
@@ -745,10 +778,40 @@
   background-image: repeating-linear-gradient(135deg, rgba(232, 211, 162, 0.07) 0 12px, transparent 12px 24px);
 }
 
-.st-foto img {
+/* Fundo desfocado (a mesma foto, ampliada) */
+.st-foto-fundo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.2);
+  filter: blur(26px) brightness(0.55) saturate(1.1);
+}
+
+/* A foto inteira: ocupa o espaço entre o topo e a legenda, sem cortar */
+.st-foto-inteira {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px 14px;
+}
+
+.st-foto-inteira img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(7, 11, 22, 0.45);
+}
+
+/* Sem legenda: a foto desce até o fim da tela */
+.st--foto > .st-foto-inteira:last-child {
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
 }
 
 .st-legenda {

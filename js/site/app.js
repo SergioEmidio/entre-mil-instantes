@@ -85,6 +85,7 @@ async function abrirPrevia() {
   conteudo = await obterPrevia();
   window.__siteComecou = true;
   document.getElementById("faixa-previa").hidden = false;
+  document.documentElement.classList.add("modo-previa");
   await mostrarTela("tela-carregamento");
   await rodarCarregamento(conteudo, prepararSite());
   abrirSite();

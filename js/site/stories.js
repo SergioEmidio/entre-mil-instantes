@@ -148,7 +148,10 @@ function slideMemoria(story) {
   return h(
     "div",
     { class: "st st--foto" },
-    h("div", { class: "st-foto" }, link ? h("img", { src: link, alt: frase || tag || "Foto de nós dois" }) : null),
+    // Fundo: a mesma foto, desfocada, preenchendo a tela.
+    h("div", { class: "st-foto" }, link ? h("img", { class: "st-foto-fundo", src: link, alt: "", "aria-hidden": "true" }) : null),
+    // Frente: a foto inteira, sem cortar nada.
+    h("div", { class: "st-foto-inteira" }, link ? h("img", { src: link, alt: frase || tag || "Foto de nós dois" }) : null),
     tag || frase
       ? h(
           "div",
