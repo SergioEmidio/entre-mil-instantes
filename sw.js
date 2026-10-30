@@ -8,7 +8,7 @@
 // Não mexe em nada do Supabase (fotos, áudios, cartas): isso passa direto.
 // =====================================================================
 
-const VERSAO = "nossos-instantes-v1";
+const VERSAO = "nossos-instantes-v2";
 const ESSENCIAIS = [
   "./offline.html",
   "./css/base.css",
@@ -41,16 +41,17 @@ self.addEventListener("fetch", (evento) => {
   // Abrir uma página: internet primeiro; sem internet, a tela "sem internet".
   if (pedido.mode === "navigate") {
     evento.respondWith(
-      fetch(pedido).catch(() =>
+      fetch(pedido.url, { cache: "no-cache", credentials: "same-origin" }).catch(() =>
         caches.match("./offline.html").then((r) => r || new Response("Sem internet.", { status: 503 }))
       )
     );
     return;
   }
 
-  // Arquivos do site: internet primeiro (guarda uma cópia); sem internet, a cópia.
+  // Arquivos do site: internet primeiro, sempre conferindo se mudou
+  // (assim o app nunca fica com versão velha); sem internet, a cópia.
   evento.respondWith(
-    fetch(pedido)
+    fetch(pedido, { cache: "no-cache" })
       .then((resposta) => {
         if (resposta && resposta.ok && resposta.type === "basic") {
           const copia = resposta.clone();

@@ -62,6 +62,33 @@
   </section>
 
   <!-- ================================================================
+       INSTALAR O APP (celular, aberto pelo navegador: veio do QR code)
+       ================================================================ -->
+  <section class="cena" id="tela-instalar" aria-labelledby="instalar-titulo" hidden>
+    <div class="tela tela--centro instalar">
+      <img class="instalar-icone" src="./icones/icone-192.png" alt="" width="104" height="104">
+
+      <div class="pilha pilha--m" id="instalar-pedido">
+        <p class="rotulo">Antes de abrir</p>
+        <h1 class="titulo titulo--italico titulo-m" id="instalar-titulo">Instala o nosso app</h1>
+        <p class="texto-2 instalar-texto">O teu presente mora num app só nosso, o <strong>Nossos Instantes</strong>. Instala primeiro e abre tudo por ele.</p>
+      </div>
+
+      <button class="botao botao--primario botao--largo" type="button" id="instalar-botao" hidden>Instalar «Nossos Instantes»</button>
+
+      <ol class="instalar-passos" id="instalar-passos"></ol>
+
+      <div class="pilha pilha--m" id="instalar-pronto" hidden>
+        <p class="rotulo">Instalado</p>
+        <h2 class="titulo titulo--italico titulo-m" tabindex="-1" id="instalar-pronto-titulo">Agora abre pelo ícone.</h2>
+        <p class="texto-2 instalar-texto">Fecha o navegador e toca no ícone <strong>Nossos Instantes</strong> na tua tela inicial (o lacre dourado com M ♥ S).</p>
+      </div>
+
+      <button class="botao-link instalar-navegador" type="button" id="instalar-navegador">Abrir aqui no navegador mesmo</button>
+    </div>
+  </section>
+
+  <!-- ================================================================
        00 · CONTAGEM (antes do dia 3)
        ================================================================ -->
   <section class="cena" id="tela-contagem" aria-labelledby="contagem-titulo" hidden>

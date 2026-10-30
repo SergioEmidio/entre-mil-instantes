@@ -3076,3 +3076,82 @@ html.modo-previa .stories-topo {
   .convite-app { flex-direction: column; }
   .convite-instalar { width: 100%; }
 }
+
+/* ---------- Tela "instala o nosso app" ---------- */
+.instalar {
+  gap: 22px;
+}
+
+.instalar-icone {
+  width: 104px;
+  height: 104px;
+  border-radius: 26px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.instalar-texto {
+  margin: 0;
+  max-width: 330px;
+  line-height: 1.55;
+}
+
+.instalar-texto strong {
+  color: var(--champanhe);
+  font-weight: 500;
+}
+
+.instalar-passos {
+  width: 100%;
+  max-width: 340px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.instalar-passos:empty {
+  display: none;
+}
+
+.instalar-passos li {
+  counter-increment: passo;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--meia-noite-2);
+  border: 1px solid #263150;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.instalar-passos li::before {
+  content: counter(passo);
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--vinho);
+  color: var(--champanhe);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.instalar-passos strong {
+  color: var(--champanhe);
+  font-weight: 600;
+}
+
+.instalar-navegador {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--texto-3);
+}
