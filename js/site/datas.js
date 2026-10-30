@@ -19,7 +19,7 @@ export function hojeEmBrasilia(agora = new Date()) {
   return { ano: pegar("year"), mes: pegar("month"), dia: pegar("day") };
 }
 
-// "2025-05-19" → { ano: 2025, mes: 5, dia: 19 } (ou null se vier errado).
+// "2000-02-01" → { ano: 2000, mes: 2, dia: 1 } (ou null se vier errado).
 export function lerDataISO(texto) {
   const certo = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(texto || "").trim());
   if (!certo) return null;
@@ -60,7 +60,7 @@ export function mesesDesde(iso, hoje = hojeEmBrasilia()) {
   return Math.max(0, meses);
 }
 
-// "2025-05-19" → "19·05·2025"
+// "2000-02-01" → "01·02·2000"
 export function dataCurta(iso, separador = "·") {
   const data = lerDataISO(iso);
   if (!data) return "";
@@ -89,7 +89,7 @@ export function somenteNumeros(texto) {
   return String(texto || "").replace(/\D/g, "").slice(0, 8);
 }
 
-// "19052025" → "19/05/2025" (vai formando enquanto digita).
+// "01022000" → "01/02/2000" (vai formando enquanto digita).
 export function mascararData(numeros) {
   const n = somenteNumeros(numeros);
   if (n.length <= 2) return n;
@@ -97,7 +97,7 @@ export function mascararData(numeros) {
   return `${n.slice(0, 2)}/${n.slice(2, 4)}/${n.slice(4)}`;
 }
 
-// "19052025" é uma data que existe? (evita gastar tentativa com 31/02)
+// "01022000" é uma data que existe? (evita gastar tentativa com 31/02)
 export function numerosFormamData(numeros) {
   const n = somenteNumeros(numeros);
   if (n.length !== 8) return false;

@@ -3001,3 +3001,78 @@ html.modo-previa .stories-topo {
   .cartao-canvas { height: 70vh; height: 70dvh; }
   .presente-foto img { max-height: 55vh; max-height: 55dvh; }
 }
+
+/* ---------- Convite para instalar o app ---------- */
+.convite-app {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #2a2133, var(--meia-noite-2));
+  border: 1px solid var(--vinho-2);
+}
+
+.convite-icone {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+.convite-textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.convite-titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.15;
+}
+
+.convite-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-2);
+}
+
+.convite-passos {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--marfim);
+}
+
+.convite-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+
+.convite-instalar {
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.convite-botoes .botao-link {
+  padding: 0 8px;
+}
+
+@media (max-width: 359px) {
+  .convite-app { flex-direction: column; }
+  .convite-instalar { width: 100%; }
+}

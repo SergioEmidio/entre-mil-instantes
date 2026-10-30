@@ -65,7 +65,7 @@ export function desenharCeu(quantidade = 34) {
   const ceu = document.getElementById("ceu");
   if (!ceu || ceu.childElementCount) return;
 
-  let semente = 19052025;
+  let semente = 7351297;
   const aleatorio = () => {
     semente = (semente * 16807) % 2147483647;
     return (semente - 1) / 2147483646;

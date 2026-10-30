@@ -28,7 +28,7 @@ export function desenharRetrospectiva(area) {
 
     bloco(
       "Datas",
-      "Os dias juntos e os meses de namoro são calculados sozinhos. A senha dela não muda por aqui: continua sendo 19052025.",
+      "Os dias juntos e os meses de namoro são calculados sozinhos. A senha dela não muda por aqui: continua sendo a data em que vocês se conheceram.",
       h(
         "div",
         { class: "campo-grupo--linha" },

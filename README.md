@@ -1,6 +1,7 @@
 # Entre Mil Instantes
 
 Presente de aniversário digital, feito à mão.
+Também é um app instalável: **Nós, em Todos os Instantes** (ícone «Nossos Instantes»).
 
 - **Site:** HTML, CSS e JavaScript puro, publicado no GitHub Pages.
 - **Dados, fotos e áudios:** Supabase (banco, login e armazenamento privados).
@@ -16,6 +17,11 @@ js/supabase.js        conexão e funções de acesso
 js/site/              telas do site
 js/painel/            abas do painel
 supabase/             scripts do banco
+manifest.webmanifest  nome, ícone e cores do app
+sw.js                 faz o site funcionar como app (e a tela "sem internet")
+offline.html          tela "sem internet"
+icones/               ícones do app
+painel/cartao-qr.html cartão com QR code para imprimir
 .github/workflows/    tarefa diária que mantém o Supabase ativo
 ```
 

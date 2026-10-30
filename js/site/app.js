@@ -28,6 +28,7 @@ import { tocarRecado } from "./recado.js";
 import { tocarCartao } from "./cartao.js";
 import { tocarCantinho } from "./cantinho.js";
 import { definirPrevia, ehPrevia, lerMemoria, guardarMemoria } from "./memoria.js";
+import { prepararApp, atualizarConvite } from "./instalar.js";
 import {
   obterSituacao,
   entrarComoConvidada,
@@ -270,6 +271,7 @@ function itensDoCantinho() {
 
 async function irParaCantinho() {
   for (;;) {
+    atualizarConvite();
     const escolha = await tocarCantinho(itensDoCantinho());
     if (escolha === "inicio") {
       caminhoCompleto();
@@ -360,4 +362,5 @@ document.getElementById("erro-tentar").addEventListener("click", () => {
   window.location.reload();
 });
 
+prepararApp();
 comecar();

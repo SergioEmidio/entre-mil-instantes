@@ -13,7 +13,16 @@
   <meta property="og:description" content="Tem uma coisa sendo preparada pra ti.">
   <meta property="og:type" content="website">
 
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <!-- App instalável: «Nós, em Todos os Instantes» -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icones/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="./icones/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="./icones/apple-touch-icon.png">
+  <meta name="application-name" content="Nossos Instantes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Nossos Instantes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
@@ -595,6 +604,18 @@
         <h1 class="titulo titulo--italico titulo-m" id="cantinho-titulo">Nosso cantinho</h1>
         <p class="texto-2 texto-p">Volta aqui quando quiser. Tudo continua guardado.</p>
       </div>
+      <section class="convite-app" id="convite-app" aria-labelledby="convite-titulo" hidden>
+        <img class="convite-icone" src="./icones/icone-192.png" alt="" width="56" height="56">
+        <div class="convite-textos">
+          <h2 class="convite-titulo" id="convite-titulo">Guarda a gente na tua tela inicial</h2>
+          <p class="convite-texto" id="convite-texto"></p>
+          <ol class="convite-passos" id="convite-passos" hidden></ol>
+          <div class="convite-botoes">
+            <button class="botao botao--primario convite-instalar" type="button" id="convite-instalar" hidden>Instalar o app</button>
+            <button class="botao-link" type="button" id="convite-agora-nao">Agora não</button>
+          </div>
+        </div>
+      </section>
       <nav class="cantinho" id="cantinho-lista" aria-label="Partes do site"></nav>
       <div class="pagina-pe">
         <button class="botao botao--fantasma botao--largo" type="button" id="cantinho-inicio">Ver tudo desde o começo</button>

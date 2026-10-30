@@ -14,7 +14,7 @@ const ESPERA_TENTAR_DE_NOVO = 5000;
 const MODELO = {
   nome: "Mika",
   autor: "Sérgio",
-  datas: { conhecemos: "2025-05-19", namoro: "2025-06-20", aniversario: "2026-11-03" },
+  datas: { conhecemos: "", namoro: "", aniversario: "" },
   abertura: {
     frase: "Preparei uma retrospectiva, alguns stories e uma rádio feita só pra ti.",
     segredo: "",

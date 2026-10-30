@@ -99,7 +99,7 @@ values (
     "nome": "Mika",
     "autor": "Sérgio",
     "datas": {
-      "conhecemos": "2025-05-19",
+      "conhecemos": "",
       "namoro": "2025-06-20",
       "aniversario": "2026-11-03"
     },

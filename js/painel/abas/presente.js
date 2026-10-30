@@ -102,6 +102,12 @@ export function desenharPresente(area, redesenhar) {
     ),
 
     bloco(
+      "Cartão com QR code (para imprimir)",
+      "Vai junto do presente: ela aponta a câmera e o site abre. Dá para mudar os textos antes de imprimir.",
+      h("a", { class: "botao-pequeno", href: "cartao-qr.html", target: "_blank", rel: "noopener" }, "Abrir o cartão para imprimir")
+    ),
+
+    bloco(
       "Mensagem secreta",
       "Aparece quando ela toca 5 vezes no nome dela, na abertura.",
       campo({

@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Nós, em Todos os Instantes",
+  "short_name": "Nossos Instantes",
+  "description": "A nossa história, as cartas, a rádio e a nossa lista dos próximos 365 dias.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#10182b",
+  "theme_color": "#10182b",
+  "categories": ["lifestyle"],
+  "icons": [
+    { "src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icones/icone-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

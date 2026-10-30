@@ -104,7 +104,7 @@ export async function obterSituacao() {
 // Entrar e sair
 // ---------------------------------------------------------------------
 
-// Ela entra só com a data: "19052025" (8 números).
+// Ela entra só com a data que ela digita (8 números, sem as barras).
 export async function entrarComoConvidada(oitoNumeros) {
   const { error } = await supabase.auth.signInWithPassword({
     email: CONFIG.EMAIL_CONVIDADA,
