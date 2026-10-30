@@ -184,7 +184,7 @@ function prepararSite() {
 const ETAPAS = [
   { id: "presente", titulo: "O presente", sub: "A caixa da surpresa", tem: temPresente, tocar: tocarPresente },
   { id: "vales", titulo: "Vales", sub: "A raspadinha", tem: temVales, tocar: tocarVales },
-  { id: "cartas", titulo: "Cartas «Abre quando…»", sub: "Pra quando tu precisares", tem: temCartas, tocar: tocarCartas },
+  { id: "cartas", titulo: "Cartas «Abre quando…»", sub: "Pra quando tu precisares", tem: temCartas, tocar: etapaDasCartas },
   {
     id: "lista",
     titulo: "Nossos próximos 365 dias",
@@ -194,6 +194,18 @@ const ETAPAS = [
   },
   { id: "recado", titulo: "Deixar um recado", sub: "Escrito ou gravado", tem: () => true, tocar: tocarRecado },
 ];
+
+// Cartas: o "Responder" leva ao recado e depois volta para as cartas.
+async function etapaDasCartas(c, opcoes) {
+  for (;;) {
+    const resultado = await tocarCartas(c, opcoes);
+    if (resultado && resultado.responder) {
+      await tocarRecado(c, { resposta: resultado.responder });
+      continue;
+    }
+    return resultado;
+  }
+}
 
 // ---------------------------------------------------------------------
 // O caminho completo

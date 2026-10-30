@@ -52,6 +52,7 @@ function pegar() {
     enviar: "recado-enviar",
     pular: "recado-pular",
     okTitulo: "recado-ok-titulo",
+    titulo: "recado-titulo",
     okTexto: "recado-ok-texto",
     seguir: "recado-seguir",
     outro: "recado-outro",
@@ -251,15 +252,28 @@ function mostrarEnviado() {
 }
 
 // ---------------------------------------------------------------------
-export async function tocarRecado(conteudo, { deCantinho = false } = {}) {
+// resposta: título da carta que ela está respondendo (vem do botão "Responder").
+export async function tocarRecado(conteudo, { deCantinho = false, resposta = null } = {}) {
   pegar();
   el.modoVoz.hidden = !podeGravar();
   if (!podeGravar()) modo = "texto";
-  el.seguir.textContent = deCantinho ? "Voltar ao cantinho" : "Continuar";
-  el.pular.textContent = deCantinho ? "Voltar ao cantinho" : "Agora não";
+  const voltar = resposta ? "Voltar às cartas" : deCantinho ? "Voltar ao cantinho" : null;
+  el.seguir.textContent = voltar || "Continuar";
+  el.pular.textContent = voltar || "Agora não";
+  el.titulo.textContent = resposta ? "Responde a carta" : "Deixa um recado pra mim";
   mostrarFormulario();
+  if (resposta) {
+    modo = "texto";
+    const inicio = `Sobre a carta «${resposta}»: `;
+    if (!texto(el.campo.value)) el.campo.value = inicio;
+    atualizar();
+  }
 
   await mostrarTela("tela-recado");
+  if (resposta) {
+    el.campo.focus({ preventScroll: true });
+    el.campo.setSelectionRange(el.campo.value.length, el.campo.value.length);
+  }
   const saida = await esperarClique([[el.seguir, "seguir"], [el.pular, "pular"]]);
   cancelarGravacao();
   el.ouvir.pause();

@@ -39,7 +39,8 @@ export function audiosDoConteudo(conteudo) {
   const c = conteudo || {};
   const musica = (c.retrospectiva && c.retrospectiva.musica) || {};
   const faixas = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
-  return [musica.audio, ...faixas.map((f) => f && f.audio)].filter(
+  const cartas = Array.isArray(c.cartas) ? c.cartas : [];
+  return [musica.audio, ...faixas.map((f) => f && f.audio), ...cartas.map((x) => x && x.audio)].filter(
     (caminho) => typeof caminho === "string" && caminho
   );
 }

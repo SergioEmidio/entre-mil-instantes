@@ -26,6 +26,7 @@ supabase/             scripts do banco
 3. `supabase/03_fase1_conteudo.sql`
 4. `supabase/04_fase2.sql`
 5. `supabase/05_fase5.sql` (presente, cartas trancadas, lista dos 365 dias e recados)
+6. `supabase/06_cartas.sql` (quando ela abre cada carta + voz nas cartas)
 
 Todos podem rodar de novo sem quebrar nada.
 

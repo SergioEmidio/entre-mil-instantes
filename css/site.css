@@ -2113,6 +2113,66 @@ html.modo-previa .stories-topo {
   color: var(--texto-3);
 }
 
+/* lacrinho no bico do envelope da grade */
+.envelope-lacre {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 65% 35%, #e6c98c, #c9a86a 60%, #a8864d);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.envelope--trancado .envelope-lacre {
+  background: radial-gradient(circle at 65% 35%, #6d7690, #4a5570);
+}
+
+.envelope-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.envelope-data {
+  font-size: 11px;
+  color: var(--texto-3);
+}
+
+.envelope--nova {
+  border-color: var(--champanhe);
+  animation: envelope-brilha 2.4s ease-in-out infinite;
+}
+
+.envelope--nova .envelope-marca {
+  color: var(--champanhe);
+  font-weight: 600;
+}
+
+@keyframes envelope-brilha {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 211, 162, 0); }
+  50%      { box-shadow: 0 0 22px 2px rgba(232, 211, 162, 0.35); }
+}
+
+.envelope--tremendo {
+  animation: envelope-treme 420ms ease-in-out;
+}
+
+@keyframes envelope-treme {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-1.5deg); }
+  40% { transform: translateX(5px) rotate(1.2deg); }
+  60% { transform: translateX(-4px) rotate(-0.8deg); }
+  80% { transform: translateX(2px); }
+}
+
+/* sem animação (celular com "reduzir movimento"): só a folha */
+.carta-fundo--simples .env {
+  display: none;
+}
+
 .cartas-aviso {
   margin: 0;
   min-height: 20px;
@@ -2124,6 +2184,7 @@ html.modo-previa .stories-topo {
   min-height: 0;
 }
 
+/* ---------- Carta aberta: envelope + folha ---------- */
 .carta-fundo {
   position: fixed;
   inset: 0;
@@ -2132,32 +2193,193 @@ html.modo-previa .stories-topo {
   align-items: center;
   justify-content: center;
   padding: calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
-  background: rgba(7, 11, 22, 0.88);
+  background: rgba(7, 11, 22, 0.9);
+  overflow: hidden;
 }
 
-.carta-papel {
+/* Envelope grande (posição e tamanho vêm do JS) */
+.env {
+  --env-l: 300px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--env-l);
+  height: calc(var(--env-l) * 0.64);
+  transform-origin: 0 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.env > * {
+  position: absolute;
+}
+
+.env-costas {
+  inset: 0;
+  border-radius: 8px;
+  background: #3a2430;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+}
+
+.env-papel {
+  left: 7%;
+  right: 7%;
+  bottom: 6%;
+  height: 78%;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f6eee1, var(--marfim));
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 9%;
+  padding: 12% 12% 0;
+  z-index: 2;
+}
+
+.env-papel span {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(70, 44, 58, 0.18);
+}
+
+.env-papel span:nth-child(2) { width: 82%; }
+.env-papel span:nth-child(3) { width: 64%; }
+
+/* bolso da frente (o "V" aberto em cima) */
+.env-bolso {
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(170deg, #55364a, var(--vinho) 60%);
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  z-index: 3;
+}
+
+.env-bolso::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 0.6px), rgba(232, 211, 162, 0.25) 50%, transparent calc(50% + 0.6px)) right top / 50% 52% no-repeat,
+    linear-gradient(to top left, transparent calc(50% - 0.6px), rgba(232, 211, 162, 0.25) 50%, transparent calc(50% + 0.6px)) left top / 50% 52% no-repeat;
+}
+
+/* aba (gira para cima ao abrir) */
+.env-aba {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 56%;
+  background: linear-gradient(180deg, #5c3a4c, #4d3141);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  transform: perspective(700px) rotateX(0deg);
+  z-index: 4;
+}
+
+/* lacre de cera */
+.env-lacre {
+  left: 50%;
+  top: 56%;
+  width: 22%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -62%);
+  z-index: 5;
+}
+
+.env-lacre-metade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: radial-gradient(circle at 70% 35%, #e6c98c, #c9a86a 55%, #a8864d);
+  box-shadow: inset 0 0 0 2px rgba(255, 245, 220, 0.25);
+}
+
+.env-lacre-metade--e {
+  left: 0;
+  border-radius: 999px 0 0 999px;
+  clip-path: polygon(0 0, 100% 0, 88% 22%, 100% 40%, 86% 60%, 100% 78%, 90% 100%, 0 100%);
+}
+
+.env-lacre-metade--d {
+  right: 0;
+  border-radius: 0 999px 999px 0;
+  background: radial-gradient(circle at 20% 35%, #e6c98c, #c9a86a 55%, #a8864d);
+  clip-path: polygon(-12% 0, 100% 0, 100% 100%, -10% 100%, 0 78%, -14% 60%, 0 40%, -12% 22%);
+}
+
+.env-lacre-letras {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-titulo);
+  font-style: italic;
+  font-weight: 600;
+  font-size: calc(var(--env-l) * 0.05);
+  color: #6b4a2a;
+  letter-spacing: 0.02em;
+}
+
+/* A folha */
+.folha {
+  position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 440px;
   max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 30%),
+    var(--marfim);
+  color: #2a1e24;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  transform-origin: 0 0;
+}
+
+.folha-rolagem {
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-radius: 6px;
-  background: var(--marfim);
-  color: #2a1e24;
+  min-height: 0;
+}
+
+.folha-conteudo {
   padding: 30px 26px 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
-.carta-fundo--abrindo .carta-papel {
-  animation: carta-abre 500ms var(--suave) both;
+/* vincos das dobras (bem de leve, depois de desdobrar) */
+.folha-vinco {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  margin-top: -7px;
+  background: linear-gradient(180deg, transparent, rgba(70, 44, 58, 0.045) 50%, rgba(255, 255, 255, 0.35) 52%, transparent);
+  pointer-events: none;
 }
 
-@keyframes carta-abre {
-  from { opacity: 0; transform: translateY(24px) scale(0.97); }
-  to   { opacity: 1; transform: none; }
+.folha-vinco--1 { top: 33.333%; }
+.folha-vinco--2 { top: 66.666%; }
+
+/* painéis que dobram (só aparecem durante a animação) */
+.folha-dobra {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: none;
+  transform-origin: 50% 0;
+  background: linear-gradient(180deg, #ede2cf, var(--marfim));
+  box-shadow: inset 0 1px 0 rgba(70, 44, 58, 0.1);
+  pointer-events: none;
+  backface-visibility: visible;
 }
 
 .carta-rotulo {
@@ -2174,6 +2396,7 @@ html.modo-previa .stories-topo {
   font-weight: 600;
   font-size: clamp(26px, 7.6vw, 30px);
   line-height: 1.1;
+  outline: none;
 }
 
 .carta-texto {
@@ -2187,14 +2410,87 @@ html.modo-previa .stories-topo {
 
 .carta-assinatura {
   margin: 0;
-  font-family: var(--fonte-titulo);
-  font-style: italic;
-  font-size: 19px;
+  align-self: flex-end;
+  font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
   color: var(--vinho);
+  transform: rotate(-3deg);
 }
 
-.carta-fechar {
-  align-self: flex-end;
+/* voz na carta */
+.carta-voz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 26px;
+  background: rgba(70, 44, 58, 0.08);
+}
+
+.carta-voz[hidden] {
+  display: none;
+}
+
+.carta-voz-botao {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--toque);
+  padding: 0 16px 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--vinho);
+  color: var(--marfim);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.carta-voz-pausa,
+.carta-voz-botao[aria-pressed="true"] .carta-voz-play {
+  display: none;
+}
+
+.carta-voz-botao[aria-pressed="true"] .carta-voz-pausa {
+  display: block;
+}
+
+.carta-voz-trilho {
+  flex: 1 1 60px;
+  min-width: 60px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(70, 44, 58, 0.18);
+  overflow: hidden;
+}
+
+.carta-voz-barra {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--vinho);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.carta-voz-tempo {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #6b4a58;
+  font-variant-numeric: tabular-nums;
+}
+
+.carta-acoes {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.carta-botao {
   min-height: var(--toque);
   padding: 0 18px;
   border: 1px solid #6b4a58;
@@ -2203,6 +2499,12 @@ html.modo-previa .stories-topo {
   color: var(--vinho);
   font-size: 14px;
   font-weight: 500;
+}
+
+.carta-botao--guardar {
+  border-color: transparent;
+  background: var(--vinho);
+  color: var(--marfim);
 }
 
 /* ---------- 14 · Lista dos 365 dias ---------- */

@@ -14,6 +14,7 @@ import {
   adicionarNaLista,
   marcarNaLista,
   apagarDaLista,
+  lerCartasAbertas,
 } from "../../supabase.js";
 
 const minSeg = (s) => {
@@ -32,6 +33,7 @@ export function desenharRecados(area) {
 
   const caixaRecados = h("div", { class: "recados" }, h("p", { class: "carregando-texto" }, "Carregando os recados…"));
   const caixaLista = h("div", { class: "lista365" }, h("p", { class: "carregando-texto" }, "Carregando a lista…"));
+  const caixaCartas = h("div", { class: "recados" }, h("p", { class: "carregando-texto" }, "Carregando…"));
 
   area.append(
     h("div", { class: "area-titulo" }, h("h2", null, `Recados da ${nome}`)),
@@ -41,6 +43,9 @@ export function desenharRecados(area) {
       "Aqui aparece o que ela escrever ou gravar no fim do site. Chega direto, sem precisar publicar. Ela não consegue ver nem apagar os recados."
     ),
     caixaRecados,
+    h("div", { class: "area-titulo area-titulo--separado" }, h("h2", null, "Cartas que ela abriu")),
+    h("p", { class: "area-intro" }, "Cada vez que ela abre uma carta «Abre quando…», aparece aqui com dia e hora. Tu testando não conta."),
+    caixaCartas,
     h("div", { class: "area-titulo area-titulo--separado" }, h("h2", null, "Nossos próximos 365 dias")),
     h(
       "p",
@@ -51,7 +56,43 @@ export function desenharRecados(area) {
   );
 
   carregarRecados(caixaRecados);
+  carregarCartasAbertas(caixaCartas);
   carregarLista(caixaLista);
+}
+
+// ---------------------------------------------------------------------
+// Cartas que ela abriu
+// ---------------------------------------------------------------------
+async function carregarCartasAbertas(caixa) {
+  let aberturas;
+  try {
+    aberturas = await lerCartasAbertas();
+  } catch (erro) {
+    console.error(erro.original || erro);
+    caixa.replaceChildren(
+      h("p", { class: "aviso-erro" }, "Não consegui carregar. (Rodaste o 06_cartas.sql no Supabase?)"),
+      h("button", { class: "botao-pequeno", type: "button", onClick: () => carregarCartasAbertas(caixa) }, "Tentar de novo")
+    );
+    return;
+  }
+  if (!aberturas.length) {
+    caixa.replaceChildren(h("div", { class: "vazio" }, "Ela ainda não abriu nenhuma carta."));
+    return;
+  }
+  caixa.replaceChildren(
+    h(
+      "ul",
+      { class: "aberturas" },
+      ...aberturas.map((a) =>
+        h(
+          "li",
+          { class: "abertura-item" },
+          h("span", { class: "abertura-titulo" }, `«${a.titulo || "carta"}»`),
+          h("span", { class: "abertura-quando" }, dataHora(a.aberta_em))
+        )
+      )
+    )
+  );
 }
 
 // ---------------------------------------------------------------------

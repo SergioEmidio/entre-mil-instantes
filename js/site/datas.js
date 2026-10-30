@@ -44,6 +44,13 @@ export function diasDesde(iso, hoje = hojeEmBrasilia()) {
   return Math.max(0, numeroDoDia(hoje) - numeroDoDia(inicio));
 }
 
+// Quantos dias faltam até uma data (0 = hoje ou já passou).
+export function diasAte(iso, hoje = hojeEmBrasilia()) {
+  const alvo = lerDataISO(iso);
+  if (!alvo) return 0;
+  return Math.max(0, numeroDoDia(alvo) - numeroDoDia(hoje));
+}
+
 // Quantos meses completos se passaram (conta o mêsversário).
 export function mesesDesde(iso, hoje = hojeEmBrasilia()) {
   const inicio = lerDataISO(iso);

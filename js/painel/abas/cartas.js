@@ -5,6 +5,7 @@
 
 import { h, campo, icone, confirmar, avisar } from "../ui.js";
 import { rascunho, alterar, novoIdentificador } from "../estado.js";
+import { campoAudio } from "../campo-audio.js";
 import { dataCurta, hojeEmBrasilia, lerDataISO } from "../../site/datas.js";
 
 const MAXIMO = 12;
@@ -109,7 +110,7 @@ function item(carta, indice, total, redesenhar) {
       );
     }
     const texto = (carta.texto || "").trim();
-    principal.textContent = texto || "Sem texto ainda (não aparece para ela)";
+    principal.textContent = texto ? `${texto}${carta.audio ? " · com voz" : ""}` : "Sem texto ainda (não aparece para ela)";
     principal.classList.toggle("item-principal--vazio", !texto);
   }
 
@@ -172,6 +173,21 @@ function item(carta, indice, total, redesenhar) {
       dica: "Deixa vazio para ela poder abrir já no dia 3.",
       aoMudar: (v) => {
         mudar((c) => { c.libera_em = v || null; });
+        atualizarResumo();
+      },
+    }),
+    campoAudio({
+      rotulo: "Voz na carta (opcional)",
+      dica: "Se quiseres, grava uma mensagem ou envia um áudio. No fim da carta aparece «Ouvir minha voz». Sem áudio, a carta fica só escrita.",
+      caminho: carta.audio || null,
+      duracao: carta.duracao || null,
+      pasta: "cartas",
+      gravar: true,
+      aoMudar: (caminho, duracao) => {
+        mudar((c) => {
+          c.audio = caminho;
+          c.duracao = duracao;
+        });
         atualizarResumo();
       },
     }),

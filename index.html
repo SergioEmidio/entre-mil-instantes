@@ -16,7 +16,7 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/site.css">
 </head>
@@ -422,12 +422,46 @@
     </div>
 
     <div class="carta-fundo" id="carta-fundo" role="dialog" aria-modal="true" aria-labelledby="carta-titulo" hidden>
-      <article class="carta-papel">
-        <p class="carta-rotulo">Abre quando…</p>
-        <h2 class="carta-titulo" id="carta-titulo"></h2>
-        <p class="carta-texto" id="carta-texto"></p>
-        <p class="carta-assinatura" id="carta-assinatura"></p>
-        <button class="carta-fechar" type="button" id="carta-fechar">Guardar a carta</button>
+      <!-- O envelope que vem da grade, abre e deixa a carta sair -->
+      <div class="env" id="carta-env" aria-hidden="true">
+        <div class="env-costas"></div>
+        <div class="env-papel" id="carta-mini"><span></span><span></span><span></span></div>
+        <div class="env-bolso"></div>
+        <div class="env-aba" id="carta-aba"></div>
+        <div class="env-lacre" id="carta-lacre">
+          <span class="env-lacre-metade env-lacre-metade--e"></span>
+          <span class="env-lacre-metade env-lacre-metade--d"></span>
+          <span class="env-lacre-letras" id="carta-iniciais"></span>
+        </div>
+      </div>
+
+      <!-- A folha (dobrada em três, desdobra na frente dela) -->
+      <article class="folha" id="carta-folha">
+        <div class="folha-rolagem" id="carta-rolagem">
+          <div class="folha-conteudo" id="carta-conteudo">
+            <p class="carta-rotulo">Abre quando…</p>
+            <h2 class="carta-titulo" id="carta-titulo" tabindex="-1"></h2>
+            <p class="carta-texto" id="carta-texto"></p>
+            <p class="carta-assinatura" id="carta-assinatura"></p>
+            <div class="carta-voz" id="carta-voz" hidden>
+              <button class="carta-voz-botao" type="button" id="carta-voz-botao" aria-pressed="false">
+                <svg class="carta-voz-play" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+                <svg class="carta-voz-pausa" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+                <span>Ouvir minha voz</span>
+              </button>
+              <span class="carta-voz-trilho" aria-hidden="true"><span class="carta-voz-barra" id="carta-voz-barra"></span></span>
+              <span class="carta-voz-tempo" id="carta-voz-tempo"></span>
+            </div>
+            <div class="carta-acoes">
+              <button class="carta-botao" type="button" id="carta-responder">Responder</button>
+              <button class="carta-botao carta-botao--guardar" type="button" id="carta-fechar">Guardar a carta</button>
+            </div>
+          </div>
+        </div>
+        <span class="folha-vinco folha-vinco--1" aria-hidden="true"></span>
+        <span class="folha-vinco folha-vinco--2" aria-hidden="true"></span>
+        <div class="folha-dobra folha-dobra--1" aria-hidden="true"></div>
+        <div class="folha-dobra folha-dobra--2" aria-hidden="true"></div>
       </article>
     </div>
   </section>

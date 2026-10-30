@@ -989,3 +989,36 @@ input[type="date"].campo {
   font-size: 12px;
   color: var(--texto-3);
 }
+
+/* Cartas que ela abriu */
+.aberturas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.abertura-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--meia-noite-2);
+}
+
+.abertura-titulo {
+  min-width: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.abertura-quando {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--texto-2);
+}

@@ -212,6 +212,23 @@ export async function enviarRecado({ tipo, texto = null, audio = null, duracao =
   falhouSe(error);
 }
 
+// Ela abriu uma carta (só conta quando é ela; tu testando não conta).
+export async function registrarCarta(id, titulo) {
+  const { error } = await supabase.rpc("registrar_carta", { p_id: String(id), p_titulo: titulo || null });
+  falhouSe(error);
+}
+
+// Painel: quando ela abriu cada carta (mais recentes primeiro).
+export async function lerCartasAbertas() {
+  const { data, error } = await supabase
+    .from("cartas_abertas")
+    .select("id, carta_id, titulo, aberta_em")
+    .order("aberta_em", { ascending: false })
+    .limit(60);
+  falhouSe(error);
+  return data || [];
+}
+
 // ---------------------------------------------------------------------
 // Arquivos (fotos e áudios ficam privados; o site pede um link temporário)
 // ---------------------------------------------------------------------
