@@ -165,6 +165,7 @@
       </div>
       <div class="abertura-pe">
         <button class="botao botao--primario botao--largo" type="button" id="abertura-entrar">Entrar na nossa história</button>
+        <button class="botao-link" type="button" id="abertura-cantinho" hidden>Ir direto pro nosso cantinho</button>
         <p class="texto-3 texto-p" id="abertura-dica">Toca na tela para avançar os stories.</p>
       </div>
     </div>
@@ -357,15 +358,212 @@
   </section>
 
   <!-- ================================================================
-       CONTINUA (provisório: a surpresa final chega na fase 5)
+       11 · O PRESENTE (caixa, confete e vibração)
        ================================================================ -->
-  <section class="cena" id="tela-continua" aria-labelledby="continua-titulo" hidden>
-    <div class="tela tela--centro pilha pilha--g">
-      <p class="rotulo">Continua…</p>
-      <h1 class="titulo titulo--italico titulo-m" id="continua-titulo">A surpresa final chega aqui.</h1>
-      <div class="pilha pilha--m">
-        <button class="botao botao--fantasma" type="button" id="continua-de-novo">Ver os stories de novo</button>
-        <button class="botao botao--fantasma" type="button" id="continua-radio" hidden>Ouvir a rádio de novo</button>
+  <section class="cena" id="tela-presente" aria-labelledby="presente-titulo" hidden>
+    <div class="confete" id="presente-confete" aria-hidden="true"></div>
+    <div class="tela tela--centro presente">
+      <div class="presente-fechado pilha pilha--g" id="presente-fechado">
+        <div class="pilha pilha--m">
+          <p class="rotulo">Uma última surpresa</p>
+          <h1 class="titulo titulo--italico titulo-g" id="presente-titulo">Hoje eu não queria só te dizer. Queria te dar algo.</h1>
+        </div>
+        <button class="caixa" type="button" id="presente-caixa" aria-label="Abrir o presente">
+          <span class="caixa-fundo"></span>
+          <span class="caixa-tampa"><span class="caixa-laco caixa-laco--e"></span><span class="caixa-laco caixa-laco--d"></span></span>
+          <span class="caixa-fita"></span>
+        </button>
+        <p class="texto-2 presente-dica" id="presente-dica" aria-live="polite">Toca na caixa</p>
+      </div>
+
+      <div class="presente-aberto pilha pilha--m" id="presente-aberto" hidden>
+        <p class="rotulo">Teu presente é</p>
+        <div class="presente-foto" id="presente-foto" hidden></div>
+        <h2 class="titulo presente-nome" id="presente-nome" tabindex="-1"></h2>
+        <p class="presente-frase" id="presente-frase"></p>
+        <button class="botao botao--primario botao--largo" type="button" id="presente-seguir">Ainda tem mais</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       12 · VALES (raspadinha)
+       ================================================================ -->
+  <section class="cena" id="tela-vales" aria-labelledby="vales-titulo" hidden>
+    <div class="tela pagina">
+      <div class="pagina-cabeca">
+        <p class="rotulo">E não acabou</p>
+        <h1 class="titulo titulo-m" id="vales-titulo">Vales só teus</h1>
+        <p class="texto-2 texto-p">Raspa com o dedo para descobrir.</p>
+      </div>
+      <div class="vales" id="vales-lista"></div>
+      <div class="pagina-pe">
+        <button class="botao botao--primario botao--largo" type="button" id="vales-seguir">Continuar</button>
+        <button class="botao-link" type="button" id="vales-revelar">Revelar sem raspar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       13 · CARTAS «ABRE QUANDO…»
+       ================================================================ -->
+  <section class="cena" id="tela-cartas" aria-labelledby="cartas-titulo" hidden>
+    <div class="tela pagina">
+      <div class="pagina-cabeca">
+        <p class="rotulo">Pra depois de hoje</p>
+        <h1 class="titulo titulo-m" id="cartas-titulo">Abre quando…</h1>
+        <p class="texto-2 texto-p">Cartas pra quando tu precisares. Elas ficam aqui o ano inteiro.</p>
+      </div>
+      <div class="cartas" id="cartas-lista"></div>
+      <p class="cartas-aviso texto-3 texto-p" id="cartas-aviso" aria-live="polite"></p>
+      <div class="pagina-pe">
+        <button class="botao botao--primario botao--largo" type="button" id="cartas-seguir">Continuar</button>
+      </div>
+    </div>
+
+    <div class="carta-fundo" id="carta-fundo" role="dialog" aria-modal="true" aria-labelledby="carta-titulo" hidden>
+      <article class="carta-papel">
+        <p class="carta-rotulo">Abre quando…</p>
+        <h2 class="carta-titulo" id="carta-titulo"></h2>
+        <p class="carta-texto" id="carta-texto"></p>
+        <p class="carta-assinatura" id="carta-assinatura"></p>
+        <button class="carta-fechar" type="button" id="carta-fechar">Guardar a carta</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       14 · NOSSOS PRÓXIMOS 365 DIAS
+       ================================================================ -->
+  <section class="cena" id="tela-lista" aria-labelledby="lista-titulo" hidden>
+    <div class="tela pagina">
+      <div class="pagina-cabeca">
+        <p class="rotulo" id="lista-rotulo">Até 03 · 11 · 2027</p>
+        <h1 class="titulo titulo-m" id="lista-titulo">Nossos próximos 365 dias</h1>
+        <p class="texto-2 texto-p">Escreve o que tu tens vontade de fazer comigo. Quando a gente fizer, marca a caixinha.</p>
+      </div>
+
+      <div class="lista-placar">
+        <div class="lista-conta lista-conta--feitos">
+          <span class="lista-numero" id="lista-feitos">0</span>
+          <span class="lista-legenda">Realizados</span>
+        </div>
+        <div class="lista-conta">
+          <span class="lista-numero" id="lista-faltam">0</span>
+          <span class="lista-legenda">Não realizados</span>
+        </div>
+      </div>
+      <div class="lista-trilho" aria-hidden="true"><span class="lista-progresso" id="lista-progresso"></span></div>
+
+      <form class="lista-nova" id="lista-form" autocomplete="off">
+        <label class="sr-only" for="lista-campo">Nova coisa para fazer juntos</label>
+        <input class="campo" id="lista-campo" type="text" maxlength="120" enterkeyhint="done" placeholder="Ex.: ver o nascer do sol juntos">
+        <button class="lista-mais" type="submit" id="lista-mais" aria-label="Adicionar à lista">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </form>
+      <p class="lista-aviso" id="lista-aviso" aria-live="polite"></p>
+
+      <ul class="lista-itens" id="lista-itens" aria-label="Nossa lista"></ul>
+      <p class="lista-vazia texto-3 texto-p" id="lista-vazia" hidden>A lista ainda está vazia. Escreve a primeira coisa aí em cima.</p>
+
+      <div class="pagina-pe">
+        <button class="botao botao--contorno botao--largo" type="button" id="lista-seguir">Continuar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       15 · DEIXA UM RECADO
+       ================================================================ -->
+  <section class="cena" id="tela-recado" aria-labelledby="recado-titulo" hidden>
+    <div class="tela pagina">
+      <div class="recado-escrever" id="recado-escrever">
+        <div class="pagina-cabeca">
+          <p class="rotulo">Agora é tua vez</p>
+          <h1 class="titulo titulo-m" id="recado-titulo">Deixa um recado pra mim</h1>
+          <p class="texto-2 texto-p">Só eu vou ler ou ouvir. Pode ser uma palavra, pode ser tudo.</p>
+        </div>
+
+        <div class="recado-modos" role="tablist" aria-label="Tipo de recado">
+          <button class="recado-modo" type="button" role="tab" id="recado-modo-texto" aria-selected="true" aria-controls="recado-texto-area">Escrever</button>
+          <button class="recado-modo" type="button" role="tab" id="recado-modo-voz" aria-selected="false" aria-controls="recado-voz-area">Gravar voz</button>
+        </div>
+
+        <div class="campo-grupo" id="recado-texto-area" role="tabpanel" aria-labelledby="recado-modo-texto">
+          <label class="campo-rotulo" for="recado-campo">Teu recado</label>
+          <textarea class="campo recado-campo" id="recado-campo" rows="7" maxlength="2000" placeholder="Escreve aqui…"></textarea>
+        </div>
+
+        <div class="recado-voz" id="recado-voz-area" role="tabpanel" aria-labelledby="recado-modo-voz" hidden>
+          <button class="recado-gravar" type="button" id="recado-gravar" aria-label="Gravar">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <p class="texto-2 texto-p recado-voz-texto" id="recado-voz-texto" aria-live="polite">Toca para gravar</p>
+          <audio class="recado-ouvir" id="recado-ouvir" controls preload="metadata" hidden></audio>
+        </div>
+
+        <p class="aviso-erro recado-erro" id="recado-erro" aria-live="polite"></p>
+
+        <div class="pagina-pe">
+          <button class="botao botao--primario botao--largo" type="button" id="recado-enviar" disabled>Enviar pra ele</button>
+          <button class="botao-link" type="button" id="recado-pular">Agora não</button>
+        </div>
+      </div>
+
+      <div class="recado-enviado tela--centro" id="recado-enviado" hidden>
+        <span class="recado-selo" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        </span>
+        <h2 class="titulo titulo--italico titulo-m" id="recado-ok-titulo" tabindex="-1">Chegou até mim.</h2>
+        <p class="texto-2 recado-ok-texto" id="recado-ok-texto">Vou guardar pra sempre. Falta só uma coisinha.</p>
+        <button class="botao botao--primario botao--largo" type="button" id="recado-seguir">Continuar</button>
+        <button class="botao-link" type="button" id="recado-outro">Mandar outro recado</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       16 · CARTÃO PARA O STORY
+       ================================================================ -->
+  <section class="cena" id="tela-cartao" aria-labelledby="cartao-titulo" hidden>
+    <div class="tela pagina cartao-tela">
+      <div class="pagina-cabeca">
+        <p class="rotulo">Uma lembrança pra levar</p>
+        <h1 class="titulo titulo-m" id="cartao-titulo">Teu cartão para o story</h1>
+      </div>
+      <div class="cartao-moldura">
+        <canvas class="cartao-canvas" id="cartao-canvas" width="1080" height="1920" role="img" aria-label="Cartão com a quantidade de dias que a gente está junto"></canvas>
+      </div>
+      <div class="cartao-estilos" role="radiogroup" aria-label="Estilo do cartão">
+        <span class="texto-2 texto-p">Estilo</span>
+        <button class="cartao-estilo" type="button" role="radio" data-estilo="0" aria-label="Noite" aria-checked="true"></button>
+        <button class="cartao-estilo" type="button" role="radio" data-estilo="1" aria-label="Vinho" aria-checked="false"></button>
+        <button class="cartao-estilo" type="button" role="radio" data-estilo="2" aria-label="Champanhe" aria-checked="false"></button>
+      </div>
+      <div class="pagina-pe">
+        <button class="botao botao--primario botao--largo" type="button" id="cartao-baixar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+          <span id="cartao-baixar-texto">Baixar imagem</span>
+        </button>
+        <button class="botao-link" type="button" id="cartao-seguir">Ir para o nosso cantinho</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       17 · NOSSO CANTINHO (para voltar quando quiser)
+       ================================================================ -->
+  <section class="cena" id="tela-cantinho" aria-labelledby="cantinho-titulo" hidden>
+    <div class="tela pagina">
+      <div class="pagina-cabeca">
+        <p class="rotulo" id="cantinho-rotulo">Fica aqui o ano inteiro</p>
+        <h1 class="titulo titulo--italico titulo-m" id="cantinho-titulo">Nosso cantinho</h1>
+        <p class="texto-2 texto-p">Volta aqui quando quiser. Tudo continua guardado.</p>
+      </div>
+      <nav class="cantinho" id="cantinho-lista" aria-label="Partes do site"></nav>
+      <div class="pagina-pe">
+        <button class="botao botao--fantasma botao--largo" type="button" id="cantinho-inicio">Ver tudo desde o começo</button>
       </div>
     </div>
   </section>

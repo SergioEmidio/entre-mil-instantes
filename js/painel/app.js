@@ -12,7 +12,7 @@ import { desenharStories } from "./abas/stories.js";
 import { desenharCartas } from "./abas/cartas.js";
 import { desenharVales } from "./abas/vales.js";
 import { desenharPresente } from "./abas/presente.js";
-import { desenharEmBreve } from "./abas/em-breve.js";
+import { desenharRecados, contarNovos } from "./abas/recados.js";
 import { desenharRadio } from "./abas/radio.js";
 
 const ABAS = [
@@ -21,12 +21,7 @@ const ABAS = [
   { id: "radio", nome: "Rádio", desenhar: desenharRadio },
   { id: "cartas", nome: "Cartas", desenhar: desenharCartas },
   { id: "vales", nome: "Vales", desenhar: desenharVales },
-  {
-    id: "recados",
-    nome: "Recados",
-    marca: "fase 5",
-    desenhar: desenharEmBreve("Recados dela", 5, "Aqui vão aparecer os recados escritos e os áudios que ela te mandar."),
-  },
+  { id: "recados", nome: "Recados", desenhar: desenharRecados },
   { id: "presente", nome: "Presente", desenhar: desenharPresente },
 ];
 
@@ -43,6 +38,7 @@ const el = {
 };
 
 let abaAtual = lerAbaGuardada();
+let novosRecados = 0;
 let liberarEm = null;
 
 // ---------------------------------------------------------------------
@@ -166,6 +162,18 @@ async function abrirPainel() {
   desenharAbas();
   desenharAba();
   aoMudarSituacao(atualizarSelo);
+
+  // Quantos recados novos ela mandou (aparece na aba).
+  contarNovos()
+    .then((n) => {
+      novosRecados = n;
+      desenharAbas();
+    })
+    .catch(() => {});
+  window.addEventListener("eni-recados-lidos", () => {
+    novosRecados = 0;
+    desenharAbas();
+  });
   atualizarSelo(situacao());
   mostrarVista("painel");
 }
@@ -180,6 +188,7 @@ function caminhosDasFotos() {
     ...r.stories.map((s) => s.foto),
     ...r.radio.faixas.map((f) => f.capa),
     ...r.radio.faixas.map((f) => f.audio),
+    r.cartao.foto,
   ].filter(Boolean);
 }
 
@@ -198,7 +207,8 @@ function desenharAbas() {
           onClick: () => trocarAba(aba.id),
         },
         aba.nome,
-        aba.marca ? h("span", { class: "aba-marca" }, aba.marca) : null
+        aba.marca ? h("span", { class: "aba-marca" }, aba.marca) : null,
+        aba.id === "recados" && novosRecados ? h("span", { class: "aba-marca aba-marca--novo" }, String(novosRecados)) : null
       )
     )
   );

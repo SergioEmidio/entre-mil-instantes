@@ -81,9 +81,9 @@ function decodificar(contexto, dados) {
 }
 
 // Escolhe a melhor qualidade em que o arquivo ainda cabe no limite.
-function escolherTaxa(duracao) {
+function escolherTaxa(duracao, taxaMaxima = TAXAS[0]) {
   const maximo = LIMITE_MB * 1024 * 1024 - 1024;
-  for (const taxa of TAXAS) if (duracao * taxa * 2 <= maximo) return taxa;
+  for (const taxa of TAXAS) if (taxa <= taxaMaxima && duracao * taxa * 2 <= maximo) return taxa;
   return TAXA_MINIMA;
 }
 
@@ -134,13 +134,14 @@ function montarWav(amostras, taxa) {
   return new Blob([vista], { type: "audio/wav" });
 }
 
-export async function converterParaWav(arquivo) {
+// voz: true → qualidade de voz (arquivo bem mais leve). Música usa a melhor que couber.
+export async function converterParaWav(arquivo, { voz = false } = {}) {
   const contexto = criarContexto();
   try {
     const dados = await arquivo.arrayBuffer();
     const buffer = await decodificar(contexto, dados);
     if (!buffer || !buffer.duration) throw erro("audio_vazio");
-    const taxa = escolherTaxa(Math.min(buffer.duration, 60 * 10));
+    const taxa = escolherTaxa(Math.min(buffer.duration, 60 * 10), voz ? TAXA_MINIMA : TAXAS[0]);
     const amostras = await paraMono(buffer, taxa);
     return { blob: montarWav(amostras, taxa), duracao: Math.round(amostras.length / taxa) };
   } finally {

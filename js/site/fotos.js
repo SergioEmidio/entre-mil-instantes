@@ -30,6 +30,7 @@ export function fotosDoConteudo(conteudo) {
     antesAgora.antes,
     antesAgora.agora,
     ...faixas.map((f) => f && f.capa),
+    c.cartao && c.cartao.foto,
   ].filter((caminho) => typeof caminho === "string" && caminho);
 }
 

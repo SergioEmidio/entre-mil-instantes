@@ -31,6 +31,7 @@ const MODELO = {
   presente: { frase_caixa: "Hoje eu não queria só te dizer. Queria te dar algo." },
   vales: [],
   cartas: [],
+  cartao: { foto: null },
 };
 
 const MODELO_PRESENTE = { nome: "", frase: "", foto: null, esconder_foto: false };
@@ -70,6 +71,7 @@ const estado = {
   publicadoTexto: "",
   presentePublicadoTexto: "",
   publicadoEm: null,
+  presenteAbertoEm: null,
   salvando: false,
   pendente: false,
   erro: false,
@@ -99,7 +101,17 @@ export async function carregar() {
       ? emTexto(completar(MODELO_PRESENTE, presente.publicado))
       : "";
   estado.publicadoEm = conteudo.publicado_em;
+  estado.presenteAbertoEm = presente.aberto_em || null;
   avisarOuvintes();
+}
+
+// Quando ela abriu a caixa (null = ainda fechada).
+export function presenteAbertoEm() {
+  return estado.presenteAbertoEm;
+}
+
+export function marcarPresenteFechado() {
+  estado.presenteAbertoEm = null;
 }
 
 // Leitura (não altere o objeto devolvido diretamente: use alterar()).

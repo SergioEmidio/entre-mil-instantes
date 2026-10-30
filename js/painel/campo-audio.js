@@ -157,7 +157,7 @@ export function campoAudio(opcoes) {
     try {
       const bruto = await gravacao.parar();
       gravacao = null;
-      const { blob, duracao: d } = await converterParaWav(bruto);
+      const { blob, duracao: d } = await converterParaWav(bruto, { voz: true });
       if (d < 1) throw Object.assign(new Error("audio_vazio"), { codigo: "audio_vazio" });
       if (blob.size > LIMITE_MB * 1024 * 1024) throw Object.assign(new Error("muito_grande"), { codigo: "muito_grande" });
       await enviar({ blob, tipo: "audio/wav", extensao: "wav", duracao: d });

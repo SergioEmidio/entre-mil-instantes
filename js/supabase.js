@@ -47,6 +47,12 @@ function traduzirErro(erro) {
   if (texto.includes("sem_acesso") || erro.code === "42501") {
     return new ErroDoSite("sem_acesso", "Ainda não está liberado.", erro);
   }
+  if (texto.includes("muitos_recados")) {
+    return new ErroDoSite("muitos_recados", "Muitos recados hoje. Tenta amanhã.", erro);
+  }
+  if (texto.includes("recado_invalido")) {
+    return new ErroDoSite("recado_invalido", "Recado inválido.", erro);
+  }
   if (texto.includes("confirmacao_invalida")) {
     return new ErroDoSite("confirmacao_invalida", "Digite AUTORIZO para confirmar.", erro);
   }
@@ -145,6 +151,67 @@ export async function abrirPresente() {
   return data || {};
 }
 
+// Pré-visualização: o presente do rascunho (só admin; não marca como aberto).
+export async function previaPresente() {
+  const { data, error } = await supabase.rpc("previa_presente");
+  falhouSe(error);
+  return data || {};
+}
+
+// ---------------------------------------------------------------------
+// Lista dos próximos 365 dias (os dois leem, adicionam, marcam e apagam)
+// ---------------------------------------------------------------------
+const CAMPOS_LISTA = "id, texto, feito, feito_em, autor, criado_em";
+
+export async function lerLista() {
+  const { data, error } = await supabase
+    .from("lista_365")
+    .select(CAMPOS_LISTA)
+    .order("criado_em", { ascending: false })
+    .order("id", { ascending: false });
+  falhouSe(error);
+  return data || [];
+}
+
+export async function adicionarNaLista(textoItem) {
+  const { data, error } = await supabase
+    .from("lista_365")
+    .insert({ texto: textoItem })
+    .select(CAMPOS_LISTA)
+    .single();
+  falhouSe(error);
+  return data;
+}
+
+export async function marcarNaLista(id, feito) {
+  const { data, error } = await supabase
+    .from("lista_365")
+    .update({ feito })
+    .eq("id", id)
+    .select(CAMPOS_LISTA)
+    .single();
+  falhouSe(error);
+  return data;
+}
+
+export async function apagarDaLista(id) {
+  const { error } = await supabase.from("lista_365").delete().eq("id", id);
+  falhouSe(error);
+}
+
+// ---------------------------------------------------------------------
+// Recados (ela envia; só tu lês no painel)
+// ---------------------------------------------------------------------
+export async function enviarRecado({ tipo, texto = null, audio = null, duracao = null }) {
+  const { error } = await supabase.rpc("enviar_recado", {
+    p_tipo: tipo,
+    p_texto: texto,
+    p_audio: audio,
+    p_duracao: duracao == null ? null : Math.round(duracao),
+  });
+  falhouSe(error);
+}
+
 // ---------------------------------------------------------------------
 // Arquivos (fotos e áudios ficam privados; o site pede um link temporário)
 // ---------------------------------------------------------------------
@@ -218,4 +285,35 @@ export async function obterPrevia() {
   const { data, error } = await supabase.rpc("obter_previa");
   falhouSe(error);
   return data || {};
+}
+
+// Recados que ela mandou (mais novos primeiro).
+export async function lerRecados() {
+  const { data, error } = await supabase
+    .from("recados")
+    .select("id, tipo, texto, audio_path, duracao, lido, criado_em")
+    .order("criado_em", { ascending: false });
+  falhouSe(error);
+  return data || [];
+}
+
+export async function marcarRecadosLidos(ids) {
+  if (!ids || !ids.length) return;
+  const { error } = await supabase.from("recados").update({ lido: true }).in("id", ids);
+  falhouSe(error);
+}
+
+export async function apagarRecado(recado) {
+  if (recado.audio_path) {
+    const { error: erroArquivo } = await supabase.storage.from("recados").remove([recado.audio_path]);
+    if (erroArquivo) console.error(erroArquivo);
+  }
+  const { error } = await supabase.from("recados").delete().eq("id", recado.id);
+  falhouSe(error);
+}
+
+// Volta o presente para "fechado" (para testar de novo).
+export async function fecharPresente() {
+  const { error } = await supabase.rpc("fechar_presente");
+  falhouSe(error);
 }

@@ -29,3 +29,30 @@ export function h(tag, atributos, ...filhos) {
 export function texto(valor) {
   return typeof valor === "string" ? valor.trim() : "";
 }
+
+// Espera um toque em um dos botões. Ex.: esperarClique([[botaoA, "a"], [botaoB, "b"]])
+// Devolve o valor do botão tocado e solta os ouvintes.
+export function esperarClique(pares) {
+  return new Promise((resolver) => {
+    const ouvintes = pares.map(([botao, valor]) => {
+      const fn = () => {
+        ouvintes.forEach(([b, f]) => b.removeEventListener("click", f));
+        resolver(valor);
+      };
+      return [botao, fn];
+    });
+    ouvintes.forEach(([b, f]) => b.addEventListener("click", f));
+  });
+}
+
+// Vibração curtinha (quando o celular deixa).
+export function vibrar(padrao) {
+  try {
+    if (navigator.vibrate) navigator.vibrate(padrao);
+  } catch {
+    /* ok */
+  }
+}
+
+export const menosMovimento = () =>
+  window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

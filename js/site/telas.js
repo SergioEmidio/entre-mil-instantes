@@ -33,6 +33,17 @@ async function trocarPara(id) {
   nova.hidden = false;
   nova.classList.add("cena--ativa", "cena--entrando");
   telaAtual = nova;
+
+  // Tira a animação de entrada quando ela acaba: enquanto ela "fica",
+  // as janelas fixas da tela (carta aberta, confete, mini player) ficariam
+  // presas à tela em vez de ao celular.
+  const limpar = (evento) => {
+    if (evento && evento.target !== nova) return;
+    nova.removeEventListener("animationend", limpar);
+    nova.classList.remove("cena--entrando");
+  };
+  nova.addEventListener("animationend", limpar);
+  setTimeout(() => limpar(), 1200);
   window.scrollTo(0, 0);
 
   // Leva o foco para o título da tela nova (bom para leitores de tela).

@@ -5,6 +5,9 @@
 //   antes do dia 3  → contagem → (zera) → senha
 //   depois do dia 3 → senha → carregamento → abertura…
 //   se ela já entrou antes neste celular → direto para a abertura
+//
+// O caminho: abertura → stories → antes e agora → rádio → presente →
+// vales → cartas → lista 365 → recado → cartão → nosso cantinho
 // =====================================================================
 
 import { desenharCeu, mostrarTela } from "./telas.js";
@@ -17,6 +20,14 @@ import { montarRadio, destravarRadio, tocarRadio, pararRadio } from "./radio.js"
 import { montarAbertura } from "./abertura.js";
 import { montarListaDeStories, tocarStories } from "./stories.js";
 import { temAntesAgora, tocarAntesAgora } from "./antes-agora.js";
+import { temPresente, tocarPresente } from "./presente.js";
+import { temVales, tocarVales } from "./vales.js";
+import { temCartas, tocarCartas } from "./cartas.js";
+import { tocarLista } from "./lista.js";
+import { tocarRecado } from "./recado.js";
+import { tocarCartao } from "./cartao.js";
+import { tocarCantinho } from "./cantinho.js";
+import { definirPrevia, ehPrevia, lerMemoria, guardarMemoria } from "./memoria.js";
 import {
   obterSituacao,
   entrarComoConvidada,
@@ -29,6 +40,7 @@ import {
 let conteudo = null;
 let situacao = null;
 let pararContagem = null;
+let papel = "convidada";
 
 const senha = iniciarSenha({ tentarEntrar, aoAcertar: abrirCarregamento });
 
@@ -80,9 +92,11 @@ async function comecar() {
 
 // Mostra o RASCUNHO, pulando contagem e senha. Só funciona logado como admin.
 async function abrirPrevia() {
-  const papel = await meuPapel().catch(() => null);
-  if (papel !== "admin") return false;
+  const quem = await meuPapel().catch(() => null);
+  if (quem !== "admin") return false;
   conteudo = await obterPrevia();
+  papel = "admin";
+  definirPrevia(true);
   window.__siteComecou = true;
   document.getElementById("faixa-previa").hidden = false;
   document.documentElement.classList.add("modo-previa");
@@ -95,9 +109,10 @@ async function abrirPrevia() {
 // Ela já acertou a senha antes neste celular? (a sessão fica guardada)
 async function jaEntrouAntes() {
   try {
-    const papel = await meuPapel();
-    if (!papel) return false;
+    const quem = await meuPapel();
+    if (!quem) return false;
     conteudo = await obterConteudo();
+    papel = quem;
     return true;
   } catch {
     return false;
@@ -134,18 +149,27 @@ async function abrirSite() {
   const musica = (conteudo && conteudo.retrospectiva && conteudo.retrospectiva.musica) || {};
   prepararMusica(musica.audio ? linkDaFoto(musica.audio) : null, musica.inicio);
   temRadio = montarRadio(conteudo);
-  document.getElementById("continua-radio").hidden = !temRadio;
   document.getElementById("abertura-dica").textContent =
     haMusica() || temRadio ? "Liga o som e, se puder, usa fone." : "Toca na tela para avançar os stories.";
+
+  // Quem já viu tudo (ou já abriu o presente) pode ir direto pro cantinho.
+  const voltou = ehPrevia() || lerMemoria("viu-tudo", false) || Boolean(conteudo && conteudo.presente_aberto);
+  document.getElementById("abertura-cantinho").hidden = !voltou;
 
   montarAbertura(conteudo, () => {
     // Precisa ser aqui, no toque: é o que libera o som no celular.
     destravarSom();
     destravarRadio();
-    irParaStories(0);
+    caminhoCompleto();
   });
   await mostrarTela("tela-abertura");
 }
+
+document.getElementById("abertura-cantinho").addEventListener("click", () => {
+  destravarSom();
+  destravarRadio();
+  irParaCantinho();
+});
 
 // Baixa as fotos enquanto o carregamento anima (uma vez só).
 let preparo = null;
@@ -155,50 +179,112 @@ function prepararSite() {
 }
 
 // ---------------------------------------------------------------------
-// O caminho: abertura → stories → antes e agora → (fase 4: rádio)
+// As partes do final (cada uma só aparece se tiver conteúdo)
 // ---------------------------------------------------------------------
-async function irParaStories(comecarEm) {
-  const lista = montarListaDeStories(conteudo);
-  if (!lista.length) {
-    // Sem stories: "voltar" leva à abertura; "seguir" pula para o próximo.
-    if (comecarEm < 0) await mostrarTela("tela-abertura");
-    else await irParaAntesAgora();
-    return;
-  }
-  await mostrarTela("tela-stories");
-  await tocarStories(lista, comecarEm);
-  await irParaAntesAgora();
-}
+const ETAPAS = [
+  { id: "presente", titulo: "O presente", sub: "A caixa da surpresa", tem: temPresente, tocar: tocarPresente },
+  { id: "vales", titulo: "Vales", sub: "A raspadinha", tem: temVales, tocar: tocarVales },
+  { id: "cartas", titulo: "Cartas «Abre quando…»", sub: "Pra quando tu precisares", tem: temCartas, tocar: tocarCartas },
+  {
+    id: "lista",
+    titulo: "Nossos próximos 365 dias",
+    sub: "A nossa lista",
+    tem: () => true,
+    tocar: (c, opcoes) => tocarLista(c, { ...opcoes, papel }),
+  },
+  { id: "recado", titulo: "Deixar um recado", sub: "Escrito ou gravado", tem: () => true, tocar: tocarRecado },
+];
 
-async function irParaAntesAgora() {
-  if (!temAntesAgora(conteudo)) {
-    await irParaRadio();
-    return;
-  }
-  await mostrarTela("tela-antes-agora");
-  const escolha = await tocarAntesAgora(conteudo);
-  if (escolha === "voltar") await irParaStories(-1);
-  else await irParaRadio();
-}
-
-async function irParaRadio() {
-  if (!temRadio) {
-    await irParaContinua();
-    return;
-  }
-  await tocarRadio();
-  await irParaContinua();
-}
-
-async function irParaContinua() {
-  await mostrarTela("tela-continua");
-}
-
-document.getElementById("continua-de-novo").addEventListener("click", () => {
+// ---------------------------------------------------------------------
+// O caminho completo
+// ---------------------------------------------------------------------
+async function caminhoCompleto() {
   pararRadio();
-  irParaStories(0);
-});
-document.getElementById("continua-radio").addEventListener("click", () => irParaRadio());
+  const resultado = await blocoDaHistoria(0);
+  if (resultado === "abertura") {
+    await mostrarTela("tela-abertura");
+    return;
+  }
+
+  if (temRadio) {
+    document.getElementById("radio-continuar").textContent = "Continuar";
+    await tocarRadio();
+  }
+
+  for (const etapa of ETAPAS) {
+    if (etapa.tem(conteudo)) await etapa.tocar(conteudo, {});
+  }
+
+  await tocarCartao(conteudo);
+  if (!ehPrevia()) guardarMemoria("viu-tudo", true);
+  document.getElementById("abertura-cantinho").hidden = false;
+  await irParaCantinho();
+}
+
+// Stories e "antes e agora" (com o "voltar" entre eles).
+// Devolve "abertura" quando ela volta e não há stories para mostrar.
+async function blocoDaHistoria(comecarEm) {
+  let inicio = comecarEm;
+  for (;;) {
+    const lista = montarListaDeStories(conteudo);
+    if (lista.length) {
+      await mostrarTela("tela-stories");
+      await tocarStories(lista, inicio);
+    }
+    if (!temAntesAgora(conteudo)) return "ok";
+    await mostrarTela("tela-antes-agora");
+    const escolha = await tocarAntesAgora(conteudo);
+    if (escolha !== "voltar") return "ok";
+    if (!lista.length) return "abertura";
+    inicio = -1;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Nosso cantinho (menu para voltar a qualquer parte)
+// ---------------------------------------------------------------------
+function itensDoCantinho() {
+  const itens = [];
+  if (montarListaDeStories(conteudo).length || temAntesAgora(conteudo)) {
+    itens.push({ id: "stories", titulo: "Nossa retrospectiva", sub: "Os stories de novo" });
+  }
+  if (temRadio) itens.push({ id: "radio", titulo: "A Rádio", sub: "As nossas faixas" });
+  for (const etapa of ETAPAS) {
+    if (etapa.tem(conteudo)) itens.push({ id: etapa.id, titulo: etapa.titulo, sub: etapa.sub });
+  }
+  itens.push({ id: "cartao", titulo: "Cartão para o story", sub: "Baixar a imagem" });
+  return itens;
+}
+
+async function irParaCantinho() {
+  for (;;) {
+    const escolha = await tocarCantinho(itensDoCantinho());
+    if (escolha === "inicio") {
+      caminhoCompleto();
+      return;
+    }
+    await abrirParte(escolha);
+  }
+}
+
+async function abrirParte(id) {
+  if (id === "stories") {
+    await blocoDaHistoria(0);
+    return;
+  }
+  if (id === "radio") {
+    document.getElementById("radio-continuar").textContent = "Voltar ao cantinho";
+    await tocarRadio();
+    return;
+  }
+  if (id === "cartao") {
+    await tocarCartao(conteudo);
+    return;
+  }
+  const etapa = ETAPAS.find((e) => e.id === id);
+  if (etapa) await etapa.tocar(conteudo, { deCantinho: true });
+}
+
 document.getElementById("stories-som").addEventListener("click", alternarSom);
 atualizarBotao();
 
@@ -208,6 +294,7 @@ atualizarBotao();
 async function tentarEntrar(numeros) {
   try {
     await entrarComoConvidada(numeros);
+    papel = "convidada";
   } catch (erro) {
     if (erro.codigo === "senha_errada") return "errado";
     if (erro.codigo === "muitas_tentativas") return "muitas_tentativas";

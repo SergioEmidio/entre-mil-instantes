@@ -19,6 +19,16 @@ supabase/             scripts do banco
 .github/workflows/    tarefa diária que mantém o Supabase ativo
 ```
 
+## Banco (rodar no SQL Editor do Supabase, em ordem, uma vez cada)
+
+1. `supabase/01_estrutura.sql`
+2. `supabase/02_fase1.sql`
+3. `supabase/03_fase1_conteudo.sql`
+4. `supabase/04_fase2.sql`
+5. `supabase/05_fase5.sql` (presente, cartas trancadas, lista dos 365 dias e recados)
+
+Todos podem rodar de novo sem quebrar nada.
+
 ## Rodar no computador
 
 Abrir a pasta no VS Code e clicar em **Go Live** (extensão Live Server).
