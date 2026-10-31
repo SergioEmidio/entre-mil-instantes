@@ -142,6 +142,29 @@ export function alternarSom() {
     else continuarMusica();
   }
   atualizarBotao();
+  ouvintesDoSom.forEach((fn) => fn(mudo));
+}
+
+// ---- vídeos nos stories ----
+let temVideo = false;
+const ouvintesDoSom = new Set();
+
+export function avisarQueTemVideo(sim) {
+  temVideo = Boolean(sim);
+  atualizarBotao();
+}
+
+// fn(mudo) é chamada quando ela liga ou desliga o som no botão.
+export function aoMudarSom(fn) {
+  ouvintesDoSom.add(fn);
+}
+
+// O celular não deixou o vídeo tocar com som: fica "sem som" (sem guardar),
+// e um toque no botão de som liga de novo.
+export function silenciarSemGuardar() {
+  if (mudo) return;
+  mudo = true;
+  atualizarBotao();
 }
 
 export function somDesligado() {
@@ -152,7 +175,7 @@ export function somDesligado() {
 export function atualizarBotao() {
   const botao = document.getElementById("stories-som");
   if (!botao) return;
-  botao.hidden = !temMusica;
+  botao.hidden = !(temMusica || temVideo);
   botao.setAttribute("aria-pressed", String(!mudo));
   botao.setAttribute("aria-label", mudo ? "Ligar o som" : "Desligar o som");
   botao.dataset.mudo = String(mudo);

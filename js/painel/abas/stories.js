@@ -4,11 +4,11 @@
 // =====================================================================
 
 import { h, campo, icone, confirmar, avisar } from "../ui.js";
-import { campoFoto } from "../campo-foto.js";
+import { campoMidia } from "../campo-midia.js";
 import { rascunho, alterar, novoIdentificador } from "../estado.js";
 import { linkGuardado, linkDe } from "../midia.js";
 
-const MAXIMO = 20;
+const MAXIMO = 25;
 let abrirId = null;   // story que deve aparecer aberto depois de redesenhar
 
 export function desenharStories(area, redesenhar) {
@@ -38,7 +38,7 @@ export function desenharStories(area, redesenhar) {
         onClick: () => {
           const id = novoIdentificador();
           alterar((r) => {
-            r.stories.push({ id, foto: null, tag: "", frase: "" });
+            r.stories.push({ id, foto: null, video: null, duracao: null, tag: "", frase: "" });
           });
           abrirId = id;
           redesenhar();
@@ -64,7 +64,7 @@ function item(story, indice, total, redesenhar) {
   const principal = h("span", { class: "item-principal" });
 
   function atualizarResumo() {
-    sobre.textContent = story.tag || "Sem data ou lugar";
+    sobre.textContent = `${story.video ? "▶ Vídeo · " : ""}${story.tag || "Sem data ou lugar"}`;
     principal.textContent = story.frase || "Sem frase ainda";
     principal.classList.toggle("item-principal--vazio", !story.frase);
     miniatura.replaceChildren();
@@ -112,15 +112,21 @@ function item(story, indice, total, redesenhar) {
   const corpo = h(
     "div",
     { class: "item-corpo" },
-    campoFoto({
-      rotulo: "Foto (tela cheia, de preferência em pé)",
-      caminho: story.foto,
+    campoMidia({
+      rotulo: "Foto ou vídeo (de preferência em pé)",
+      foto: story.foto,
+      video: story.video,
+      duracao: story.duracao,
       pasta: "stories",
-      alta: true,
-      removivel: false,
-      aoMudar: (c) => {
-        mudar((s) => { s.foto = c; });
-        story.foto = c;
+      aoMudar: ({ foto, video, duracao }) => {
+        mudar((s) => {
+          s.foto = foto;
+          s.video = video;
+          s.duracao = duracao;
+        });
+        story.foto = foto;
+        story.video = video;
+        story.duracao = duracao;
         atualizarResumo();
       },
     }),

@@ -41,7 +41,8 @@ export function audiosDoConteudo(conteudo) {
   const musica = (c.retrospectiva && c.retrospectiva.musica) || {};
   const faixas = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
   const cartas = Array.isArray(c.cartas) ? c.cartas : [];
-  return [musica.audio, ...faixas.map((f) => f && f.audio), ...faixas.map((f) => f && f.capa), ...cartas.map((x) => x && x.audio)].filter(
+  const stories = Array.isArray(c.stories) ? c.stories : [];
+  return [musica.audio, ...faixas.map((f) => f && f.audio), ...faixas.map((f) => f && f.capa), ...cartas.map((x) => x && x.audio), ...stories.map((s) => s && s.video)].filter(
     (caminho) => typeof caminho === "string" && caminho
   );
 }

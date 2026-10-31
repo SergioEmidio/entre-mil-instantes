@@ -3155,3 +3155,44 @@ html.modo-previa .stories-topo {
   font-size: 13px;
   color: var(--texto-3);
 }
+
+/* ---------- Story com vídeo ---------- */
+.st-foto-inteira video {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: 0 18px 40px rgba(7, 11, 22, 0.45);
+}
+
+.st-carregando {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 3px solid rgba(242, 232, 216, 0.25);
+  border-top-color: var(--champanhe);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  animation: girar 0.9s linear infinite;
+}
+
+.st--esperando .st-carregando {
+  opacity: 1;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+/* Muitos stories (até 25 + a retrospectiva): barrinhas mais juntas */
+.stories-barras--muitas {
+  gap: 2px;
+}

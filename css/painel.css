@@ -1022,3 +1022,28 @@ input[type="date"].campo {
   font-size: 13px;
   color: var(--texto-2);
 }
+
+/* Story com vídeo */
+.foto-previa {
+  position: relative;
+}
+
+.midia-selo {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(16, 24, 43, 0.82);
+  color: var(--champanhe);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.midia-situacao {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--texto-2);
+}

@@ -8,7 +8,7 @@
 // Não mexe em nada do Supabase (fotos, áudios, cartas): isso passa direto.
 // =====================================================================
 
-const VERSAO = "nossos-instantes-v2";
+const VERSAO = "nossos-instantes-v3";
 const ESSENCIAIS = [
   "./offline.html",
   "./css/base.css",
@@ -41,7 +41,11 @@ self.addEventListener("fetch", (evento) => {
   // Abrir uma página: internet primeiro; sem internet, a tela "sem internet".
   if (pedido.mode === "navigate") {
     evento.respondWith(
-      fetch(pedido.url, { cache: "no-cache", credentials: "same-origin" }).catch(() =>
+      fetch(pedido.url, { cache: "no-cache", credentials: "same-origin" })
+        // Endereço que redireciona (ex.: /painel → /painel/): o Chrome não
+        // aceita a resposta redirecionada direto, então manda ir para o novo.
+        .then((resposta) => (resposta.redirected ? Response.redirect(resposta.url, 302) : resposta))
+        .catch(() =>
         caches.match("./offline.html").then((r) => r || new Response("Sem internet.", { status: 503 }))
       )
     );

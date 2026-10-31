@@ -15,7 +15,7 @@ import { iniciarContagem } from "./contagem.js";
 import { iniciarSenha } from "./senha.js";
 import { rodarCarregamento } from "./carregamento.js";
 import { prepararFotos, linkDaFoto } from "./fotos.js";
-import { prepararMusica, destravarSom, alternarSom, atualizarBotao, haMusica } from "./som.js";
+import { prepararMusica, destravarSom, alternarSom, atualizarBotao, haMusica, avisarQueTemVideo } from "./som.js";
 import { montarRadio, destravarRadio, tocarRadio, pararRadio } from "./radio.js";
 import { montarAbertura } from "./abertura.js";
 import { montarListaDeStories, tocarStories } from "./stories.js";
@@ -156,8 +156,12 @@ async function abrirSite() {
   const musica = (conteudo && conteudo.retrospectiva && conteudo.retrospectiva.musica) || {};
   prepararMusica(musica.audio ? linkDaFoto(musica.audio) : null, musica.inicio);
   temRadio = montarRadio(conteudo);
+  const temVideo = (Array.isArray(conteudo && conteudo.stories) ? conteudo.stories : []).some(
+    (s) => s && s.video && linkDaFoto(s.video)
+  );
+  avisarQueTemVideo(temVideo);
   document.getElementById("abertura-dica").textContent =
-    haMusica() || temRadio ? "Liga o som e, se puder, usa fone." : "Toca na tela para avançar os stories.";
+    haMusica() || temRadio || temVideo ? "Liga o som e, se puder, usa fone." : "Toca na tela para avançar os stories.";
 
   // Quem já viu tudo (ou já abriu o presente) pode ir direto pro cantinho.
   const voltou = ehPrevia() || lerMemoria("viu-tudo", false) || Boolean(conteudo && conteudo.presente_aberto);

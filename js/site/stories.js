@@ -11,11 +11,20 @@
 import { h, texto } from "./dom.js";
 import { diasDesde, mesesDesde, dataCurta, dataPorExtenso } from "./datas.js";
 import { linkDaFoto } from "./fotos.js";
-import { entrarNoStoryDaMusica, sairDoStoryDaMusica, pausarMusica, continuarMusica } from "./som.js";
+import {
+  entrarNoStoryDaMusica,
+  sairDoStoryDaMusica,
+  pausarMusica,
+  continuarMusica,
+  somDesligado,
+  aoMudarSom,
+  silenciarSemGuardar,
+} from "./som.js";
 
 const DURACAO_RETRO = 7000;
 const TRECHO_MAXIMO = 30;      // segundos de música no story
 const DURACAO_MEMORIA = 6500;
+const VIDEO_MAXIMO = 60;       // segundos
 const TOQUE_MAXIMO = 250;      // até isso é toque; mais que isso foi "segurar"
 const AREA_VOLTAR = 0.3;       // 30% da esquerda volta
 
@@ -59,10 +68,14 @@ export function montarListaDeStories(conteudo) {
     lista.push({ secao: "Nossa retrospectiva", tema: "azul", duracao: DURACAO_RETRO, montar: () => slideDetalhes(detalhes) });
   }
 
-  // 4. Memórias (só as que têm foto)
-  const memorias = (Array.isArray(c.stories) ? c.stories : []).filter((s) => s && s.foto);
+  // 4. Memórias (foto ou vídeo)
+  const memorias = (Array.isArray(c.stories) ? c.stories : []).filter((s) => s && (s.foto || s.video));
   for (const story of memorias) {
-    lista.push({ secao: "Pequenos infinitos", tema: "foto", duracao: DURACAO_MEMORIA, montar: () => slideMemoria(story) });
+    if (story.video && linkDaFoto(story.video)) {
+      lista.push(itemDeVideo(story));
+    } else if (story.foto) {
+      lista.push({ secao: "Pequenos infinitos", tema: "foto", duracao: DURACAO_MEMORIA, montar: () => slideMemoria(story) });
+    }
   }
 
   return lista;
@@ -141,26 +154,130 @@ function slideDetalhes(detalhes) {
   );
 }
 
-function slideMemoria(story) {
-  const link = linkDaFoto(story.foto);
+function legenda(story) {
   const tag = texto(story.tag);
   const frase = texto(story.frase);
+  if (!tag && !frase) return null;
+  return h(
+    "div",
+    { class: "st-legenda" },
+    tag ? h("p", { class: "st-legenda-tag" }, tag) : null,
+    frase ? h("p", { class: "st-legenda-frase" }, `“${frase}”`) : null
+  );
+}
+
+function slideMemoria(story) {
+  const link = linkDaFoto(story.foto);
+  const alt = texto(story.frase) || texto(story.tag) || "Foto de nós dois";
   return h(
     "div",
     { class: "st st--foto" },
     // Fundo: a mesma foto, desfocada, preenchendo a tela.
     h("div", { class: "st-foto" }, link ? h("img", { class: "st-foto-fundo", src: link, alt: "", "aria-hidden": "true" }) : null),
     // Frente: a foto inteira, sem cortar nada.
-    h("div", { class: "st-foto-inteira" }, link ? h("img", { src: link, alt: frase || tag || "Foto de nós dois" }) : null),
-    tag || frase
-      ? h(
-          "div",
-          { class: "st-legenda" },
-          tag ? h("p", { class: "st-legenda-tag" }, tag) : null,
-          frase ? h("p", { class: "st-legenda-frase" }, `“${frase}”`) : null
-        )
-      : null
+    h("div", { class: "st-foto-inteira" }, link ? h("img", { src: link, alt }) : null),
+    legenda(story)
   );
+}
+
+// ---------------------------------------------------------------------
+// Story com vídeo (com o som do vídeo)
+// ---------------------------------------------------------------------
+let videoAtual = null;
+
+// Botão de som do topo: liga/desliga o som do vídeo que está tocando.
+aoMudarSom((mudo) => {
+  if (videoAtual) videoAtual.muted = mudo;
+});
+
+function tocarVideo(video) {
+  video.muted = somDesligado();
+  const promessa = video.play();
+  if (promessa && typeof promessa.catch === "function") {
+    promessa.catch(() => {
+      // O celular não deixou tocar com som: toca sem som; o botão liga.
+      if (!video.isConnected || video.muted) return;
+      silenciarSemGuardar();
+      video.muted = true;
+      const outra = video.play();
+      if (outra && typeof outra.catch === "function") outra.catch(() => {});
+    });
+  }
+}
+
+function slideVideo(story) {
+  const capa = linkDaFoto(story.foto);
+  const alt = texto(story.frase) || texto(story.tag) || "Vídeo de nós dois";
+  const video = h("video", {
+    class: "st-video",
+    src: linkDaFoto(story.video),
+    poster: capa || null,
+    preload: "auto",
+    playsinline: true,
+    "webkit-playsinline": true,
+    "aria-label": alt,
+  });
+  video.playsInline = true;
+  const raiz = h(
+    "div",
+    { class: "st st--foto st--video st--esperando" },
+    h("div", { class: "st-foto" }, capa ? h("img", { class: "st-foto-fundo", src: capa, alt: "", "aria-hidden": "true" }) : null),
+    h("div", { class: "st-foto-inteira" }, video, h("span", { class: "st-carregando", "aria-hidden": "true" })),
+    legenda(story)
+  );
+  const esperando = (sim) => raiz.classList.toggle("st--esperando", sim);
+  video.addEventListener("waiting", () => esperando(true));
+  video.addEventListener("playing", () => esperando(false));
+  video.addEventListener("canplay", () => { if (!video.paused) esperando(false); });
+  video.addEventListener("error", () => esperando(false));
+  return { raiz, video };
+}
+
+function itemDeVideo(story) {
+  let video = null;
+  let terminou = false;
+  let falhou = false;
+  const segundos = Math.max(3, Math.min(VIDEO_MAXIMO, Number(story.duracao) || 15));
+  const item = { secao: "Pequenos infinitos", tema: "foto", duracao: segundos * 1000 };
+
+  item.montar = () => {
+    const { raiz, video: v } = slideVideo(story);
+    video = v;
+    terminou = false;
+    falhou = false;
+    v.addEventListener("ended", () => { terminou = true; });
+    v.addEventListener("error", () => { falhou = true; });
+    return raiz;
+  };
+  item.aoEntrar = () => {
+    if (!video) return;
+    videoAtual = video;
+    tocarVideo(video);
+  };
+  item.aoSair = () => {
+    if (video) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
+    if (videoAtual === video) videoAtual = null;
+    video = null;
+  };
+  item.aoPausar = () => {
+    if (video) video.pause();
+  };
+  item.aoContinuar = () => {
+    if (video && !terminou) tocarVideo(video);
+  };
+  // A barrinha anda com o vídeo (se ele travar para carregar, ela espera).
+  item.progresso = () => {
+    if (!video || falhou) return null;
+    if (terminou) return 1;
+    const d = video.duration;
+    return Number.isFinite(d) && d > 0 ? video.currentTime / d : 0;
+  };
+  item.acabou = () => terminou;
+  return item;
 }
 
 // Número subindo (ex.: 0 → 533) quando o story aparece.
@@ -222,6 +339,8 @@ export function tocarStories(lista, comecarEm = 0) {
       ...lista.map(() => h("span", { class: "stories-barra" }, h("span", { class: "stories-barra-cheia" })))
     );
     const cheias = [...el.barras.querySelectorAll(".stories-barra-cheia")];
+    // Muitos stories: barrinhas mais juntinhas (cabem até no celular pequeno).
+    el.barras.classList.toggle("stories-barras--muitas", lista.length > 16);
 
     const pausado = () => pausadoPorToque || pausadoPorBotao || pausadoPorAba;
     let inicioToque = 0;
@@ -302,9 +421,17 @@ export function tocarStories(lista, comecarEm = 0) {
         avisarItem(lista[atual], somPausado ? "aoPausar" : "aoContinuar");
       }
       if (!agoraPausado) {
-        decorrido += Math.min(passo, 100);   // se a aba travar, não pula vários stories
-        if (decorrido >= lista[atual].duracao) {
-          proximo();
+        const item = lista[atual];
+        const progresso = typeof item.progresso === "function" ? item.progresso() : null;
+        if (progresso !== null && progresso !== undefined) {
+          // story de vídeo: o tempo é o do próprio vídeo
+          decorrido = Math.min(1, progresso) * item.duracao;
+          if (item.acabou()) proximo();
+        } else {
+          decorrido += Math.min(passo, 100);   // se a aba travar, não pula vários stories
+          if (decorrido >= item.duracao) {
+            proximo();
+          }
         }
       }
       if (!encerrado) {
