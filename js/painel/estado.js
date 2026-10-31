@@ -199,6 +199,54 @@ export function situacao() {
   };
 }
 
+// ---------------------------------------------------------------------
+// Cópia de segurança (arquivo .json no computador)
+// ---------------------------------------------------------------------
+export const FORMATO_COPIA = "nossos-instantes-copia";
+
+export function copiaDeSeguranca() {
+  return {
+    formato: FORMATO_COPIA,
+    versao: 1,
+    feita_em: new Date().toISOString(),
+    rascunho: copiar(estado.rascunho),
+    presente: copiar(estado.presente),
+  };
+}
+
+// Confere o arquivo e devolve { rascunho, presente } já completos,
+// ou lança Error("copia_invalida").
+export function lerCopia(dados) {
+  if (
+    !dados ||
+    typeof dados !== "object" ||
+    dados.formato !== FORMATO_COPIA ||
+    !dados.rascunho ||
+    typeof dados.rascunho !== "object" ||
+    Array.isArray(dados.rascunho)
+  ) {
+    throw new Error("copia_invalida");
+  }
+  const rascunhoLido = completar(MODELO, copiar(dados.rascunho));
+  const presenteLido =
+    dados.presente && typeof dados.presente === "object" && !Array.isArray(dados.presente)
+      ? completar(MODELO_PRESENTE, copiar(dados.presente))
+      : copiar(estado.presente);
+  for (const lista of ["stories", "vales", "cartas"]) {
+    if (!Array.isArray(rascunhoLido[lista])) throw new Error("copia_invalida");
+  }
+  if (!Array.isArray(rascunhoLido.radio.faixas)) throw new Error("copia_invalida");
+  return { rascunho: rascunhoLido, presente: presenteLido, feitaEm: dados.feita_em || null };
+}
+
+// Troca o rascunho inteiro pelo da cópia (e salva). Não publica.
+export function restaurarCopia(copia) {
+  alterar(() => {
+    estado.rascunho = copiar(copia.rascunho);
+    estado.presente = copiar(copia.presente);
+  });
+}
+
 // Identificador único para stories, cartas, vales…
 export function novoIdentificador() {
   if (window.crypto && typeof window.crypto.randomUUID === "function") {

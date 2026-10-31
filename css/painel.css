@@ -1047,3 +1047,156 @@ input[type="date"].campo {
   line-height: 1.4;
   color: var(--texto-2);
 }
+
+/* =====================================================================
+   Aba "Antes de entregar"
+   ===================================================================== */
+.conferencia {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.conf-lista {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conf-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border-radius: 12px;
+  background: var(--meia-noite-2);
+  border-left: 3px solid var(--linha-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.conf-item > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.conf-item--falta { border-left-color: var(--erro); }
+.conf-item--aviso { border-left-color: var(--champanhe); }
+.conf-item--ok    { border-left-color: var(--certo); color: var(--texto-2); }
+.conf-item--info  { color: var(--texto-3); }
+
+.conf-ir {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.copia-ultima {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.copia-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.botao-pequeno--destaque {
+  background: var(--champanhe);
+  border-color: var(--champanhe);
+  color: var(--meia-noite);
+  font-weight: 600;
+}
+
+.limpar-opcao,
+.limpar-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--painel-fundo);
+  cursor: pointer;
+}
+
+.limpar-radio {
+  align-items: center;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.limpar-opcao input,
+.limpar-radio input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--champanhe);
+}
+
+.limpar-opcao-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.limpar-opcao-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.limpar-opcao-detalhe {
+  font-size: 13px;
+  color: var(--texto-2);
+  overflow-wrap: anywhere;
+}
+
+.limpar-opcao--vazia {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.limpar-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--painel-fundo);
+  min-width: 0;
+}
+
+.limpar-lista legend {
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.limpar-lista .limpar-radio {
+  background: var(--meia-noite-2);
+}
+
+.limpar-confirmar {
+  margin-top: 4px;
+}
+
+.limpar-botao {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.limpar-zerado {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--certo);
+}

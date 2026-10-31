@@ -14,6 +14,7 @@ import { desenharVales } from "./abas/vales.js";
 import { desenharPresente } from "./abas/presente.js";
 import { desenharRecados, contarNovos } from "./abas/recados.js";
 import { desenharRadio } from "./abas/radio.js";
+import { desenharEntrega } from "./abas/entrega.js";
 
 const ABAS = [
   { id: "retrospectiva", nome: "Retrospectiva", desenhar: desenharRetrospectiva },
@@ -23,6 +24,7 @@ const ABAS = [
   { id: "vales", nome: "Vales", desenhar: desenharVales },
   { id: "recados", nome: "Recados", desenhar: desenharRecados },
   { id: "presente", nome: "Presente", desenhar: desenharPresente },
+  { id: "entrega", nome: "Antes de entregar", desenhar: desenharEntrega },
 ];
 
 const el = {
@@ -170,6 +172,9 @@ async function abrirPainel() {
       desenharAbas();
     })
     .catch(() => {});
+  window.addEventListener("eni-ir-para-aba", (evento) => {
+    if (ABAS.some((a) => a.id === evento.detail)) trocarAba(evento.detail);
+  });
   window.addEventListener("eni-recados-lidos", () => {
     novosRecados = 0;
     desenharAbas();

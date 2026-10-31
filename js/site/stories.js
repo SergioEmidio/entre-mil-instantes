@@ -333,7 +333,7 @@ function tocarVideo(video) {
   }
 }
 
-function slideVideo(story) {
+function criarVideo(story) {
   const capa = linkDaFoto(story.foto);
   const alt = texto(story.frase) || texto(story.tag) || "Vídeo de nós dois";
   const video = h("video", {
@@ -346,6 +346,14 @@ function slideVideo(story) {
     "aria-label": alt,
   });
   video.playsInline = true;
+  video.muted = true;
+  return video;
+}
+
+// "pronto": o vídeo que já foi sendo baixado enquanto ela via o story anterior.
+function slideVideo(story, pronto) {
+  const capa = linkDaFoto(story.foto);
+  const video = pronto || criarVideo(story);
   const raiz = h(
     "div",
     { class: "st st--foto st--video st--esperando" },
@@ -358,6 +366,7 @@ function slideVideo(story) {
   video.addEventListener("playing", () => esperando(false));
   video.addEventListener("canplay", () => { if (!video.paused) esperando(false); });
   video.addEventListener("error", () => esperando(false));
+  if (video.error) esperando(false);
   return { raiz, video };
 }
 
@@ -368,11 +377,36 @@ function itemDeVideo(story) {
   const segundos = Math.max(3, Math.min(VIDEO_MAXIMO, Number(story.duracao) || 15));
   const item = { secao: "Pequenos infinitos", tema: "foto", duracao: segundos * 1000 };
 
+  let pronto = null;
+
+  // Começa a baixar o vídeo antes (enquanto ela vê o story anterior).
+  item.preparar = () => {
+    if (pronto || video) return;
+    pronto = criarVideo(story);
+    try {
+      pronto.load();
+    } catch {
+      /* tudo bem: baixa quando aparecer */
+    }
+  };
+  // Desiste do vídeo baixado antes (ela foi para longe dele).
+  item.descartar = () => {
+    if (!pronto) return;
+    pronto.removeAttribute("src");
+    try {
+      pronto.load();
+    } catch {
+      /* tudo bem */
+    }
+    pronto = null;
+  };
+
   item.montar = () => {
-    const { raiz, video: v } = slideVideo(story);
+    const { raiz, video: v } = slideVideo(story, pronto);
+    pronto = null;
     video = v;
     terminou = false;
-    falhou = false;
+    falhou = Boolean(v.error);
     v.addEventListener("ended", () => { terminou = true; });
     v.addEventListener("error", () => { falhou = true; });
     return raiz;
@@ -515,9 +549,25 @@ export function tocarStories(lista, comecarEm = 0) {
       desenharBarras();
       estavaPausado = false;
       avisarItem(item, "aoEntrar");
+      prepararProximo();
       if (pausadoParaSom()) {
         estavaPausado = true;
         avisarItem(item, "aoPausar");
+      }
+    }
+
+    // Só o próximo story fica baixando antes (para não gastar internet à toa).
+    function prepararProximo() {
+      for (let i = 0; i < lista.length; i++) {
+        if (i !== atual + 1 && lista[i].descartar) lista[i].descartar();
+      }
+      const seguinte = lista[atual + 1];
+      if (seguinte && seguinte.preparar) {
+        try {
+          seguinte.preparar();
+        } catch {
+          /* tudo bem */
+        }
       }
     }
 
@@ -648,6 +698,7 @@ export function tocarStories(lista, comecarEm = 0) {
       encerrado = true;
       cancelAnimationFrame(quadro);
       avisarItem(lista[atual], "aoSair");
+      for (const item of lista) if (item.descartar) item.descartar();
       for (const [alvo, tipo, fn] of ouvintes) alvo.removeEventListener(tipo, fn);
       cheias.forEach((barra) => { barra.style.transform = "scaleX(1)"; });
       terminar();

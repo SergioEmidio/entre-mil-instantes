@@ -56,6 +56,12 @@ function traduzirErro(erro) {
   if (texto.includes("confirmacao_invalida")) {
     return new ErroDoSite("confirmacao_invalida", "Digite AUTORIZO para confirmar.", erro);
   }
+  if (texto.includes("falta_autorizo")) {
+    return new ErroDoSite("confirmacao_invalida", "Digite AUTORIZO para confirmar.", erro);
+  }
+  if (erro.code === "PGRST202" || texto.includes("could not find the function")) {
+    return new ErroDoSite("falta_sql", "Falta rodar um arquivo SQL no Supabase.", erro);
+  }
   if (texto.includes("failed to fetch") || texto.includes("network")) {
     return new ErroDoSite("rede", "Sem conexão. Confere a internet.", erro);
   }
@@ -333,4 +339,47 @@ export async function apagarRecado(recado) {
 export async function fecharPresente() {
   const { error } = await supabase.rpc("fechar_presente");
   falhouSe(error);
+}
+
+// ---------------------------------------------------------------------
+// Antes de entregar: limpar os testes
+// ---------------------------------------------------------------------
+export async function resumoDosTestes() {
+  const { data, error } = await supabase.rpc("resumo_testes");
+  falhouSe(error);
+  return data || {};
+}
+
+// opcoes: { recados: bool, lista: "nada"|"dela"|"tudo", cartas: bool, presente: bool }
+export async function limparTestes(confirmacao, opcoes) {
+  const { data, error } = await supabase.rpc("limpar_testes", {
+    confirmacao,
+    p_recados: Boolean(opcoes.recados),
+    p_lista: opcoes.lista || "nada",
+    p_cartas: Boolean(opcoes.cartas),
+    p_presente: Boolean(opcoes.presente),
+  });
+  falhouSe(error);
+  const resultado = data || {};
+
+  // Apaga os áudios dos recados do armazenamento (os da lista e também
+  // qualquer áudio "solto" que tenha sobrado de testes antigos).
+  if (opcoes.recados) {
+    const caminhos = new Set(Array.isArray(resultado.audios) ? resultado.audios : []);
+    try {
+      const { data: soltos } = await supabase.storage.from("recados").list("recado", { limit: 1000 });
+      for (const arquivo of soltos || []) {
+        if (arquivo && arquivo.name && arquivo.id) caminhos.add(`recado/${arquivo.name}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    const lista = Array.from(caminhos);
+    for (let i = 0; i < lista.length; i += 100) {
+      const { error: erroArquivo } = await supabase.storage.from("recados").remove(lista.slice(i, i + 100));
+      if (erroArquivo) console.error(erroArquivo);
+    }
+    resultado.arquivos = lista.length;
+  }
+  return resultado;
 }
