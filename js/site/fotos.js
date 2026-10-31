@@ -29,7 +29,8 @@ export function fotosDoConteudo(conteudo) {
     ...stories.map((s) => s && s.foto),
     antesAgora.antes,
     antesAgora.agora,
-    ...faixas.map((f) => f && f.capa),
+    c.radio && c.radio.capa,
+    // as capas das faixas carregam só quando aparecem (pode ter muitas)
     c.cartao && c.cartao.foto,
   ].filter((caminho) => typeof caminho === "string" && caminho);
 }
@@ -40,7 +41,7 @@ export function audiosDoConteudo(conteudo) {
   const musica = (c.retrospectiva && c.retrospectiva.musica) || {};
   const faixas = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
   const cartas = Array.isArray(c.cartas) ? c.cartas : [];
-  return [musica.audio, ...faixas.map((f) => f && f.audio), ...cartas.map((x) => x && x.audio)].filter(
+  return [musica.audio, ...faixas.map((f) => f && f.audio), ...faixas.map((f) => f && f.capa), ...cartas.map((x) => x && x.audio)].filter(
     (caminho) => typeof caminho === "string" && caminho
   );
 }

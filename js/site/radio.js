@@ -28,6 +28,7 @@ let acabou = false;
 let arrastando = false;
 let idCarregada = null;
 let nomePlaylist = "A Rádio";
+let capaPlaylist = null;
 let aoContinuar = null;
 let ligado = false;
 const curtidas = new Set();
@@ -69,10 +70,20 @@ function tocarSemErro() {
   }
 }
 
-function imagem(caminho, alt = "") {
+function imagem(caminho, alt = "", preguicosa = false) {
   const link = linkDaFoto(caminho);
-  return link ? h("img", { src: link, alt, draggable: "false" }) : null;
+  if (!link) return null;
+  return h("img", {
+    src: link,
+    alt,
+    draggable: "false",
+    decoding: "async",
+    loading: preguicosa ? "lazy" : null,
+  });
 }
+
+// Capa de uma faixa; sem capa própria, usa a da playlist.
+const capaDe = (f) => (f && f.capa) || capaPlaylist;
 
 // Ícones
 const ICONES = {
@@ -98,6 +109,7 @@ export function montarRadio(conteudo) {
   const autor = texto(c.autor);
   const nome = texto(c.nome);
   nomePlaylist = nome ? `A Rádio da ${nome}` : "A nossa Rádio";
+  capaPlaylist = (c.radio && typeof c.radio.capa === "string" && c.radio.capa) || null;
 
   const lista = c.radio && Array.isArray(c.radio.faixas) ? c.radio.faixas : [];
   faixas = lista
@@ -282,7 +294,7 @@ function avisarTelaDeBloqueio() {
   const f = faixaAtual();
   if (!f) return;
   try {
-    const capa = linkDaFoto(f.capa);
+    const capa = linkDaFoto(capaDe(f));
     navigator.mediaSession.metadata = new window.MediaMetadata({
       title: f.titulo,
       artist: f.artista,
@@ -307,7 +319,8 @@ function desenharCabecalho() {
   partes.push(faixas.length === 1 ? "1 faixa" : `${faixas.length} faixas`);
   if (total) partes.push(total >= 60 ? `${Math.round(total / 60)}\u00a0min` : `${total}\u00a0s`);
   el.sub.textContent = partes.join(" · ");
-  el.capa.replaceChildren(...[imagem(faixas[0] && faixas[0].capa)].filter(Boolean));
+  const capa = capaPlaylist || (faixas.find((f) => f.capa) || {}).capa;
+  el.capa.replaceChildren(...[imagem(capa, nomePlaylist)].filter(Boolean));
 }
 
 function desenharLista() {
@@ -328,7 +341,7 @@ function desenharLista() {
               mostrarTela("tela-tocando");
             },
           },
-          h("span", { class: "radio-faixa-capa" }, imagem(f.capa)),
+          h("span", { class: "radio-faixa-capa" }, imagem(capaDe(f), "", true)),
           h(
             "span",
             { class: "radio-faixa-textos" },
@@ -371,7 +384,7 @@ function atualizarTudo() {
 
   // Tela "tocando agora"
   el.tocando.style.setProperty("--cor-faixa", f.cor);
-  el.tocCapa.replaceChildren(...[imagem(f.capa, f.titulo)].filter(Boolean));
+  el.tocCapa.replaceChildren(...[imagem(capaDe(f), f.titulo)].filter(Boolean));
   el.tocTitulo.textContent = f.titulo;
   el.tocArtista.textContent = f.artista;
   el.tocContinuar.hidden = !acabou;
@@ -393,7 +406,7 @@ function atualizarTudo() {
 
   // Mini player
   el.mini.hidden = false;
-  el.miniCapa.replaceChildren(...[imagem(f.capa)].filter(Boolean));
+  el.miniCapa.replaceChildren(...[imagem(capaDe(f))].filter(Boolean));
   el.miniTitulo.textContent = f.titulo;
   el.miniArtista.textContent = f.artista;
 

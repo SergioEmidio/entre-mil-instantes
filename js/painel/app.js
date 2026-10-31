@@ -189,6 +189,7 @@ function caminhosDasFotos() {
     ...r.radio.faixas.map((f) => f.capa),
     ...r.radio.faixas.map((f) => f.audio),
     r.cartao.foto,
+    r.radio.capa,
   ].filter(Boolean);
 }
 

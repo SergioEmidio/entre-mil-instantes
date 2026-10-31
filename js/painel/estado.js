@@ -27,7 +27,7 @@ const MODELO = {
   },
   stories: [],
   antes_agora: { antes: null, agora: null, frase: "" },
-  radio: { faixas: [] },
+  radio: { capa: null, faixas: [] },
   presente: { frase_caixa: "Hoje eu não queria só te dizer. Queria te dar algo." },
   vales: [],
   cartas: [],

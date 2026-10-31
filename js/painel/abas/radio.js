@@ -3,13 +3,12 @@
 // Cada faixa é uma memória: capa (foto), título, "artista" e a tua voz.
 // =====================================================================
 
-import { h, campo, icone, confirmar, avisar } from "../ui.js";
+import { h, campo, icone, confirmar, avisar, bloco } from "../ui.js";
 import { campoFoto } from "../campo-foto.js";
 import { campoAudio } from "../campo-audio.js";
 import { rascunho, alterar, novoIdentificador } from "../estado.js";
 import { linkGuardado, linkDe } from "../midia.js";
 
-const MAXIMO = 12;
 let abrirId = null;
 
 const minSeg = (s) => {
@@ -23,13 +22,26 @@ export function desenharRadio(area, redesenhar) {
   const total = lista.reduce((soma, f) => soma + (f.audio && f.duracao ? f.duracao : 0), 0);
 
   area.append(
-    h("div", { class: "area-titulo" }, h("h2", null, "A Rádio dela"), h("p", null, `${lista.length} de ${MAXIMO}`)),
+    h("div", { class: "area-titulo" }, h("h2", null, "A Rádio dela"), h("p", null, lista.length === 1 ? "1 faixa" : `${lista.length} faixas`)),
     h(
       "p",
       { class: "area-intro" },
       "Cada faixa é uma memória contada pela tua voz (uns 30 segundos). Grava direto pelo celular ou envia um áudio. Faixa sem áudio não aparece para ela."
     ),
-    total ? h("p", { class: "bloco-dica" }, `Duração total da rádio: ${minSeg(total)}`) : null
+    total ? h("p", { class: "bloco-dica" }, `Duração total da rádio: ${minSeg(total)}`) : null,
+    bloco(
+      "Capa da playlist",
+      "A foto grande do topo da rádio. Sem foto aqui, usa a capa da primeira faixa.",
+      campoFoto({
+        rotulo: "Capa da playlist",
+        caminho: r.radio.capa,
+        pasta: "radio",
+        aoMudar: (c) =>
+          alterar((d) => {
+            d.radio.capa = c;
+          }),
+      })
+    )
   );
 
   const caixa = h("div", { class: "lista" });
@@ -42,7 +54,6 @@ export function desenharRadio(area, redesenhar) {
       {
         class: "botao-adicionar",
         type: "button",
-        disabled: lista.length >= MAXIMO,
         onClick: () => {
           const id = novoIdentificador();
           alterar((d) => {
