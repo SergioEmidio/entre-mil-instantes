@@ -122,23 +122,28 @@ export function desenharRetrospectiva(area) {
 
     bloco(
       "Nossos detalhes",
-      "As coisas que são só de vocês.",
+      "As coisas que são só de vocês. Cada uma vira um story.",
       campo({
-        rotulo: "O apelido que eu mais te chamo",
+        rotulo: "Os apelidos que eu mais te chamo",
         valor: r.retrospectiva.apelido,
-        max: 40,
+        max: 160,
+        dica: "Separa com ponto e vírgula (;). Cada um vira uma etiqueta. Ex.: Meu neném; Minha carente",
         aoMudar: (v) => alterar((d) => { d.retrospectiva.apelido = v; }),
       }),
       campo({
         rotulo: "Nosso lugar favorito",
         valor: r.retrospectiva.lugar,
-        max: 60,
+        max: 80,
+        dica: "O que vier depois da vírgula vira o subtítulo. Ex.: Marco Zero, onde tudo começou",
         aoMudar: (v) => alterar((d) => { d.retrospectiva.lugar = v; }),
       }),
       campo({
-        rotulo: "A frase que tu mais falas",
+        rotulo: "As frases que tu mais falas",
         valor: r.retrospectiva.frase_dela,
-        max: 80,
+        max: 240,
+        multilinha: true,
+        linhas: 3,
+        dica: "Separa com ponto e vírgula (;). Cada uma vira um balão de conversa. Ex.: PARA; Tu é MUITO CHATO",
         aoMudar: (v) => alterar((d) => { d.retrospectiva.frase_dela = v; }),
       })
     ),

@@ -58,14 +58,29 @@ export function montarListaDeStories(conteudo) {
     lista.push(item);
   }
 
-  // 3. Detalhes (só os que estiverem preenchidos)
-  const detalhes = [
-    ["O apelido que eu mais te chamo", texto(retro.apelido), false],
-    ["Nosso lugar favorito", texto(retro.lugar), false],
-    ["A frase que tu mais falas", texto(retro.frase_dela), true],
-  ].filter((d) => d[1]);
-  if (detalhes.length) {
-    lista.push({ secao: "Nossa retrospectiva", tema: "azul", duracao: DURACAO_RETRO, montar: () => slideDetalhes(detalhes) });
+  // 3. Detalhes: cada um no seu story (só os que estiverem preenchidos).
+  //    Separados por ";" viram etiquetas (apelidos) e balões (frases).
+  const apelidos = partes(retro.apelido);
+  if (apelidos.length) {
+    lista.push({
+      secao: "Nossos detalhes",
+      tema: "azul",
+      duracao: Math.min(12000, Math.max(DURACAO_RETRO, 3500 + apelidos.length * 900)),
+      montar: () => slideApelidos(apelidos),
+    });
+  }
+  const lugar = texto(retro.lugar);
+  if (lugar) {
+    lista.push({ secao: "Nossos detalhes", tema: "vinho", duracao: DURACAO_RETRO, montar: () => slideLugar(lugar) });
+  }
+  const frases = partes(retro.frase_dela);
+  if (frases.length) {
+    lista.push({
+      secao: "Nossos detalhes",
+      tema: "azul",
+      duracao: Math.min(15000, Math.max(DURACAO_RETRO, 3800 + frases.length * 1100)),
+      montar: () => slideFrases(frases, texto(c.nome)),
+    });
   }
 
   // 4. Memórias (foto ou vídeo)
@@ -129,38 +144,151 @@ function slideMusica(musica) {
   );
 }
 
-function slideDetalhes(detalhes) {
+// "Meu neném; Minha carente" → ["Meu neném", "Minha carente"]
+function partes(valor) {
+  return texto(valor)
+    .split(/\s*[;\n]\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function iconeSvg(caminho, tamanho) {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("width", String(tamanho));
+  svg.setAttribute("height", String(tamanho));
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.6");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(ns, "path");
+  p.setAttribute("d", caminho);
+  svg.append(p);
+  return svg;
+}
+
+// Apelidos: etiquetas que vão aparecendo
+function slideApelidos(apelidos) {
+  const um = apelidos.length === 1;
   return h(
     "div",
-    { class: "st st--centro" },
-    h("h2", { class: "st-titulo st-titulo--m" }, "Os detalhes que são só nossos"),
+    { class: "st st--centro st--encaixar st--apelidos" },
+    h("p", { class: "st-rotulo" }, um ? "O apelido que eu mais te chamo" : "Os apelidos que eu mais te chamo"),
+    h("h2", { class: "st-titulo st-encaixe-titulo" }, "Do jeitinho que só eu te chamo"),
     h(
-      "ol",
-      { class: "st-lista" },
-      detalhes.map(([rotulo, valor, citacao], i) =>
+      "ul",
+      { class: "st-chips" },
+      apelidos.map((apelido, i) => h("li", { class: "st-chip", style: `--i: ${i}` }, apelido))
+    )
+  );
+}
+
+// Lugar: "Marco Zero, onde tudo começou" → nome grande + subtítulo
+function slideLugar(lugar) {
+  const corte = lugar.search(/\s*[,–—-]\s+/);
+  const nome = corte > 0 ? lugar.slice(0, corte) : lugar;
+  const sub = corte > 0 ? lugar.slice(corte).replace(/^\s*[,–—-]\s*/, "") : "";
+  return h(
+    "div",
+    { class: "st st--centro st--encaixar st--lugar" },
+    h("p", { class: "st-rotulo" }, "Nosso lugar favorito"),
+    h(
+      "span",
+      { class: "st-pino" },
+      h("span", { class: "st-pino-onda" }),
+      iconeSvg("M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z", 40)
+    ),
+    h("h2", { class: "st-lugar-nome" }, nome),
+    sub ? h("p", { class: "st-lugar-sub" }, sub) : null
+  );
+}
+
+// Frases: balões de conversa, um por vez, como se ela estivesse digitando
+function slideFrases(frases, nome) {
+  const quem = nome || "Tu";
+  const fim = (frases.length - 1) * 0.9 + 0.6;
+  return h(
+    "div",
+    { class: "st st--centro st--encaixar st--frases" },
+    h("p", { class: "st-rotulo" }, frases.length === 1 ? "A frase que tu mais falas" : "As frases que tu mais falas"),
+    h(
+      "div",
+      { class: "st-chat", style: `--fim: ${fim}s` },
+      h(
+        "div",
+        { class: "st-chat-cabeca" },
+        h("span", { class: "st-chat-avatar", "aria-hidden": "true" }, quem[0]),
         h(
-          "li",
-          { class: "st-lista-item" },
-          h("span", { class: "st-lista-numero", "aria-hidden": "true" }, String(i + 1)),
+          "span",
+          { class: "st-chat-quem" },
+          h("span", { class: "st-chat-nome" }, quem),
           h(
             "span",
-            { class: "st-lista-textos" },
-            h("span", { class: "st-lista-rotulo" }, rotulo),
-            h("span", { class: citacao ? "st-lista-valor st-lista-valor--citacao" : "st-lista-valor" }, citacao ? `“${valor}”` : valor)
+            { class: "st-chat-status" },
+            h("span", { class: "st-chat-digitando" }, "digitando…"),
+            h("span", { class: "st-chat-online" }, "online")
           )
+        )
+      ),
+      h(
+        "ul",
+        { class: "st-baloes" },
+        frases.map((frase, i) =>
+          h("li", { class: `st-balao${i === frases.length - 1 ? " st-balao--ultimo" : ""}`, style: `--i: ${i}` }, frase)
         )
       )
     )
   );
 }
 
+// Legenda que ainda passa do espaço dela: diminui um pouco mais a letra.
+function encaixarLegenda(raiz) {
+  const leg = raiz.querySelector(".st-legenda");
+  if (!leg) return;
+  let escala = 1;
+  leg.style.setProperty("--escala", "1");
+  for (let i = 0; i < 10 && leg.scrollHeight > leg.clientHeight + 1 && escala > 0.6; i++) {
+    escala = Math.round((escala - 0.05) * 100) / 100;
+    leg.style.setProperty("--escala", String(escala));
+  }
+}
+
+// Diminui o texto até caber na tela (stories não rolam).
+function encaixar(raiz) {
+  encaixarLegenda(raiz);
+  const alvo = raiz.classList.contains("st--encaixar") ? raiz : null;
+  if (!alvo) return;
+  let escala = 1;
+  alvo.classList.remove("st--compacto");
+  alvo.style.setProperty("--escala", "1");
+  const passa = () => alvo.scrollHeight > alvo.clientHeight + 1;
+  for (let i = 0; i < 12 && passa() && escala > 0.6; i++) {
+    escala = Math.round((escala - 0.05) * 100) / 100;
+    alvo.style.setProperty("--escala", String(escala));
+  }
+  // Ainda não coube (muito texto em tela pequena): tira os enfeites e aperta mais.
+  if (passa()) {
+    alvo.classList.add("st--compacto");
+    for (let i = 0; i < 12 && passa() && escala > 0.4; i++) {
+      escala = Math.round((escala - 0.05) * 100) / 100;
+      alvo.style.setProperty("--escala", String(escala));
+    }
+  }
+}
+
 function legenda(story) {
   const tag = texto(story.tag);
   const frase = texto(story.frase);
   if (!tag && !frase) return null;
+  const tamanho = tag.length * 0.5 + frase.length;
+  const classe = tamanho > 110 ? "st-legenda st-legenda--longa" : tamanho > 60 ? "st-legenda st-legenda--media" : "st-legenda";
   return h(
     "div",
-    { class: "st-legenda" },
+    { class: classe },
     tag ? h("p", { class: "st-legenda-tag" }, tag) : null,
     frase ? h("p", { class: "st-legenda-frase" }, `“${frase}”`) : null
   );
@@ -382,6 +510,7 @@ export function tocarStories(lista, comecarEm = 0) {
       const conteudo = item.montar();
       conteudo.classList.add("st--entrando");
       el.slide.replaceChildren(conteudo);
+      encaixar(conteudo);
       animarNumeros(conteudo);
       desenharBarras();
       estavaPausado = false;
