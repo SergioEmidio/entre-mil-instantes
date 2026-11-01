@@ -3,6 +3,8 @@
 // Troca de telas com transição suave e o céu estrelado do fundo.
 // =====================================================================
 
+import { atualizarFioDaPagina } from "./fio.js";
+
 const SAIDA_MS = 450;   // igual ao --medio do CSS
 let telaAtual = document.querySelector(".cena--ativa");
 let trocando = Promise.resolve();
@@ -45,6 +47,7 @@ async function trocarPara(id) {
   nova.addEventListener("animationend", limpar);
   setTimeout(() => limpar(), 1200);
   window.scrollTo(0, 0);
+  atualizarFioDaPagina();
 
   // Leva o foco para o título da tela nova (bom para leitores de tela).
   const titulo = nova.querySelector("h1");

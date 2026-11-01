@@ -28,6 +28,7 @@ import { tocarRecado } from "./recado.js";
 import { tocarCartao } from "./cartao.js";
 import { tocarCantinho } from "./cantinho.js";
 import { definirPrevia, ehPrevia, lerMemoria, guardarMemoria } from "./memoria.js";
+import { prepararFioDaPagina } from "./fio.js";
 import { prepararApp, atualizarConvite, precisaInstalarPrimeiro, tocarTelaInstalar } from "./instalar.js";
 import {
   obterSituacao,
@@ -373,4 +374,5 @@ document.getElementById("erro-tentar").addEventListener("click", () => {
 });
 
 prepararApp();
+prepararFioDaPagina();
 comecar();

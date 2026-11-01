@@ -2042,49 +2042,323 @@ html.modo-previa .stories-topo {
 .cartas {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 22px 14px;
 }
 
-.envelope {
-  position: relative;
-  overflow: hidden;
-  min-height: 150px;
-  padding: 52px 14px 14px;
-  border: 1px solid var(--vinho-2);
-  border-radius: 10px;
-  background: var(--vinho);
-  color: var(--marfim);
+/* =====================================================================
+   O envelope (desenho único, usado na grade e no grande que abre)
+   Tudo em % e cqw: o mesmo desenho serve em qualquer tamanho.
+   ===================================================================== */
+.env-corpo {
+  --env-papel-sobe: -20%;
+  --env-aba-aberta: perspective(320cqw) rotateX(124deg);
+  container-type: inline-size;
+}
+
+.env-corpo > * {
+  position: absolute;
+}
+
+/* o fundo de dentro (forro de estrelinhas, aparece pelo "V") */
+.env-costas,
+.env-aba--dentro .env-aba-face,
+.env-corpo--aberto .env-aba-face {
+  background-color: #26345f;
+  background-image:
+    radial-gradient(circle, rgba(244, 228, 187, 0.9) 0.5cqw, transparent 0.8cqw),
+    radial-gradient(circle, rgba(232, 211, 162, 0.45) 0.35cqw, transparent 0.6cqw),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+  background-size: 9cqw 9cqw, 9cqw 9cqw, 100% 100%;
+  background-position: 0 0, 4.5cqw 4.5cqw, 0 0;
+}
+
+.env-costas {
+  inset: 0;
+  z-index: 1;
+  border-radius: 3cqw;
+  box-shadow: 0 4cqw 9cqw rgba(0, 0, 0, 0.45);
+}
+
+/* a cartinha lá dentro */
+.env-papel {
+  left: 8%;
+  right: 8%;
+  top: 6%;
+  height: 82%;
+  z-index: 2;
+  border-radius: 1.2cqw;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 40%),
+    var(--marfim);
+  box-shadow: 0 -0.6cqw 2.4cqw rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
-  gap: 6px;
-  text-align: left;
-  transition: transform var(--rapido) var(--suave);
+  gap: 4.2cqw;
+  padding: 8cqw 9cqw 0;
 }
 
-.envelope:active {
-  transform: scale(0.98);
+.env-papel i {
+  display: block;
+  height: 1.2cqw;
+  border-radius: 1cqw;
+  background: rgba(70, 44, 58, 0.2);
+}
+
+.env-papel i:nth-child(1) { width: 46%; background: rgba(70, 44, 58, 0.32); }
+.env-papel i:nth-child(3) { width: 82%; }
+.env-papel i:nth-child(4) { width: 64%; }
+
+/* o bolso (frente das costas do envelope), com o "V" em cima */
+.env-bolso {
+  inset: 0;
+  z-index: 3;
+  border-radius: 3cqw;
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.014) 0 0.5cqw, transparent 0.5cqw 1.6cqw),
+    linear-gradient(165deg, #5e3c50 0%, #4b2f3f 55%, #3f2734 100%);
+  clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* a aba de baixo (o "X" das dobras do envelope) */
+.env-bolso::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.12));
+  clip-path: polygon(0 100%, 50% 50%, 100% 100%);
+}
+
+/* brilhinho nas bordas do "V" */
+.env-bolso::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 0.35cqw), rgba(232, 211, 162, 0.28) 50%, transparent calc(50% + 0.35cqw)) right top / 50% 46% no-repeat,
+    linear-gradient(to top left, transparent calc(50% - 0.35cqw), rgba(232, 211, 162, 0.28) 50%, transparent calc(50% + 0.35cqw)) left top / 50% 46% no-repeat;
+}
+
+/* a aba de cima (gira para abrir). A sombra fica no "suporte". */
+.env-aba {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 54%;
+  z-index: 4;
+  transform-origin: 50% 0;
+  transform: perspective(900px) rotateX(0deg);
+  transform: perspective(320cqw) rotateX(0deg);
+  filter: drop-shadow(0 0.9cqw 0.9cqw rgba(0, 0, 0, 0.38));
+  transition: transform 380ms var(--suave);
+}
+
+.env-aba-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom left, transparent calc(50% - 0.45cqw), rgba(232, 211, 162, 0.55) 50%, transparent calc(50% + 0.45cqw)) left top / 50% 100% no-repeat,
+    linear-gradient(to bottom right, transparent calc(50% - 0.45cqw), rgba(232, 211, 162, 0.55) 50%, transparent calc(50% + 0.45cqw)) right top / 50% 100% no-repeat;
+  opacity: 0.55;
+}
+
+.env-aba-face {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, 100% 0, 53.5% 94%, 50% 100%, 46.5% 94%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent 35%),
+    linear-gradient(180deg, #67445a, #553749 70%, #4c3141);
+}
+
+/* aberto: a aba deitada para trás e a cartinha aparecendo */
+.env-corpo--aberto .env-aba {
+  z-index: 0;
+  transform: perspective(900px) rotateX(124deg);
+  transform: var(--env-aba-aberta);
+  filter: none;
+}
+
+.env-corpo--aberto .env-papel {
+  transform: translateY(var(--env-papel-sobe));
+}
+
+.env-corpo--aberto .env-lacre {
+  display: none;
+}
+
+/* lacre de cera */
+.env-lacre {
+  left: 50%;
+  top: 54%;
+  width: 21cqw;
+  aspect-ratio: 1;
+  z-index: 6;
+  transform: translate(-50%, -58%);
+}
+
+.env-lacre-cera,
+.env-lacre-metade {
+  position: absolute;
+  inset: 0;
+  border-radius: 52% 48% 50% 47% / 48% 53% 47% 52%;
+  background: radial-gradient(circle at 34% 28%, #f6e2b0 0%, #dcbd7f 26%, #bd9654 60%, #8f6c33 100%);
+  box-shadow:
+    0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.4),
+    inset 0 -0.8cqw 1.4cqw rgba(80, 52, 18, 0.45),
+    inset 0 0.7cqw 0.8cqw rgba(255, 248, 225, 0.45);
+}
+
+/* anel carimbado */
+.env-lacre-cera::before,
+.env-lacre-metade::before {
+  content: "";
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 0.5cqw rgba(110, 78, 32, 0.5),
+    0 0 0 0.35cqw rgba(255, 240, 205, 0.32);
+}
+
+.env-lacre-metade {
+  display: none;
+}
+
+.env-lacre-metade--e {
+  clip-path: polygon(0 0, 54% 0, 44% 22%, 56% 41%, 43% 60%, 55% 78%, 46% 100%, 0 100%);
+}
+
+.env-lacre-metade--d {
+  clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 55% 78%, 43% 60%, 56% 41%, 44% 22%);
+}
+
+.env-lacre-emblema {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-titulo);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 5.6cqw;
+  letter-spacing: 0.02em;
+  color: #74501f;
+  text-shadow: 0 0.25cqw 0 rgba(255, 244, 214, 0.55);
+  white-space: nowrap;
+}
+
+.env-lacre-emblema svg {
+  width: 46%;
+  height: 46%;
+}
+
+.env-lacre-emblema--coracao {
+  font-family: Georgia, serif;
+  font-style: normal;
+  font-size: 9.5cqw;
+}
+
+/* trancada: envelope da noite, amarrado com barbante e cadeado no lacre */
+.env-corpo--trancado .env-bolso {
+  background:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 0.5cqw, transparent 0.5cqw 1.6cqw),
+    linear-gradient(165deg, #2a3656 0%, #1f2945 55%, #19213a 100%);
+}
+
+.env-corpo--trancado .env-aba-face {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 35%),
+    linear-gradient(180deg, #33406a, #283458 70%, #222d4c);
+}
+
+.env-corpo--trancado .env-lacre-cera {
+  background: radial-gradient(circle at 34% 28%, #c9d0e2 0%, #8f9ab6 32%, #5f6a88 70%, #46506c 100%);
+}
+
+.env-corpo--trancado .env-lacre-emblema {
+  color: #2f3854;
+  text-shadow: 0 0.25cqw 0 rgba(235, 240, 255, 0.35);
+}
+
+.env-barbante {
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 0.45cqw), rgba(232, 211, 162, 0.85) calc(50% - 0.45cqw), rgba(200, 175, 125, 0.85) calc(50% + 0.45cqw), transparent calc(50% + 0.45cqw)),
+    linear-gradient(180deg, transparent calc(56% - 0.45cqw), rgba(232, 211, 162, 0.85) calc(56% - 0.45cqw), rgba(200, 175, 125, 0.85) calc(56% + 0.45cqw), transparent calc(56% + 0.45cqw));
+  filter: drop-shadow(0 0.3cqw 0.3cqw rgba(0, 0, 0, 0.4));
+}
+
+/* =====================================================================
+   Na grade
+   ===================================================================== */
+.envelope {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 0 4px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--marfim);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .envelope:focus-visible {
   outline: 2px solid var(--champanhe);
-  outline-offset: 2px;
+  outline-offset: 6px;
 }
 
-/* a aba do envelope (um "V" fininho) */
-.envelope-aba {
+/* a "arte": espaço em cima para a aba aberta + o envelope */
+.envelope-arte {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 0.88;
+  margin-bottom: 6px;
+  transition: transform 420ms var(--suave);
+}
+
+.envelope-corpo {
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
-  height: 44px;
-  background:
-    linear-gradient(to top right, transparent calc(50% - 0.8px), #8a6a72 50%, transparent calc(50% + 0.8px)) right / 50% 100% no-repeat,
-    linear-gradient(to top left, transparent calc(50% - 0.8px), #8a6a72 50%, transparent calc(50% + 0.8px)) left / 50% 100% no-repeat;
+  bottom: 0;
+  height: 75%;
+}
+
+@media (hover: hover) {
+  .envelope:not(.envelope--trancado):hover .envelope-arte {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+  .envelope:not(.envelope--trancado):hover .env-corpo:not(.env-corpo--aberto) .env-aba {
+    transform: perspective(900px) rotateX(16deg);
+    transform: perspective(320cqw) rotateX(16deg);
+  }
+  .envelope:hover .env-corpo--aberto .env-papel {
+    transform: translateY(-30%);
+  }
+  .env-papel {
+    transition: transform 420ms var(--suave);
+  }
+}
+
+.envelope:active .envelope-arte {
+  transform: scale(0.97);
 }
 
 .envelope-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2094,52 +2368,9 @@ html.modo-previa .stories-topo {
 .envelope-titulo {
   font-family: var(--fonte-titulo);
   font-weight: 600;
-  font-size: clamp(19px, 5.4vw, 21px);
-  line-height: 1.1;
+  font-size: clamp(18px, 5.2vw, 21px);
+  line-height: 1.12;
   overflow-wrap: anywhere;
-}
-
-.envelope--lido .envelope-marca {
-  color: var(--texto-2);
-}
-
-.envelope--trancado {
-  border: 1px dashed var(--linha-2);
-  background: var(--meia-noite-2);
-  color: var(--texto-3);
-}
-
-.envelope--trancado .envelope-aba {
-  background:
-    linear-gradient(to top right, transparent calc(50% - 0.8px), var(--linha-2) 50%, transparent calc(50% + 0.8px)) right / 50% 100% no-repeat,
-    linear-gradient(to top left, transparent calc(50% - 0.8px), var(--linha-2) 50%, transparent calc(50% + 0.8px)) left / 50% 100% no-repeat;
-}
-
-.envelope--trancado .envelope-marca {
-  color: var(--texto-3);
-}
-
-/* lacrinho no bico do envelope da grade */
-.envelope-lacre {
-  position: absolute;
-  top: 34px;
-  left: 50%;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 65% 35%, #e6c98c, #c9a86a 60%, #a8864d);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.envelope--trancado .envelope-lacre {
-  background: radial-gradient(circle at 65% 35%, #6d7690, #4a5570);
-}
-
-.envelope-marca {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .envelope-data {
@@ -2147,36 +2378,51 @@ html.modo-previa .stories-topo {
   color: var(--texto-3);
 }
 
-.envelope--nova {
-  border-color: var(--champanhe);
-  animation: envelope-brilha 2.4s ease-in-out infinite;
+.envelope--lido .envelope-marca {
+  color: var(--texto-2);
 }
 
+.envelope--trancado {
+  color: var(--texto-2);
+}
+
+.envelope--trancado .envelope-marca {
+  color: var(--texto-3);
+}
+
+/* nova: o lacre brilha e o envelope respira */
 .envelope--nova .envelope-marca {
-  color: var(--champanhe);
   font-weight: 600;
 }
 
-@keyframes envelope-brilha {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 211, 162, 0); }
-  50%      { box-shadow: 0 0 22px 2px rgba(232, 211, 162, 0.35); }
+.envelope--nova .envelope-arte {
+  animation: envelope-respira 3.2s ease-in-out infinite;
 }
 
-.envelope--tremendo {
-  animation: envelope-treme 420ms ease-in-out;
+.envelope--nova .env-lacre-cera {
+  animation: lacre-brilha 2.4s ease-in-out infinite;
+}
+
+@keyframes envelope-respira {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes lacre-brilha {
+  0%, 100% { box-shadow: 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.4), inset 0 -0.8cqw 1.4cqw rgba(80, 52, 18, 0.45), inset 0 0.7cqw 0.8cqw rgba(255, 248, 225, 0.45), 0 0 0 0 rgba(232, 211, 162, 0); }
+  50%      { box-shadow: 0 0.8cqw 1.6cqw rgba(0, 0, 0, 0.4), inset 0 -0.8cqw 1.4cqw rgba(80, 52, 18, 0.45), inset 0 0.7cqw 0.8cqw rgba(255, 248, 225, 0.45), 0 0 5cqw 1.5cqw rgba(232, 211, 162, 0.55); }
+}
+
+.envelope--tremendo .envelope-arte {
+  animation: envelope-treme 460ms ease-in-out;
 }
 
 @keyframes envelope-treme {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px) rotate(-1.5deg); }
-  40% { transform: translateX(5px) rotate(1.2deg); }
-  60% { transform: translateX(-4px) rotate(-0.8deg); }
-  80% { transform: translateX(2px); }
-}
-
-/* sem animação (celular com "reduzir movimento"): só a folha */
-.carta-fundo--simples .env {
-  display: none;
+  15% { transform: translateX(-6px) rotate(-2deg); }
+  35% { transform: translateX(5px) rotate(1.6deg); }
+  55% { transform: translateX(-4px) rotate(-1deg); }
+  75% { transform: translateX(2px) rotate(0.4deg); }
 }
 
 .cartas-aviso {
@@ -2190,7 +2436,9 @@ html.modo-previa .stories-topo {
   min-height: 0;
 }
 
-/* ---------- Carta aberta: envelope + folha ---------- */
+/* =====================================================================
+   A carta aberta: envelope grande + folha
+   ===================================================================== */
 .carta-fundo {
   position: fixed;
   inset: 0;
@@ -2199,139 +2447,142 @@ html.modo-previa .stories-topo {
   align-items: center;
   justify-content: center;
   padding: calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
-  background: rgba(7, 11, 22, 0.9);
+  background:
+    radial-gradient(120% 70% at 50% 45%, rgba(70, 44, 58, 0.35), transparent 70%),
+    rgba(7, 11, 22, 0.92);
   overflow: hidden;
 }
 
-/* Envelope grande (posição e tamanho vêm do JS) */
+.carta-fundo--simples .env,
+.carta-fundo--simples .env-dica {
+  display: none;
+}
+
+/* envelope grande (posição e tamanho vêm do JS) */
 .env {
   --env-l: 300px;
   position: fixed;
   left: 0;
   top: 0;
   width: var(--env-l);
-  height: calc(var(--env-l) * 0.64);
+  height: calc(var(--env-l) * 0.66);
   transform-origin: 0 0;
   z-index: 1;
   pointer-events: none;
 }
 
-.env > * {
-  position: absolute;
+.env-tocar {
+  position: fixed;
+  z-index: 8;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.env-costas {
-  inset: 0;
-  border-radius: 8px;
-  background: #3a2430;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+.env-tocar:focus-visible {
+  outline: 2px solid var(--champanhe);
+  outline-offset: 4px;
 }
 
-.env-papel {
-  left: 7%;
-  right: 7%;
-  bottom: 6%;
-  height: 78%;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #f6eee1, var(--marfim));
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 9%;
-  padding: 12% 12% 0;
-  z-index: 2;
+/* o lacre chamando o toque */
+.env-lacre--chamando .env-lacre-cera {
+  animation: lacre-chama 1.6s ease-in-out infinite;
 }
 
-.env-papel span {
-  display: block;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(70, 44, 58, 0.18);
-}
-
-.env-papel span:nth-child(2) { width: 82%; }
-.env-papel span:nth-child(3) { width: 64%; }
-
-/* bolso da frente (o "V" aberto em cima) */
-.env-bolso {
-  inset: 0;
-  border-radius: 8px;
-  background: linear-gradient(170deg, #55364a, var(--vinho) 60%);
-  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
-  z-index: 3;
-}
-
-.env-bolso::after {
+.env-lacre--chamando::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to top right, transparent calc(50% - 0.6px), rgba(232, 211, 162, 0.25) 50%, transparent calc(50% + 0.6px)) right top / 50% 52% no-repeat,
-    linear-gradient(to top left, transparent calc(50% - 0.6px), rgba(232, 211, 162, 0.25) 50%, transparent calc(50% + 0.6px)) left top / 50% 52% no-repeat;
+  inset: -8%;
+  border-radius: 50%;
+  border: 0.5cqw solid rgba(232, 211, 162, 0.7);
+  animation: lacre-onda 1.6s ease-out infinite;
+  pointer-events: none;
 }
 
-/* aba (gira para cima ao abrir) */
-.env-aba {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 56%;
-  background: linear-gradient(180deg, #5c3a4c, #4d3141);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  transform-origin: 50% 0;
-  transform: perspective(700px) rotateX(0deg);
-  z-index: 4;
+@keyframes lacre-chama {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.06); }
 }
 
-/* lacre de cera */
-.env-lacre {
-  left: 50%;
-  top: 56%;
-  width: 22%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -62%);
-  z-index: 5;
+@keyframes lacre-onda {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.7); opacity: 0; }
 }
 
-.env-lacre-metade {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background: radial-gradient(circle at 70% 35%, #e6c98c, #c9a86a 55%, #a8864d);
-  box-shadow: inset 0 0 0 2px rgba(255, 245, 220, 0.25);
-}
-
-.env-lacre-metade--e {
-  left: 0;
-  border-radius: 999px 0 0 999px;
-  clip-path: polygon(0 0, 100% 0, 88% 22%, 100% 40%, 86% 60%, 100% 78%, 90% 100%, 0 100%);
-}
-
-.env-lacre-metade--d {
-  right: 0;
-  border-radius: 0 999px 999px 0;
-  background: radial-gradient(circle at 20% 35%, #e6c98c, #c9a86a 55%, #a8864d);
-  clip-path: polygon(-12% 0, 100% 0, 100% 100%, -10% 100%, 0 78%, -14% 60%, 0 40%, -12% 22%);
-}
-
-.env-lacre-letras {
+.env-rachadura {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--fonte-titulo);
-  font-style: italic;
-  font-weight: 600;
-  font-size: calc(var(--env-l) * 0.05);
-  color: #6b4a2a;
-  letter-spacing: 0.02em;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
-/* A folha */
+.env-rachadura path {
+  fill: none;
+  stroke: #5a3d16;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+}
+
+.env-dica {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  margin: 0;
+  text-align: center;
+  font-family: "Caveat", "Segoe Script", cursive;
+  font-size: 24px;
+  color: var(--champanhe);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* brilhinhos dourados que saem do envelope */
+.env-brilho {
+  position: fixed;
+  z-index: 3;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6dc 0%, #e8d3a2 45%, rgba(232, 211, 162, 0) 72%);
+  pointer-events: none;
+}
+
+.env-brilho--estrela {
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 0;
+  background: #f4e4bb;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+}
+
+.env-farelo {
+  position: fixed;
+  z-index: 7;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 40% 60% 55% 45%;
+  background: #b38e4f;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   A folha
+   ===================================================================== */
 .folha {
+  --tinta: #2a1e24;
   position: relative;
   z-index: 2;
   width: 100%;
@@ -2341,49 +2592,152 @@ html.modo-previa .stories-topo {
   flex-direction: column;
   border-radius: 4px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 30%),
+    radial-gradient(140% 90% at 50% 0%, rgba(255, 255, 255, 0.45), transparent 60%),
+    radial-gradient(120% 120% at 50% 50%, transparent 60%, rgba(150, 110, 80, 0.12) 100%),
     var(--marfim);
-  color: #2a1e24;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  color: var(--tinta);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 30px 70px rgba(0, 0, 0, 0.5),
+    0 8px 18px rgba(0, 0, 0, 0.25);
   transform-origin: 0 0;
 }
 
 .folha-rolagem {
+  position: relative;
   overflow-y: auto;
   overscroll-behavior: contain;
   min-height: 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.folha-rolagem::-webkit-scrollbar {
+  display: none;
+}
+
+/* o papel "some" de leve nas pontas quando tem mais texto para ler */
+.folha-rolagem--acima {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 34px);
+  mask-image: linear-gradient(180deg, transparent 0, #000 34px);
+}
+
+.folha-rolagem--abaixo {
+  -webkit-mask-image: linear-gradient(0deg, transparent 0, #000 46px);
+  mask-image: linear-gradient(0deg, transparent 0, #000 46px);
+}
+
+.folha-rolagem--acima.folha-rolagem--abaixo {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 34px, #000 calc(100% - 46px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 34px, #000 calc(100% - 46px), transparent 100%);
 }
 
 .folha-conteudo {
-  padding: 30px 26px 22px;
+  padding: 32px 30px 24px 26px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* vincos das dobras (bem de leve, depois de desdobrar) */
+/* a fita de cetim: a barrinha de rolar da carta */
+.folha-fita {
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  right: 7px;
+  z-index: 3;
+  width: 14px;
+  opacity: 0;
+  transition: opacity 360ms ease;
+  touch-action: none;
+}
+
+.folha-fita::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  margin-left: -0.5px;
+  background: linear-gradient(180deg, transparent, rgba(92, 58, 76, 0.22) 12%, rgba(92, 58, 76, 0.22) 88%, transparent);
+}
+
+.folha--rolavel .folha-fita {
+  opacity: 0.55;
+}
+
+.folha--rolando .folha-fita,
+.folha-fita:hover,
+.folha-fita--arrastando {
+  opacity: 1;
+}
+
+.folha-fita-polegar {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4px;
+  min-height: 28px;
+  margin-left: -2px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #7a4d63, var(--vinho-2) 60%, var(--vinho));
+  box-shadow: 0 1px 2px rgba(70, 44, 58, 0.3);
+  cursor: grab;
+  transition: width 200ms var(--suave), margin-left 200ms var(--suave);
+}
+
+/* rabinho em "V" da fita, como um marcador de livro */
+.folha-fita-polegar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 6px;
+  background: var(--vinho);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 45%, 0 100%);
+}
+
+.folha-fita:hover .folha-fita-polegar,
+.folha-fita--arrastando .folha-fita-polegar {
+  width: 6px;
+  margin-left: -3px;
+}
+
+.folha-fita--arrastando .folha-fita-polegar {
+  cursor: grabbing;
+}
+
+/* vincos das dobras: só marquinhas nas bordas (nunca riscam o texto)
+   e somem devagar depois que a carta abre */
 .folha-vinco {
   position: absolute;
   left: 0;
   right: 0;
-  height: 14px;
-  margin-top: -7px;
-  background: linear-gradient(180deg, transparent, rgba(70, 44, 58, 0.045) 50%, rgba(255, 255, 255, 0.35) 52%, transparent);
+  height: 10px;
+  margin-top: -5px;
   pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent, rgba(70, 44, 58, 0.12) 50%, rgba(255, 255, 255, 0.6) 56%, transparent) left / 18px 100% no-repeat,
+    linear-gradient(180deg, transparent, rgba(70, 44, 58, 0.12) 50%, rgba(255, 255, 255, 0.6) 56%, transparent) right / 18px 100% no-repeat;
+  opacity: 0;
 }
 
 .folha-vinco--1 { top: 33.333%; }
 .folha-vinco--2 { top: 66.666%; }
 
-/* painéis que dobram (só aparecem durante a animação) */
+/* painéis que dobram (só durante a animação) */
 .folha-dobra {
   position: absolute;
   left: 0;
   right: 0;
   display: none;
   transform-origin: 50% 0;
-  background: linear-gradient(180deg, #ede2cf, var(--marfim));
-  box-shadow: inset 0 1px 0 rgba(70, 44, 58, 0.1);
+  background:
+    linear-gradient(180deg, rgba(70, 44, 58, 0.08), transparent 18%),
+    linear-gradient(180deg, #efe4d1, var(--marfim));
+  box-shadow: inset 0 1px 0 rgba(70, 44, 58, 0.12), 0 -1px 0 rgba(255, 255, 255, 0.5);
   pointer-events: none;
   backface-visibility: visible;
 }
@@ -2409,7 +2763,7 @@ html.modo-previa .stories-topo {
   margin: 0;
   font-family: var(--fonte-titulo);
   font-size: 20px;
-  line-height: 1.45;
+  line-height: 1.5;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -2417,12 +2771,59 @@ html.modo-previa .stories-topo {
 .carta-assinatura {
   margin: 0;
   align-self: flex-end;
+  padding: 0 4px;
   font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
   font-weight: 600;
   font-size: 30px;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--vinho);
   transform: rotate(-3deg);
+}
+
+/* ---------- a tinta aparecendo (só quando a carta abre animada) ---------- */
+.folha--escrevendo .carta-titulo {
+  animation: tinta-titulo 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.folha--escrevendo .carta-rotulo {
+  animation: tinta 600ms ease both;
+}
+
+.folha--escrevendo .tinta {
+  animation: tinta 640ms ease both;
+  animation-delay: var(--d, 0ms);
+}
+
+.folha--escrevendo .carta-assinatura {
+  animation: assinar 1100ms cubic-bezier(0.45, 0.05, 0.35, 1) both;
+  animation-delay: var(--d-assinatura, 0ms);
+}
+
+.folha--escrevendo .carta-voz,
+.folha--escrevendo .carta-acoes {
+  animation: surgir 520ms var(--suave) both;
+  animation-delay: var(--d-fim, 0ms);
+}
+
+@keyframes tinta {
+  from { opacity: 0; color: #8f6f7d; }
+  60% { opacity: 1; }
+  to { opacity: 1; color: var(--tinta); }
+}
+
+@keyframes tinta-titulo {
+  from { opacity: 0; filter: blur(3px); letter-spacing: 0.04em; }
+  to { opacity: 1; filter: blur(0); letter-spacing: 0; }
+}
+
+@keyframes assinar {
+  from { clip-path: inset(-20% 100% -20% 0); }
+  to { clip-path: inset(-20% 0 -20% 0); }
+}
+
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 /* voz na carta */
@@ -2986,8 +3387,7 @@ html.modo-previa .stories-topo {
 
 /* ---------- Telas pequenas e celular deitado (fase 5) ---------- */
 @media (max-width: 359px) {
-  .cartas { gap: 8px; }
-  .envelope { min-height: 132px; padding: 46px 12px 12px; }
+  .cartas { gap: 18px 10px; }
   .vale-conteudo { padding: 16px 18px; }
   .lista-conta { padding: 10px 12px; }
   .lista-numero { font-size: 32px; }

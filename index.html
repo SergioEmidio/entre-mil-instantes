@@ -458,18 +458,23 @@
     </div>
 
     <div class="carta-fundo" id="carta-fundo" role="dialog" aria-modal="true" aria-labelledby="carta-titulo" hidden>
-      <!-- O envelope que vem da grade, abre e deixa a carta sair -->
-      <div class="env" id="carta-env" aria-hidden="true">
+      <!-- O envelope que vem da grade: a primeira vez ela toca no lacre,
+           ele racha, a aba abre e a carta sai; depois ele fica aberto -->
+      <div class="env env-corpo" id="carta-env" aria-hidden="true">
+        <div class="env-aba" id="carta-aba"><span class="env-aba-face"></span></div>
         <div class="env-costas"></div>
-        <div class="env-papel" id="carta-mini"><span></span><span></span><span></span></div>
+        <div class="env-papel" id="carta-mini"><i></i><i></i><i></i><i></i></div>
         <div class="env-bolso"></div>
-        <div class="env-aba" id="carta-aba"></div>
         <div class="env-lacre" id="carta-lacre">
+          <span class="env-lacre-cera"></span>
           <span class="env-lacre-metade env-lacre-metade--e"></span>
           <span class="env-lacre-metade env-lacre-metade--d"></span>
-          <span class="env-lacre-letras" id="carta-iniciais"></span>
+          <svg class="env-rachadura" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 L45 22 L56 40 L43 60 L55 78 L46 96"/></svg>
+          <span class="env-lacre-emblema" id="carta-iniciais"></span>
         </div>
       </div>
+      <button class="env-tocar" id="carta-tocar" type="button" aria-label="Quebrar o lacre e abrir a carta" hidden></button>
+      <p class="env-dica" id="carta-dica" aria-hidden="true">toca no lacre ♥</p>
 
       <!-- A folha (dobrada em três, desdobra na frente dela) -->
       <article class="folha" id="carta-folha">
@@ -494,6 +499,7 @@
             </div>
           </div>
         </div>
+        <div class="folha-fita" id="carta-fita" aria-hidden="true"><span class="folha-fita-polegar" id="carta-fita-polegar"></span></div>
         <span class="folha-vinco folha-vinco--1" aria-hidden="true"></span>
         <span class="folha-vinco folha-vinco--2" aria-hidden="true"></span>
         <div class="folha-dobra folha-dobra--1" aria-hidden="true"></div>
