@@ -4425,3 +4425,470 @@ html.modo-previa .stories-topo {
   .folha-voz-texto { font-size: 12.5px; }
   .folha-voz-botao { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
 }
+
+/* =====================================================================
+   ACABAMENTO · as mesmas cores, com profundidade
+   Ideia: papelaria fina sob um céu de noite. Superfícies de "vidro da
+   noite" (luz por cima, fio dourado que se dissolve, sombra funda),
+   dourado com volume de metal, grão de papel no céu e ornamentos finos.
+   ===================================================================== */
+:root {
+  --ouro-claro: #f6e9c8;
+  --ouro-fundo: #c9a86a;
+  --folha-de-ouro: linear-gradient(172deg, #fbf1d6 0%, #ecd8a8 34%, #cfae6e 58%, #f3e2b6 80%, #d8bb80 100%);
+  --vidro: linear-gradient(180deg, rgba(40, 52, 86, 0.55) 0%, rgba(20, 28, 48, 0.78) 100%);
+  --fio: linear-gradient(155deg, rgba(232, 211, 162, 0.42) 0%, rgba(232, 211, 162, 0.07) 38%, rgba(255, 255, 255, 0.03) 64%, rgba(232, 211, 162, 0.2) 100%);
+  --sombra-funda: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 36px -16px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- o céu: névoas de vinho e azul, grão e vinheta ---------- */
+.ceu {
+  background:
+    radial-gradient(62% 42% at 12% 6%, rgba(92, 58, 76, 0.42), transparent 72%),
+    radial-gradient(58% 44% at 92% 88%, rgba(36, 48, 77, 0.75), transparent 72%),
+    radial-gradient(38% 26% at 74% 18%, rgba(232, 211, 162, 0.055), transparent 72%),
+    radial-gradient(50% 36% at 20% 78%, rgba(70, 44, 58, 0.22), transparent 72%),
+    var(--meia-noite);
+}
+
+.ceu::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(30% 22% at 30% 30%, rgba(92, 58, 76, 0.2), transparent 70%),
+    radial-gradient(28% 20% at 70% 62%, rgba(55, 72, 115, 0.22), transparent 70%);
+  animation: nevoa 48s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes nevoa {
+  from { transform: translate(-3%, -2%) scale(1); }
+  to   { transform: translate(4%, 3%) scale(1.12); }
+}
+
+.ceu::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(120% 90% at 50% 42%, transparent 58%, rgba(4, 7, 15, 0.5) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.95 0 0 0 0 0.85 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* estrelas com temperaturas diferentes; algumas brilham mais */
+.estrela:nth-child(4n) {
+  background: #f4e4bb;
+}
+
+.estrela:nth-child(7n) {
+  box-shadow: 0 0 6px 1px rgba(244, 228, 187, 0.55);
+}
+
+.estrela:nth-child(5n + 2) {
+  background: #cfd8f2;
+}
+
+/* ---------- texto: títulos equilibrados e ornamentos finos ---------- */
+.titulo,
+.st-titulo,
+.radio-titulo,
+.tocando-titulo {
+  text-wrap: balance;
+}
+
+.texto-2,
+.texto-3,
+.st-texto,
+.st-intro,
+.presente-frase {
+  text-wrap: pretty;
+}
+
+.titulo {
+  letter-spacing: -0.005em;
+}
+
+.rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rotulo[hidden] {
+  display: none;
+}
+
+.pagina-cabeca .rotulo::before,
+.tela--centro .rotulo::before,
+.tela--centro .rotulo::after,
+.aa-cabeca .rotulo::before,
+.senha .rotulo::before {
+  content: "";
+  flex-shrink: 0;
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 211, 162, 0.7));
+}
+
+.tela--centro .rotulo::after {
+  background: linear-gradient(90deg, rgba(232, 211, 162, 0.7), transparent);
+}
+
+/* números importantes em folha de ouro */
+.contagem-numero,
+.carga-numero,
+.carga-data,
+.lista-conta--feitos .lista-numero,
+.presente-nome,
+.stories-palco:not([data-tema="champanhe"]) .st-numero,
+.stories-palco:not([data-tema="champanhe"]) .st-caixa-numero {
+  background: var(--folha-de-ouro);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.st-numero {
+  filter: drop-shadow(0 6px 22px rgba(0, 0, 0, 0.25));
+}
+
+.abertura-nome {
+  text-shadow: 0 0 42px rgba(232, 211, 162, 0.22), 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- botões ---------- */
+.botao {
+  letter-spacing: 0.01em;
+}
+
+.botao--primario {
+  background: linear-gradient(180deg, #f5e7c4 0%, #e8d3a2 48%, #d8bd83 100%);
+  color: #18131c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(140, 105, 50, 0.35),
+    0 10px 24px -10px rgba(232, 211, 162, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+.botao--primario:disabled {
+  box-shadow: none;
+}
+
+.botao--contorno {
+  border-color: rgba(232, 211, 162, 0.55);
+  background: linear-gradient(180deg, rgba(232, 211, 162, 0.07), rgba(232, 211, 162, 0.02));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.botao--fantasma {
+  border-color: rgba(242, 232, 216, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.botao-link {
+  color: var(--texto-2);
+  text-decoration-color: rgba(232, 211, 162, 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color var(--rapido), text-decoration-color var(--rapido);
+}
+
+.botao-link:hover {
+  color: var(--marfim);
+  text-decoration-color: var(--champanhe);
+}
+
+.botao:focus-visible,
+.botao-link:focus-visible {
+  outline: 2px solid var(--champanhe);
+  outline-offset: 3px;
+}
+
+/* ---------- campos ---------- */
+.campo {
+  border-color: rgba(232, 211, 162, 0.16);
+  background: linear-gradient(180deg, rgba(16, 24, 43, 0.85), rgba(24, 33, 56, 0.85));
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: border-color var(--rapido), box-shadow var(--medio) var(--suave);
+}
+
+.campo:focus {
+  border-color: rgba(232, 211, 162, 0.85);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(232, 211, 162, 0.12), 0 0 24px rgba(232, 211, 162, 0.12);
+}
+
+.campo--erro {
+  border-color: var(--erro);
+}
+
+.senha-campo {
+  height: 66px;
+  font-family: var(--fonte-titulo);
+  font-size: clamp(24px, 7vw, 28px);
+  font-weight: 500;
+  color: var(--ouro-claro);
+}
+
+/* ---------- superfícies de "vidro da noite" ---------- */
+.contagem-casa,
+.instalar-passos li,
+.cantinho-item,
+.lista-conta:not(.lista-conta--feitos),
+.lista-item,
+.tocando-fila,
+.convite-app,
+.recado-modos {
+  border: 1px solid transparent;
+  background: var(--vidro) padding-box, var(--fio) border-box;
+  box-shadow: var(--sombra-funda);
+}
+
+.lista-conta--feitos {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(160deg, #5f3b50 0%, var(--vinho) 60%, #3b2431 100%) padding-box,
+    linear-gradient(155deg, rgba(232, 211, 162, 0.55), rgba(232, 211, 162, 0.08) 45%, rgba(232, 211, 162, 0.3)) border-box;
+  box-shadow: var(--sombra-funda);
+}
+
+.lista-item--feito {
+  background: linear-gradient(180deg, rgba(22, 29, 48, 0.6), rgba(16, 22, 38, 0.7)) padding-box, var(--fio) border-box;
+  box-shadow: none;
+}
+
+.contagem-casa {
+  position: relative;
+  overflow: hidden;
+}
+
+/* uma linha de luz no topo de cada casinha da contagem */
+.contagem-casa::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(244, 228, 187, 0.75), transparent);
+}
+
+.st-caixa {
+  border: 1px solid rgba(232, 211, 162, 0.16);
+  background: linear-gradient(180deg, rgba(16, 24, 43, 0.42), rgba(16, 24, 43, 0.25));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 26px -14px rgba(0, 0, 0, 0.5);
+}
+
+/* passos do "instalar": o número num selinho dourado */
+.instalar-passos li::before {
+  background: var(--folha-de-ouro);
+  color: #2a1e24;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.instalar-icone {
+  border-radius: 24px;
+  box-shadow: 0 0 0 1px rgba(232, 211, 162, 0.25), 0 18px 40px -10px rgba(232, 211, 162, 0.35), 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- cantinho: ícones num anel dourado ---------- */
+.cantinho-icone {
+  border: 1px solid transparent;
+  background:
+    radial-gradient(circle at 35% 30%, #6a4359, var(--vinho) 70%) padding-box,
+    var(--folha-de-ouro) border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.cantinho-item:hover {
+  background: linear-gradient(180deg, rgba(48, 60, 98, 0.6), rgba(24, 32, 54, 0.8)) padding-box, var(--fio) border-box;
+}
+
+.cantinho-seta {
+  color: var(--champanhe);
+  opacity: 0.7;
+}
+
+/* ---------- recado: as abas deslizam ---------- */
+@supports selector(:has(a)) {
+  .recado-modos {
+    position: relative;
+  }
+  .recado-modos::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 6px);
+    border-radius: 9px;
+    background: linear-gradient(180deg, #f5e7c4, #e8d3a2 50%, #d8bd83);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 4px 12px -4px rgba(232, 211, 162, 0.5);
+    transition: transform 460ms cubic-bezier(0.34, 1.25, 0.64, 1);
+  }
+  .recado-modos:has(#recado-modo-voz[aria-selected="true"])::before {
+    transform: translateX(calc(100% + 4px));
+  }
+  .recado-modos:has(.recado-modo[hidden])::before {
+    width: calc(100% - 8px);
+    transform: none;
+  }
+  .recado-modo {
+    position: relative;
+    z-index: 1;
+    transition: color 300ms ease;
+  }
+  .recado-modo[aria-selected="true"] {
+    background: transparent;
+    color: #18131c;
+  }
+}
+
+.recado-gravar {
+  background: radial-gradient(circle at 35% 30%, #6a4359, var(--vinho) 70%);
+  box-shadow: 0 0 0 1px rgba(232, 211, 162, 0.35), 0 14px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+.recado-selo {
+  background: radial-gradient(circle, rgba(232, 211, 162, 0.12), transparent 70%);
+  box-shadow: 0 0 30px rgba(232, 211, 162, 0.15);
+}
+
+/* ---------- lista: caixinhas douradas ---------- */
+.lista-caixa {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid rgba(232, 211, 162, 0.55);
+  border-radius: 50%;
+  background: rgba(16, 24, 43, 0.6);
+  cursor: pointer;
+  transition: background-color var(--rapido), border-color var(--rapido);
+}
+
+.lista-caixa::after {
+  content: "";
+  width: 11px;
+  height: 6px;
+  margin-top: -3px;
+  border-left: 2px solid #2a1e24;
+  border-bottom: 2px solid #2a1e24;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 260ms cubic-bezier(0.34, 1.6, 0.64, 1);
+}
+
+.lista-caixa:checked {
+  border-color: transparent;
+  background: var(--folha-de-ouro);
+}
+
+.lista-caixa:checked::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+.lista-caixa:focus-visible {
+  outline: 2px solid var(--champanhe);
+  outline-offset: 3px;
+}
+
+.lista-mais {
+  background: linear-gradient(180deg, #f5e7c4, #e8d3a2 50%, #d8bd83);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 8px 18px -8px rgba(232, 211, 162, 0.5);
+}
+
+.lista-trilho {
+  background: rgba(30, 40, 66, 0.8);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.lista-progresso {
+  background: var(--folha-de-ouro);
+  box-shadow: 0 0 10px rgba(232, 211, 162, 0.45);
+}
+
+/* ---------- vales: ingresso picotado, com brilho de cetim ---------- */
+.vale {
+  border: 0;
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(232, 211, 162, 0.12), transparent 55%),
+    linear-gradient(150deg, #5c3a4c 0%, var(--vinho) 55%, #3a2330 100%);
+  -webkit-mask:
+    radial-gradient(circle 11px at 0 50%, transparent 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 11px at 100% 50%, transparent 97%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 11px at 0 50%, transparent 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 11px at 100% 50%, transparent 97%, #000) right / 51% 100% no-repeat;
+}
+
+.vale::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(232, 211, 162, 0.22);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.vale-conteudo {
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+.vale-numero::before {
+  content: "✦ ";
+  color: var(--champanhe);
+}
+
+/* ---------- rádio ---------- */
+.radio-mini {
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(70, 44, 58, 0.92), rgba(42, 28, 38, 0.95)) padding-box, var(--fio) border-box;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+.radio-play,
+.tocando-play {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 24px -8px rgba(232, 211, 162, 0.55);
+}
+
+.radio-capa,
+.tocando-capa {
+  outline: 1px solid rgba(232, 211, 162, 0.14);
+  outline-offset: -1px;
+}
+
+/* ---------- presente ---------- */
+.caixa {
+  filter: drop-shadow(0 24px 22px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 40px rgba(232, 211, 162, 0.12));
+}
+
+.presente-foto img {
+  box-shadow: 0 0 0 1px rgba(232, 211, 162, 0.3), 0 0 0 8px rgba(232, 211, 162, 0.06), 0 24px 50px rgba(7, 11, 22, 0.6);
+}
+
+/* ---------- antes e agora ---------- */
+.aa-quadro {
+  box-shadow: 0 0 0 1px rgba(232, 211, 162, 0.2), 0 24px 50px -16px rgba(0, 0, 0, 0.65);
+}
+
+/* ---------- cartão ---------- */
+.cartao-canvas {
+  box-shadow: 0 0 0 1px rgba(232, 211, 162, 0.22), 0 0 0 7px rgba(232, 211, 162, 0.05), 0 28px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.cartao-estilo {
+  transition: transform var(--rapido) var(--suave), box-shadow var(--rapido);
+}
+
+.cartao-estilo[aria-checked="true"] {
+  transform: scale(1.08);
+}

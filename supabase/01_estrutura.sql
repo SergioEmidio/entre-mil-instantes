@@ -26,7 +26,7 @@ create table if not exists public.configuracao (
 );
 
 insert into public.configuracao (id, liberar_em)
-values (1, '2026-11-03 00:00:00-03')
+values (1, '2026-11-03 19:55:00-03')
 on conflict (id) do nothing;
 
 alter table public.configuracao enable row level security;

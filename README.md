@@ -34,6 +34,7 @@ painel/cartao-qr.html cartão com QR code para imprimir
 5. `supabase/05_fase5.sql` (presente, cartas trancadas, lista dos 365 dias e recados)
 6. `supabase/06_cartas.sql` (quando ela abre cada carta + voz nas cartas)
 7. `supabase/07_limpeza.sql` (aba «Antes de entregar»: limpar os testes)
+8. `supabase/08_horario.sql` (o site abre em 03/11/2026 às 19:55)
 
 Todos podem rodar de novo sem quebrar nada.
 

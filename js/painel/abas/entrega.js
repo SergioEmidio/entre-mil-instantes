@@ -97,10 +97,10 @@ function desenharConferencia(caixa) {
   linhas.push(linhaAbertura);
   obterSituacao()
     .then(({ liberarEm }) => {
-      const ok = liberarEm.getTime() === Date.parse("2026-11-03T00:00:00-03:00");
+      const ok = liberarEm.getTime() === Date.parse("2026-11-03T19:55:00-03:00");
       linhaAbertura.className = `conf-item ${ok ? "conf-item--ok" : "conf-item--aviso"}`;
       linhaAbertura.replaceChildren(
-        h("span", null, `O site abre para ela em ${dataHora(liberarEm)}.${ok ? "" : " (Confere se é isso mesmo: o combinado era 03/11 à 00:00.)"}`)
+        h("span", null, `O site abre para ela em ${dataHora(liberarEm)}.${ok ? "" : " (Confere se é isso mesmo: o combinado é 03/11 às 19:55.)"}`)
       );
     })
     .catch(() => {
