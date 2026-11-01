@@ -30,6 +30,7 @@ import { tocarCantinho } from "./cantinho.js";
 import { definirPrevia, ehPrevia, lerMemoria, guardarMemoria } from "./memoria.js";
 import { prepararFioDaPagina } from "./fio.js";
 import { prepararApp, atualizarConvite, precisaInstalarPrimeiro, tocarTelaInstalar } from "./instalar.js";
+import { atualizarConviteDosAvisos, sincronizarAvisos } from "./avisos.js";
 import {
   obterSituacao,
   entrarComoConvidada,
@@ -174,7 +175,37 @@ async function abrirSite() {
     destravarRadio();
     caminhoCompleto();
   });
+
+  // Avisos: confere a inscrição deste celular e apaga a bolinha do ícone.
+  if (!ehPrevia()) sincronizarAvisos().catch(() => {});
+
+  // Veio de um aviso (ex.: "a carta foi liberada"): vai direto pra lá.
+  const destino = destinoDoAviso(voltou);
+  if (destino) {
+    await abrirParte(destino);
+    irParaCantinho();
+    return;
+  }
+
   await mostrarTela("tela-abertura");
+}
+
+// ?ir=cartas / ?ir=radio (vem do toque no aviso). Só para quem já viu tudo.
+function destinoDoAviso(voltou) {
+  const params = new URLSearchParams(window.location.search);
+  const ir = params.get("ir");
+  if (!ir) return null;
+  params.delete("ir");
+  const resto = params.toString();
+  try {
+    window.history.replaceState(null, "", window.location.pathname + (resto ? `?${resto}` : ""));
+  } catch {
+    /* ok */
+  }
+  if (!voltou) return null;
+  if (ir === "radio" && temRadio) return "radio";
+  if (ir === "cartas" && temCartas(conteudo)) return "cartas";
+  return null;
 }
 
 document.getElementById("abertura-cantinho").addEventListener("click", () => {
@@ -283,6 +314,7 @@ function itensDoCantinho() {
 async function irParaCantinho() {
   for (;;) {
     atualizarConvite();
+    atualizarConviteDosAvisos().catch(() => {});
     const escolha = await tocarCantinho(itensDoCantinho());
     if (escolha === "inicio") {
       caminhoCompleto();

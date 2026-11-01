@@ -8,7 +8,7 @@
 // Ordem: Retrospectiva (dias, música, detalhes) → memórias com foto.
 // =====================================================================
 
-import { h, texto } from "./dom.js";
+import { h, texto, menosMovimento } from "./dom.js";
 import { diasDesde, mesesDesde, dataCurta, dataPorExtenso } from "./datas.js";
 import { linkDaFoto } from "./fotos.js";
 import {
@@ -73,14 +73,9 @@ export function montarListaDeStories(conteudo) {
   if (lugar) {
     lista.push({ secao: "Nossos detalhes", tema: "vinho", duracao: DURACAO_RETRO, montar: () => slideLugar(lugar) });
   }
-  const frases = partes(retro.frase_dela);
+  const frases = partes(retro.frase_dela, 40);   // a conversa sobe: cabem quantas quiser
   if (frases.length) {
-    lista.push({
-      secao: "Nossos detalhes",
-      tema: "azul",
-      duracao: Math.min(15000, Math.max(DURACAO_RETRO, 3800 + frases.length * 1100)),
-      montar: () => slideFrases(frases, texto(c.nome)),
-    });
+    lista.push(itemDeFrases(frases, texto(c.nome)));
   }
 
   // 4. Memórias (foto ou vídeo)
@@ -145,12 +140,12 @@ function slideMusica(musica) {
 }
 
 // "Meu neném; Minha carente" → ["Meu neném", "Minha carente"]
-function partes(valor) {
+function partes(valor, limite = 12) {
   return texto(valor)
     .split(/\s*[;\n]\s*/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .slice(0, 12);
+    .slice(0, limite);
 }
 
 function iconeSvg(caminho, tamanho) {
@@ -208,16 +203,122 @@ function slideLugar(lugar) {
 }
 
 // Frases: balões de conversa, um por vez, como se ela estivesse digitando
-function slideFrases(frases, nome) {
+// ---------------------------------------------------------------------
+// Frases: uma conversa de WhatsApp. Para cada frase aparece o "•••"
+// (digitando), depois a mensagem, que entra por baixo e empurra a
+// conversa para cima; as mais antigas saem pelo topo.
+// O relógio é o da própria conversa: a barrinha do story anda junto e
+// pausa junto (segurar a tela).
+// ---------------------------------------------------------------------
+const CHAT_INICIO = 500;      // espera antes da primeira mensagem
+const CHAT_INTERVALO = 450;   // depois de cada mensagem
+const CHAT_FINAL = 1900;      // a última fica na tela antes de passar
+
+function tempoDigitando(frase) {
+  return Math.max(550, Math.min(1300, 420 + frase.length * 28));
+}
+
+// Linha do tempo: [{ digita: ms, mostra: ms }] e o total.
+function roteiroDasFrases(frases) {
+  let t = CHAT_INICIO;
+  const passos = frases.map((frase) => {
+    const digita = t;
+    const mostra = t + tempoDigitando(frase);
+    t = mostra + CHAT_INTERVALO;
+    return { digita, mostra };
+  });
+  return { passos, total: t - CHAT_INTERVALO + CHAT_FINAL };
+}
+
+function horaAgora() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function itemDeFrases(frases, nome) {
   const quem = nome || "Tu";
-  const fim = (frases.length - 1) * 0.9 + 0.6;
-  return h(
-    "div",
-    { class: "st st--centro st--encaixar st--frases" },
-    h("p", { class: "st-rotulo" }, frases.length === 1 ? "A frase que tu mais falas" : "As frases que tu mais falas"),
-    h(
+  const roteiro = roteiroDasFrases(frases);
+  const item = { tipo: "frases", secao: "Nossos detalhes", tema: "azul", duracao: roteiro.total };
+
+  let el = null;
+  let decorrido = 0;
+  let ultimo = 0;
+  let quadro = 0;
+  let pausado = false;
+  let feitos = 0;          // quantos passos já aconteceram (digitar e mostrar contam 2)
+  let digitando = null;    // o balão "•••" na tela
+
+  function empurrar(mudanca) {
+    // Mede a conversa antes e depois e anima a diferença: a conversa sobe.
+    const antes = el.baloes.offsetHeight;
+    mudanca();
+    const depois = el.baloes.offsetHeight;
+    const sobe = depois - antes;
+    if (sobe > 0 && !menosMovimento() && typeof el.baloes.animate === "function") {
+      el.baloes.animate([{ transform: `translateY(${sobe}px)` }, { transform: "translateY(0)" }], {
+        duration: 340,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      });
+    }
+  }
+
+  function mostrarDigitando() {
+    el.chat.classList.add("st-chat--digitando");
+    empurrar(() => {
+      digitando = h("li", { class: "st-balao st-balao--digitando", "aria-hidden": "true" }, h("i"), h("i"), h("i"));
+      el.baloes.append(digitando);
+    });
+  }
+
+  function mostrarFrase(i) {
+    el.chat.classList.remove("st-chat--digitando");
+    empurrar(() => {
+      if (digitando) digitando.remove();
+      digitando = null;
+      el.baloes.append(
+        h(
+          "li",
+          { class: `st-balao st-balao--novo${i === frases.length - 1 ? " st-balao--ultimo" : ""}` },
+          h("span", { class: "st-balao-texto" }, frases[i]),
+          h("span", { class: "st-balao-hora", "aria-hidden": "true" }, horaAgora())
+        )
+      );
+    });
+  }
+
+  // Faz acontecer tudo o que já devia ter acontecido até "decorrido".
+  function andar() {
+    while (feitos < frases.length * 2) {
+      const passo = roteiro.passos[Math.floor(feitos / 2)];
+      const ehMostrar = feitos % 2 === 1;
+      const quando = ehMostrar ? passo.mostra : passo.digita;
+      if (decorrido < quando) break;
+      if (ehMostrar) mostrarFrase(Math.floor(feitos / 2));
+      else mostrarDigitando();
+      feitos += 1;
+    }
+  }
+
+  function loop(agora) {
+    if (!el) return;
+    if (!pausado) {
+      decorrido += Math.min(100, agora - (ultimo || agora));
+      andar();
+    }
+    ultimo = agora;
+    if (decorrido < roteiro.total) quadro = requestAnimationFrame(loop);
+  }
+
+  item.montar = () => {
+    decorrido = 0;
+    ultimo = 0;
+    feitos = 0;
+    digitando = null;
+    pausado = false;
+    const baloes = h("ul", { class: "st-baloes", "aria-label": `Frases de ${quem}` });
+    const chat = h(
       "div",
-      { class: "st-chat", style: `--fim: ${fim}s` },
+      { class: "st-chat" },
       h(
         "div",
         { class: "st-chat-cabeca" },
@@ -234,15 +335,37 @@ function slideFrases(frases, nome) {
           )
         )
       ),
-      h(
-        "ul",
-        { class: "st-baloes" },
-        frases.map((frase, i) =>
-          h("li", { class: `st-balao${i === frases.length - 1 ? " st-balao--ultimo" : ""}`, style: `--i: ${i}` }, frase)
-        )
-      )
-    )
-  );
+      h("div", { class: "st-chat-janela" }, baloes)
+    );
+    el = { chat, baloes };
+    return h(
+      "div",
+      { class: "st st--centro st--frases" },
+      h("p", { class: "st-rotulo" }, frases.length === 1 ? "A frase que tu mais falas" : "As frases que tu mais falas"),
+      chat
+    );
+  };
+
+  item.aoEntrar = () => {
+    if (!el) return;
+    if (menosMovimento() && feitos === 0) {
+      // sem animação: a conversa já aparece inteira (o tempo do story segue normal)
+      frases.forEach((_, i) => mostrarFrase(i));
+      feitos = frases.length * 2;
+    }
+    cancelAnimationFrame(quadro);
+    quadro = requestAnimationFrame(loop);
+  };
+  item.aoPausar = () => { pausado = true; };
+  item.aoContinuar = () => { pausado = false; };
+  item.aoSair = () => {
+    cancelAnimationFrame(quadro);
+    el = null;
+  };
+  // a barrinha do story anda com a conversa
+  item.progresso = () => (el ? Math.min(1, decorrido / roteiro.total) : null);
+  item.acabou = () => decorrido >= roteiro.total;
+  return item;
 }
 
 // Legenda que ainda passa do espaço dela: diminui um pouco mais a letra.

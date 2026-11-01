@@ -8,12 +8,13 @@
 // Não mexe em nada do Supabase (fotos, áudios, cartas): isso passa direto.
 // =====================================================================
 
-const VERSAO = "nossos-instantes-v3";
+const VERSAO = "nossos-instantes-v5";
 const ESSENCIAIS = [
   "./offline.html",
   "./css/base.css",
   "./icones/icone-192.png",
   "./icones/favicon-48.png",
+  "./icones/aviso-selo.png",
   "./manifest.webmanifest",
 ];
 
@@ -64,5 +65,52 @@ self.addEventListener("fetch", (evento) => {
         return resposta;
       })
       .catch(() => caches.match(pedido).then((r) => r || Response.error()))
+  );
+});
+
+// ---------------------------------------------------------------------
+// Avisos (notificações). Chegam mesmo com o app fechado.
+// ---------------------------------------------------------------------
+const VIBRACAO = [180, 90, 180, 90, 320];
+
+self.addEventListener("push", (evento) => {
+  let dados = {};
+  try {
+    dados = evento.data ? evento.data.json() : {};
+  } catch {
+    dados = { corpo: evento.data ? evento.data.text() : "" };
+  }
+  const titulo = dados.titulo || "Nossos Instantes";
+  const opcoes = {
+    body: dados.corpo || "Tem novidade no nosso cantinho.",
+    icon: "./icones/icone-192.png",
+    badge: "./icones/aviso-selo.png",
+    vibrate: VIBRACAO,
+    tag: dados.tag || "nossos-instantes",
+    renotify: true,
+    data: { url: dados.url || "./" },
+  };
+  evento.waitUntil(
+    Promise.all([
+      self.registration.showNotification(titulo, opcoes),
+      // bolinha no ícone do app (onde o Android mostrar)
+      self.navigator && self.navigator.setAppBadge ? self.navigator.setAppBadge(1).catch(() => {}) : Promise.resolve(),
+    ])
+  );
+});
+
+// Tocou no aviso: abre o app no lugar certo (cartas, rádio…)
+self.addEventListener("notificationclick", (evento) => {
+  evento.notification.close();
+  const destino = new URL((evento.notification.data && evento.notification.data.url) || "./", self.registration.scope).href;
+  evento.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((janelas) => {
+      for (const janela of janelas) {
+        if (janela.url.startsWith(self.registration.scope) && "focus" in janela) {
+          return janela.navigate ? janela.navigate(destino).then((j) => (j || janela).focus()).catch(() => janela.focus()) : janela.focus();
+        }
+      }
+      return self.clients.openWindow ? self.clients.openWindow(destino) : undefined;
+    })
   );
 });

@@ -140,10 +140,10 @@ export function desenharRetrospectiva(area) {
       campo({
         rotulo: "As frases que tu mais falas",
         valor: r.retrospectiva.frase_dela,
-        max: 240,
+        max: 400,
         multilinha: true,
         linhas: 3,
-        dica: "Separa com ponto e vírgula (;). Cada uma vira um balão de conversa. Ex.: PARA; Tu é MUITO CHATO",
+        dica: "Separa com ponto e vírgula (;). Cada uma vira uma mensagem que chega como no WhatsApp (pode pôr quantas quiser). Ex.: PARA; Tu é MUITO CHATO",
         aoMudar: (v) => alterar((d) => { d.retrospectiva.frase_dela = v; }),
       })
     ),

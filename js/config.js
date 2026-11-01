@@ -22,6 +22,10 @@ export const CONFIG = {
   // das cartas e no cartão final. Primeiro a dela, depois a tua.
   INICIAIS: ["M", "S"],
 
+  // Avisos no celular: a chave PÚBLICA das notificações (pode ficar aqui).
+  // A chave privada fica só nos segredos do Supabase, nunca no GitHub.
+  AVISOS_CHAVE_PUBLICA: "BMU_IBlUAiOgp6MrO2VTjqEqpqaZfIO4D9xodj7G2HWZQ4oJi2LfNrg4HC1AndA-3s6tCpX6pKRjT4QTyHwGgow",
+
   // Fuso usado para datas e para a contagem.
   FUSO: "America/Sao_Paulo",
 };

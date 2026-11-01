@@ -56,6 +56,9 @@ function traduzirErro(erro) {
   if (texto.includes("confirmacao_invalida")) {
     return new ErroDoSite("confirmacao_invalida", "Digite AUTORIZO para confirmar.", erro);
   }
+  if (texto.includes("muitos_avisos")) {
+    return new ErroDoSite("muitos_avisos", "Celulares demais com avisos.", erro);
+  }
   if (texto.includes("falta_autorizo")) {
     return new ErroDoSite("confirmacao_invalida", "Digite AUTORIZO para confirmar.", erro);
   }
@@ -382,4 +385,39 @@ export async function limparTestes(confirmacao, opcoes) {
     resultado.arquivos = lista.length;
   }
   return resultado;
+}
+
+// ---------------------------------------------------------------------
+// Avisos no celular (notificações)
+// ---------------------------------------------------------------------
+export async function salvarAviso(inscricao) {
+  const k = (inscricao && inscricao.keys) || {};
+  const { error } = await supabase.rpc("salvar_aviso", { p_endpoint: inscricao.endpoint, p_p256dh: k.p256dh, p_auth: k.auth });
+  falhouSe(error);
+}
+
+export async function removerAviso(endpoint) {
+  const { error } = await supabase.rpc("remover_aviso", { p_endpoint: endpoint });
+  falhouSe(error);
+}
+
+// Painel
+export async function avisosPainel() {
+  const { data, error } = await supabase.rpc("avisos_painel");
+  falhouSe(error);
+  return data || { inscricoes: [] };
+}
+
+export async function apagarAviso(id) {
+  const { error } = await supabase.rpc("apagar_aviso", { p_id: id });
+  falhouSe(error);
+}
+
+export async function testarAvisos() {
+  const { data, error } = await supabase.functions.invoke("avisos", { body: { modo: "teste" } });
+  if (error) {
+    const e = new ErroDoSite("funcao", "A função de avisos não respondeu.", error);
+    throw e;
+  }
+  return data || {};
 }

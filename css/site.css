@@ -4892,3 +4892,194 @@ html.modo-previa .stories-topo {
 .cartao-estilo[aria-checked="true"] {
   transform: scale(1.08);
 }
+
+/* =====================================================================
+   Frases: conversa de WhatsApp (janela fixa, mensagens sobem)
+   ===================================================================== */
+.st--frases {
+  --escala: 1;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.st--frases .st-chat {
+  flex: 0 1 540px;
+  min-height: 0;
+  width: 100%;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(20, 28, 48, 0.82), rgba(14, 20, 36, 0.9)) padding-box,
+    var(--fio) border-box;
+  box-shadow: var(--sombra-funda);
+  overflow: hidden;
+}
+
+.st--frases .st-chat-cabeca {
+  flex-shrink: 0;
+}
+
+/* status: "digitando…" enquanto aparece o •••, senão "online" */
+.st--frases .st-chat-digitando,
+.st--frases .st-chat-online {
+  animation: none;
+  transition: opacity 200ms ease;
+}
+
+.st--frases .st-chat-digitando { opacity: 0; }
+.st--frases .st-chat-online { opacity: 1; }
+.st--frases .st-chat--digitando .st-chat-digitando { opacity: 1; }
+.st--frases .st-chat--digitando .st-chat-online { opacity: 0; }
+
+/* a janela da conversa: mensagens presas embaixo, as antigas saem por cima */
+.st-chat-janela {
+  flex: 1 1 auto;
+  min-height: 120px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  margin: 0 calc(-14px * var(--escala));
+  padding: 0 calc(14px * var(--escala)) 2px;
+  background-image: radial-gradient(circle, rgba(232, 211, 162, 0.05) 1px, transparent 1.6px);
+  background-size: 18px 18px;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 44px);
+  mask-image: linear-gradient(180deg, transparent 0, #000 44px);
+}
+
+.st--frases .st-baloes {
+  flex-shrink: 0;
+  will-change: transform;
+}
+
+.st--frases .st-balao {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: none;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+}
+
+.st-balao-texto {
+  min-width: 0;
+}
+
+.st-balao-hora {
+  flex-shrink: 0;
+  margin-bottom: -2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #8f7a84;
+  font-variant-numeric: tabular-nums;
+}
+
+.st--frases .st-balao--novo {
+  transform-origin: 0 100%;
+  animation: msg-chega 300ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+@keyframes msg-chega {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* o balão "•••" de quem está digitando */
+.st--frases .st-balao--digitando {
+  align-items: center;
+  gap: 4px;
+  padding: 13px 15px;
+  transform-origin: 0 100%;
+  animation: msg-chega 260ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+
+.st-balao--digitando i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8f7a84;
+  animation: digita 1.1s ease-in-out infinite;
+}
+
+.st-balao--digitando i:nth-child(2) { animation-delay: 0.16s; }
+.st-balao--digitando i:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes digita {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ---------- avisos no celular (cartão do cantinho) ---------- */
+.avisos-sino {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background:
+    radial-gradient(circle at 35% 30%, #6a4359, var(--vinho) 70%) padding-box,
+    var(--folha-de-ouro) border-box;
+  color: var(--champanhe);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.convite-avisos[data-situacao="desligado"] .avisos-sino svg {
+  animation: sino-balanca 3.4s ease-in-out 1.2s infinite;
+  transform-origin: 50% 8%;
+}
+
+@keyframes sino-balanca {
+  0%, 70%, 100% { transform: rotate(0); }
+  74% { transform: rotate(14deg); }
+  80% { transform: rotate(-11deg); }
+  86% { transform: rotate(7deg); }
+  92% { transform: rotate(-3deg); }
+}
+
+.convite-avisos[data-situacao="ligado"] .avisos-sino {
+  color: var(--certo);
+}
+
+/* =====================================================================
+   A marca (monograma M ♥ S em folha de ouro, o mesmo do ícone do app)
+   ===================================================================== */
+.marca {
+  display: block;
+  flex-shrink: 0;
+  height: auto;
+  filter: drop-shadow(0 10px 26px rgba(232, 211, 162, 0.16));
+}
+
+.marca--abertura {
+  width: 76px;
+  margin: 0 auto 6px;
+  animation: marca-brilha 6s ease-in-out infinite;
+}
+
+.marca--contagem {
+  width: 64px;
+  margin: 0 auto 4px;
+}
+
+.marca--senha {
+  width: 52px;
+  margin-bottom: 4px;
+}
+
+.marca--cantinho {
+  width: 48px;
+  margin-bottom: 2px;
+}
+
+@keyframes marca-brilha {
+  0%, 100% { filter: drop-shadow(0 10px 26px rgba(232, 211, 162, 0.14)); }
+  50%      { filter: drop-shadow(0 10px 34px rgba(232, 211, 162, 0.34)); }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .marca--abertura { width: 54px; margin-bottom: 0; }
+  .marca--contagem { width: 48px; }
+  .marca--senha,
+  .marca--cantinho { display: none; }
+}

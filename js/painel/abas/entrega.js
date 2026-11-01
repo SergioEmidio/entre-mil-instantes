@@ -9,7 +9,7 @@
 
 import { h, avisar, confirmar, dataHora } from "../ui.js";
 import { rascunho, presente, situacao, copiaDeSeguranca, lerCopia, restaurarCopia, marcarPresenteFechado, salvarAgora } from "../estado.js";
-import { obterSituacao, resumoDosTestes, limparTestes } from "../../supabase.js";
+import { obterSituacao, resumoDosTestes, limparTestes, avisosPainel, apagarAviso, testarAvisos } from "../../supabase.js";
 
 const CHAVE_ULTIMA_COPIA = "eni-painel-ultima-copia";
 
@@ -24,6 +24,7 @@ export function desenharEntrega(area) {
   const caixaConferencia = h("div", { class: "conferencia" });
   const caixaCopia = h("div", { class: "bloco" });
   const caixaLimpar = h("div", { class: "bloco" }, h("p", { class: "carregando-texto" }, "Conferindo o que tem de teste…"));
+  const caixaAvisos = h("div", { class: "bloco" }, h("p", { class: "carregando-texto" }, "Conferindo os avisos…"));
 
   area.append(
     h("div", { class: "area-titulo" }, h("h2", null, "Antes de entregar")),
@@ -32,12 +33,15 @@ export function desenharEntrega(area) {
     caixaConferencia,
     h("div", { class: "area-titulo area-titulo--separado" }, h("h2", null, "Cópia de segurança")),
     caixaCopia,
+    h("div", { class: "area-titulo area-titulo--separado" }, h("h2", null, "Avisos no celular")),
+    caixaAvisos,
     h("div", { class: "area-titulo area-titulo--separado" }, h("h2", null, "Deixar tudo zerado para ela")),
     caixaLimpar
   );
 
   desenharConferencia(caixaConferencia);
   desenharCopia(caixaCopia);
+  carregarAvisos(caixaAvisos);
   carregarLimpeza(caixaLimpar);
 }
 
@@ -409,5 +413,91 @@ function desenharLimpeza(caixa, resumo) {
     ),
     erro,
     botao
+  );
+}
+
+// =====================================================================
+// 4. Avisos no celular (notificações)
+// =====================================================================
+async function carregarAvisos(caixa) {
+  let dados;
+  try {
+    dados = await avisosPainel();
+  } catch (erro) {
+    console.error((erro && erro.original) || erro);
+    caixa.replaceChildren(
+      h(
+        "p",
+        { class: "aviso-erro" },
+        erro && erro.codigo === "falta_sql"
+          ? "Falta rodar o arquivo 09_avisos.sql no Supabase (SQL Editor → New query → colar → Run)."
+          : "Não consegui ver os avisos agora."
+      ),
+      h("button", { class: "botao-pequeno", type: "button", onClick: () => carregarAvisos(caixa) }, "Tentar de novo")
+    );
+    return;
+  }
+
+  const inscricoes = Array.isArray(dados.inscricoes) ? dados.inscricoes : [];
+  const resultado = h("p", { class: "bloco-dica", "aria-live": "polite" });
+  const botaoTeste = h("button", { class: "botao-pequeno botao-pequeno--destaque", type: "button", disabled: !inscricoes.length }, "Enviar aviso de teste");
+  botaoTeste.addEventListener("click", async () => {
+    botaoTeste.disabled = true;
+    botaoTeste.textContent = "Enviando…";
+    resultado.textContent = "";
+    try {
+      const r = await testarAvisos();
+      resultado.textContent = r.entregues
+        ? `Enviado para ${plural(r.entregues, "celular", "celulares")}. Deve chegar em alguns segundos, com vibração.`
+        : "Nenhum celular recebeu. Confere se os avisos estão ligados no cantinho do celular.";
+    } catch (erro) {
+      console.error((erro && erro.original) || erro);
+      resultado.textContent = "A função de avisos não respondeu. Confere se ela foi criada no Supabase (passo 3 do guia) e se os segredos estão salvos.";
+    } finally {
+      botaoTeste.textContent = "Enviar aviso de teste";
+      botaoTeste.disabled = false;
+    }
+  });
+
+  const quem = (papel) => (papel === "admin" ? "Teu celular (teste)" : papel === "convidada" ? "Celular dela" : "Celular");
+  const servico = (s) => (String(s || "").includes("google") ? "Android/Chrome" : String(s || "").includes("apple") ? "iPhone" : String(s || "").includes("mozilla") ? "Firefox" : "navegador");
+
+  caixa.replaceChildren(
+    h(
+      "p",
+      { class: "bloco-dica" },
+      "O celular avisa quando chega carta nova ou música nova, e conta os dias das cartas trancadas (30, 20, 10, 9… 1) até avisar que foi liberada. Ela ativa no cantinho do app. Os avisos de contagem saem a partir das 9h."
+    ),
+    inscricoes.length
+      ? h(
+          "ul",
+          { class: "conf-lista" },
+          ...inscricoes.map((i) =>
+            h(
+              "li",
+              { class: `conf-item ${i.papel === "convidada" ? "conf-item--ok" : "conf-item--info"}` },
+              h("span", null, `${quem(i.papel)} · ${servico(i.servico)} · ativado em ${dataHora(i.criado_em)}${i.ultimo_ok ? ` · último aviso ${dataHora(i.ultimo_ok)}` : ""}`),
+              h(
+                "button",
+                {
+                  class: "botao-pequeno botao-pequeno--perigo conf-ir",
+                  type: "button",
+                  "aria-label": "Tirar este celular dos avisos",
+                  onClick: async () => {
+                    const sim = await confirmar("Este celular para de receber os avisos.", { titulo: "Tirar dos avisos?", botao: "Tirar" });
+                    if (!sim) return;
+                    await apagarAviso(i.id).catch(() => avisar("Não consegui tirar agora.", "erro"));
+                    carregarAvisos(caixa);
+                  },
+                },
+                "Tirar"
+              )
+            )
+          )
+        )
+      : h("p", { class: "copia-ultima" }, "Nenhum celular com avisos ainda."),
+    h("p", { class: "copia-ultima" }, dados.rodou_em ? `A conferência automática rodou pela última vez em ${dataHora(dados.rodou_em)}.` : "A conferência automática ainda não rodou (passo 4 do guia)."),
+    h("div", { class: "copia-acoes" }, botaoTeste, h("button", { class: "botao-pequeno", type: "button", onClick: () => carregarAvisos(caixa) }, "Atualizar")),
+    resultado
   );
 }

@@ -35,6 +35,15 @@ painel/cartao-qr.html cartão com QR code para imprimir
 6. `supabase/06_cartas.sql` (quando ela abre cada carta + voz nas cartas)
 7. `supabase/07_limpeza.sql` (aba «Antes de entregar»: limpar os testes)
 8. `supabase/08_horario.sql` (o site abre em 03/11/2026 às 19:55)
+9. `supabase/09_avisos.sql` (avisos no celular: tabelas)
+
+### Avisos no celular (notificações)
+
+A função `supabase/functions/avisos/index.ts` manda os avisos (carta nova,
+música nova, contagem das cartas trancadas e "a carta foi liberada").
+Ela é criada no painel do Supabase (Edge Functions → Via Editor), roda de
+hora em hora pelo `pg_cron` e usa segredos que **não** ficam no GitHub
+(VAPID_PRIVADA e AVISOS_SEGREDO). A chave pública fica em `js/config.js`.
 
 Todos podem rodar de novo sem quebrar nada.
 

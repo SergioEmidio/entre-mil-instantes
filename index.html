@@ -94,6 +94,7 @@
   <section class="cena" id="tela-contagem" aria-labelledby="contagem-titulo" hidden>
     <div class="tela tela--centro contagem">
       <div class="pilha pilha--m">
+        <img class="marca marca--contagem" src="./icones/marca.svg" alt="" width="64" height="64" decoding="async">
         <p class="rotulo" id="contagem-rotulo">Ainda não</p>
         <h1 class="titulo titulo--italico titulo-g" id="contagem-titulo">Tem uma coisa sendo preparada pra ti.</h1>
         <p class="texto-2">Abre no dia 3 de novembro, às 19h55.</p>
@@ -117,6 +118,7 @@
     <div class="tela senha">
       <form class="senha-form pilha pilha--g" id="senha-form" novalidate autocomplete="off">
         <div class="pilha pilha--m">
+          <img class="marca marca--senha" src="./icones/marca.svg" alt="" width="52" height="52" decoding="async">
           <p class="rotulo">Antes de entrar</p>
           <h1 class="titulo titulo--italico titulo-g" id="senha-titulo">Quando a nossa história começou?</h1>
           <p class="texto-2">Só quem estava lá sabe a resposta.</p>
@@ -192,6 +194,7 @@
   <section class="cena" id="tela-abertura" aria-labelledby="abertura-nome" hidden>
     <div class="tela tela--centro abertura">
       <div class="abertura-meio">
+        <img class="marca marca--abertura" src="./icones/marca.svg" alt="" width="76" height="76" decoding="async">
         <p class="rotulo" id="abertura-data"></p>
         <h1 class="abertura-titulo">
           <button class="abertura-nome" id="abertura-nome" type="button">Feliz aniversário</button>
@@ -645,6 +648,7 @@
   <section class="cena" id="tela-cantinho" aria-labelledby="cantinho-titulo" hidden>
     <div class="tela pagina">
       <div class="pagina-cabeca">
+        <img class="marca marca--cantinho" src="./icones/marca.svg" alt="" width="48" height="48" decoding="async">
         <p class="rotulo" id="cantinho-rotulo">Fica aqui o ano inteiro</p>
         <h1 class="titulo titulo--italico titulo-m" id="cantinho-titulo">Nosso cantinho</h1>
         <p class="texto-2 texto-p">Volta aqui quando quiser. Tudo continua guardado.</p>
@@ -658,6 +662,20 @@
           <div class="convite-botoes">
             <button class="botao botao--primario convite-instalar" type="button" id="convite-instalar" hidden>Instalar o app</button>
             <button class="botao-link" type="button" id="convite-agora-nao">Agora não</button>
+          </div>
+        </div>
+      </section>
+      <section class="convite-app convite-avisos" id="convite-avisos" aria-labelledby="avisos-titulo" hidden>
+        <span class="avisos-sino" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </span>
+        <div class="convite-textos">
+          <h2 class="convite-titulo" id="avisos-titulo">Quer que eu te avise?</h2>
+          <p class="convite-texto" id="avisos-texto"></p>
+          <div class="convite-botoes">
+            <button class="botao botao--primario convite-instalar" type="button" id="avisos-ativar">Ativar avisos</button>
+            <button class="botao-link" type="button" id="avisos-agora-nao">Agora não</button>
+            <button class="botao-link" type="button" id="avisos-desligar" hidden>Desligar avisos</button>
           </div>
         </div>
       </section>
