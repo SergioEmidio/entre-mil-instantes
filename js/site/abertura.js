@@ -4,7 +4,7 @@
 // Segredo: 5 toques rápidos no nome abrem a mensagem secreta.
 // =====================================================================
 
-import { texto } from "./dom.js";
+import { texto, h } from "./dom.js";
 import { dataCurta } from "./datas.js";
 
 const TOQUES_PARA_SEGREDO = 5;
@@ -23,7 +23,22 @@ export function montarAbertura(conteudo, entrar) {
   const aniversario = dataCurta(c.datas && c.datas.aniversario, " · ");
 
   const elNome = document.getElementById("abertura-nome");
-  elNome.textContent = nome;
+  // cada letra num pedacinho (para aparecer uma depois da outra);
+  // o leitor de tela continua lendo o nome inteiro
+  elNome.setAttribute("aria-label", nome);
+  let i = 0;
+  elNome.replaceChildren(
+    h(
+      "span",
+      { "aria-hidden": "true" },
+      ...Array.from(nome).map((letra) => {
+        if (/\s/.test(letra)) return document.createTextNode(" ");
+        const span = h("span", { class: "letra" }, letra);
+        span.style.setProperty("--i", String(i++));
+        return span;
+      })
+    )
+  );
   elNome.classList.toggle("abertura-nome--longo", nome.length > 8);
   elNome.classList.toggle("abertura-nome--muito-longo", nome.length > 14);
 

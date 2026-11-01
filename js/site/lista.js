@@ -5,7 +5,7 @@
 // Na pré-visualização, nada do que mudar aqui é salvo.
 // =====================================================================
 
-import { h, texto, vibrar, esperarClique } from "./dom.js";
+import { h, texto, vibrar, esperarClique, menosMovimento } from "./dom.js";
 import { lerDataISO } from "./datas.js";
 import { ehPrevia } from "./memoria.js";
 import { mostrarTela } from "./telas.js";
@@ -72,11 +72,41 @@ function nomeDoAutor(item) {
 // ---------------------------------------------------------------------
 // Desenhar
 // ---------------------------------------------------------------------
+// O item que acabou de chegar ou de ser marcado ganha uma animação.
+// Se a lista for redesenhada no meio (resposta do banco), a animação
+// continua de onde estava (atraso negativo), sem recomeçar.
+let destaque = null;   // { item, tipo: "novo" | "marcado", inicio }
+const DESTAQUE_MS = 1000;
+
+function destacar(item, tipo) {
+  destaque = { item, tipo, inicio: performance.now() };
+}
+
+function classeDoDestaque(item) {
+  if (!destaque || destaque.item !== item) return null;
+  const passou = performance.now() - destaque.inicio;
+  if (passou > DESTAQUE_MS) return null;
+  return { classe: `lista-item--${destaque.tipo}`, atraso: `${-Math.round(passou)}ms` };
+}
+
+// O número pula quando muda.
+function trocarNumero(campo, valor) {
+  const novo = String(valor);
+  if (campo.textContent === novo) return;
+  const tinha = campo.textContent !== "";
+  campo.textContent = novo;
+  if (!tinha || menosMovimento() || typeof campo.animate !== "function") return;
+  campo.animate(
+    [{ transform: "translateY(-30%) scale(1.25)", opacity: 0.2 }, { transform: "none", opacity: 1 }],
+    { duration: 520, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" }
+  );
+}
+
 function desenhar() {
   const feitos = itens.filter((i) => i.feito).length;
   const total = itens.length;
-  el.feitos.textContent = String(feitos);
-  el.faltam.textContent = String(total - feitos);
+  trocarNumero(el.feitos, feitos);
+  trocarNumero(el.faltam, total - feitos);
   el.progresso.style.transform = `scaleX(${total ? feitos / total : 0})`;
   el.vazia.hidden = total > 0;
 
@@ -117,9 +147,10 @@ function desenhar() {
       });
       caixa.checked = Boolean(item.feito);
 
-      return h(
+      const d = classeDoDestaque(item);
+      const li = h(
         "li",
-        { class: `lista-item${item.feito ? " lista-item--feito" : ""}`, "data-id": item.id },
+        { class: `lista-item${item.feito ? " lista-item--feito" : ""}${d ? ` ${d.classe}` : ""}`, "data-id": item.id },
         caixa,
         h(
           "label",
@@ -144,6 +175,8 @@ function desenhar() {
           "×"
         )
       );
+      if (d) li.style.setProperty("--atraso", d.atraso);
+      return li;
     })
   );
 }
@@ -174,6 +207,7 @@ async function adicionar() {
     criado_em: new Date().toISOString(),
   };
   itens.push(temporario);
+  destacar(temporario, "novo");
   el.campo.value = "";
   desenhar();
   vibrar(15);
@@ -187,6 +221,7 @@ async function adicionar() {
   try {
     const salvo = await adicionarNaLista(novo);
     itens = itens.map((i) => (i === temporario ? salvo : i));
+    if (destaque && destaque.item === temporario) destaque.item = salvo;
   } catch (erro) {
     console.error((erro && erro.original) || erro);
     itens = itens.filter((i) => i !== temporario);
@@ -201,6 +236,7 @@ async function marcar(item, feito) {
   item.feito = feito;
   item.feito_em = feito ? new Date().toISOString() : null;
   if (feito) vibrar([20, 40, 20]);
+  destacar(item, "marcado");
   desenhar();
   if (ehPrevia()) return;
 

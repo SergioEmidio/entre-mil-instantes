@@ -54,7 +54,7 @@ function criarCartao(vale, indice, jaRaspado, aoRevelar) {
   function revelar() {
     if (revelado) return;
     revelado = true;
-    cartao.classList.add("vale--revelado");
+    cartao.classList.add("vale--revelado", "vale--acabou");
     conteudo.removeAttribute("aria-hidden");
     vibrar(25);
     aoRevelar(cartao.dataset.id);

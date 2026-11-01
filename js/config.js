@@ -18,6 +18,10 @@ export const CONFIG = {
   // E-mail da conta dela, criada por ti no Supabase (ela nunca vê isso).
   EMAIL_CONVIDADA: "amor@teamo.com",
 
+  // As letras do casal (as mesmas do ícone do app): aparecem no lacre
+  // das cartas e no cartão final. Primeiro a dela, depois a tua.
+  INICIAIS: ["M", "S"],
+
   // Fuso usado para datas e para a contagem.
   FUSO: "America/Sao_Paulo",
 };

@@ -3,7 +3,7 @@
 // Duas fotos sobrepostas: ela arrasta a barrinha para comparar.
 // =====================================================================
 
-import { texto } from "./dom.js";
+import { texto, menosMovimento } from "./dom.js";
 import { linkDaFoto } from "./fotos.js";
 
 // Só aparece se as duas fotos existirem.
@@ -38,6 +38,33 @@ export function tocarAntesAgora(conteudo) {
   barra.value = "50";
   posicionar(50);
 
+  // Uma "dica" sem palavras: a linha vai e volta uma vez, mostrando que
+  // dá para arrastar. Para na hora se ela tocar.
+  let dicaQuadro = 0;
+  let dicaParada = menosMovimento();
+  const pararDica = () => {
+    dicaParada = true;
+    cancelAnimationFrame(dicaQuadro);
+  };
+  const PONTOS = [50, 30, 70, 50];
+  setTimeout(() => {
+    if (dicaParada) return;
+    const inicio = performance.now();
+    const DURA = 2200;
+    const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const passo = (agora) => {
+      if (dicaParada) return;
+      const t = Math.min(1, (agora - inicio) / DURA);
+      const trecho = Math.min(PONTOS.length - 2, Math.floor(t * (PONTOS.length - 1)));
+      const local = t * (PONTOS.length - 1) - trecho;
+      const valor = PONTOS[trecho] + (PONTOS[trecho + 1] - PONTOS[trecho]) * suave(local);
+      barra.value = String(Math.round(valor));
+      posicionar(valor);
+      if (t < 1) dicaQuadro = requestAnimationFrame(passo);
+    };
+    dicaQuadro = requestAnimationFrame(passo);
+  }, 1100);
+
   // Arrastar direto na foto também move a barrinha.
   let arrastando = false;
   function moverPeloDedo(evento) {
@@ -47,8 +74,12 @@ export function tocarAntesAgora(conteudo) {
     posicionar(barra.value);
   }
 
-  const aoMudarBarra = () => posicionar(barra.value);
+  const aoMudarBarra = () => {
+    pararDica();
+    posicionar(barra.value);
+  };
   const aoApertar = (evento) => {
+    pararDica();
     arrastando = true;
     try { quadro.setPointerCapture(evento.pointerId); } catch { /* ok */ }
     moverPeloDedo(evento);
@@ -68,6 +99,7 @@ export function tocarAntesAgora(conteudo) {
 
   return new Promise((terminar) => {
     function sair(resposta) {
+      pararDica();
       barra.removeEventListener("input", aoMudarBarra);
       quadro.removeEventListener("pointerdown", aoApertar);
       quadro.removeEventListener("pointermove", aoMover);

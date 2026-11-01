@@ -499,6 +499,18 @@
             </div>
           </div>
         </div>
+        <!-- Aviso da voz: conta 5 s e toca sozinha (ela pode tocar já ou cancelar) -->
+        <div class="folha-voz" id="carta-auto" role="status" aria-live="polite" hidden>
+          <span class="folha-voz-anel" aria-hidden="true">
+            <svg viewBox="0 0 36 36"><circle class="folha-voz-trilho" cx="18" cy="18" r="16"/><circle class="folha-voz-conta" id="carta-auto-anel" cx="18" cy="18" r="16"/></svg>
+            <span class="folha-voz-nota">♪</span>
+          </span>
+          <span class="folha-voz-texto" id="carta-auto-texto">Minha voz em 5s</span>
+          <button class="folha-voz-botao folha-voz-botao--forte" type="button" id="carta-auto-sim">Ouvir já</button>
+          <button class="folha-voz-fechar" type="button" id="carta-auto-nao" aria-label="Agora não">
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </button>
+        </div>
         <div class="folha-fita" id="carta-fita" aria-hidden="true"><span class="folha-fita-polegar" id="carta-fita-polegar"></span></div>
         <span class="folha-vinco folha-vinco--1" aria-hidden="true"></span>
         <span class="folha-vinco folha-vinco--2" aria-hidden="true"></span>

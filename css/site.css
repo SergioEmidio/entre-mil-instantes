@@ -2114,6 +2114,7 @@ html.modo-previa .stories-topo {
   z-index: 3;
   border-radius: 3cqw;
   background:
+    radial-gradient(75% 65% at var(--luz-x, 35%) var(--luz-y, 25%), rgba(255, 228, 214, 0.11), transparent 70%),
     repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.014) 0 0.5cqw, transparent 0.5cqw 1.6cqw),
     linear-gradient(165deg, #5e3c50 0%, #4b2f3f 55%, #3f2734 100%);
   clip-path: polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
@@ -2225,6 +2226,26 @@ html.modo-previa .stories-topo {
   display: none;
 }
 
+/* o reflexo da luz na cera (anda quando ela inclina o celular) */
+.env-lacre-cera::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--luz-x, 35%) var(--luz-y, 25%), rgba(255, 252, 238, 0.85) 0%, rgba(255, 245, 215, 0.25) 22%, transparent 46%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.env-lacre-cera {
+  transition: transform 140ms ease, filter 140ms ease;
+}
+
+.env-lacre--apertando .env-lacre-cera {
+  transform: scale(0.9);
+  filter: brightness(0.9);
+}
+
 .env-lacre-metade--e {
   clip-path: polygon(0 0, 54% 0, 44% 22%, 56% 41%, 43% 60%, 55% 78%, 46% 100%, 0 100%);
 }
@@ -2263,6 +2284,7 @@ html.modo-previa .stories-topo {
 /* trancada: envelope da noite, amarrado com barbante e cadeado no lacre */
 .env-corpo--trancado .env-bolso {
   background:
+    radial-gradient(75% 65% at var(--luz-x, 35%) var(--luz-y, 25%), rgba(210, 222, 255, 0.1), transparent 70%),
     repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.012) 0 0.5cqw, transparent 0.5cqw 1.6cqw),
     linear-gradient(165deg, #2a3656 0%, #1f2945 55%, #19213a 100%);
 }
@@ -2324,7 +2346,24 @@ html.modo-previa .stories-topo {
   width: 100%;
   aspect-ratio: 1 / 0.88;
   margin-bottom: 6px;
-  transition: transform 420ms var(--suave);
+  rotate: var(--inclina, 0deg);
+  transition: transform 420ms var(--suave), rotate 520ms var(--suave);
+}
+
+.envelope:focus-visible .envelope-arte {
+  rotate: 0deg;
+}
+
+/* chegada: os envelopes caem na mesa, um depois do outro */
+.cartas--chegando .envelope {
+  animation: envelope-chega 760ms cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+  animation-delay: calc(var(--ordem, 0) * 90ms + 120ms);
+}
+
+@keyframes envelope-chega {
+  from { opacity: 0; transform: translateY(-34px) rotate(-7deg) scale(0.9); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: none; }
 }
 
 .envelope-corpo {
@@ -2337,7 +2376,8 @@ html.modo-previa .stories-topo {
 
 @media (hover: hover) {
   .envelope:not(.envelope--trancado):hover .envelope-arte {
-    transform: translateY(-4px) rotate(-1deg);
+    transform: translateY(-5px);
+    rotate: 0deg;
   }
   .envelope:not(.envelope--trancado):hover .env-corpo:not(.env-corpo--aberto) .env-aba {
     transform: perspective(900px) rotateX(16deg);
@@ -2601,6 +2641,30 @@ html.modo-previa .stories-topo {
     0 30px 70px rgba(0, 0, 0, 0.5),
     0 8px 18px rgba(0, 0, 0, 0.25);
   transform-origin: 0 0;
+}
+
+/* grão do papel + a luz passeando por ele */
+.folha::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.folha::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(90% 60% at var(--luz-x, 35%) var(--luz-y, 25%), rgba(255, 253, 245, 0.55), transparent 70%);
+  mix-blend-mode: soft-light;
 }
 
 .folha-rolagem {
@@ -3854,3 +3918,510 @@ html.modo-previa .stories-topo {
 /* Legenda: quanto mais texto, menor a letra (a foto continua grande) */
 .st-legenda--media { --tam: 0.84; }
 .st-legenda--longa { --tam: 0.72; }
+
+/* =====================================================================
+   MOVIMENTO · o acabamento de todas as telas
+   Regras gerais: só transform/opacity (leve no celular), a mesma curva
+   (--suave) em tudo, nada que atrapalhe ler ou tocar, e "reduzir
+   movimento" do celular desliga tudo (base.css).
+   ===================================================================== */
+
+/* ---------- troca de tela: a antiga recua e some ---------- */
+@keyframes cena-sai {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.985); }
+}
+
+@keyframes cena-entra {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---------- o céu: profundidade e estrelas cadentes ---------- */
+.ceu {
+  inset: -3%;
+  translate: calc((var(--luz-x, 50%) - 50%) * -0.05) calc((var(--luz-y, 50%) - 50%) * -0.05);
+}
+
+.cadente {
+  position: absolute;
+  width: 110px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(242, 232, 216, 0), rgba(242, 232, 216, 0.85) 85%, #fff);
+  transform-origin: 100% 50%;
+  rotate: 152deg;
+  opacity: 0;
+  animation: cadente 1.3s cubic-bezier(0.25, 0.6, 0.35, 1) forwards;
+}
+
+@keyframes cadente {
+  0%   { opacity: 0; transform: translateX(0) scaleX(0.2); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-260px) scaleX(1); }
+}
+
+/* ---------- botão principal: um brilho passa quando a tela chega ---------- */
+.botao--primario {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.botao--primario::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+
+.cena--recem .botao--primario::after {
+  animation: varre 1.3s 1.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes varre {
+  from { transform: translateX(-130%); }
+  to   { transform: translateX(130%); }
+}
+
+@media (hover: hover) {
+  .botao {
+    transition: transform var(--rapido) var(--suave), box-shadow var(--rapido) ease, background-color var(--rapido) ease;
+  }
+  .botao:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .botao--primario:hover:not(:disabled) {
+    box-shadow: 0 10px 26px rgba(232, 211, 162, 0.22);
+  }
+  .botao--primario:hover:not(:disabled)::after {
+    animation: varre 0.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+}
+
+/* ---------- instalar: o ícone flutua ---------- */
+.instalar-icone {
+  animation: flutua 5s ease-in-out infinite;
+}
+
+@keyframes flutua {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(-1.5deg); }
+}
+
+/* ---------- contagem: os números trocam com um giro ---------- */
+.contagem-numero {
+  display: inline-block;
+}
+
+/* ---------- abertura: o nome dela é escrito letra por letra ---------- */
+.abertura-titulo {
+  position: relative;
+}
+
+.abertura-titulo::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: min(90vw, 560px);
+  aspect-ratio: 1.4;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(232, 211, 162, 0.16), rgba(70, 44, 58, 0.12) 55%, transparent);
+  animation: halo 7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes halo {
+  0%, 100% { opacity: 0.7; scale: 1; }
+  50%      { opacity: 1; scale: 1.08; }
+}
+
+.abertura-nome .letra {
+  display: inline-block;
+}
+
+.cena--recem .abertura-nome .letra {
+  animation: letra 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 280ms);
+}
+
+@keyframes letra {
+  from { opacity: 0; transform: translateY(0.32em) rotate(4deg); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* ---------- stories: o fundo desfocado respira devagar ---------- */
+.st--foto .st-foto-fundo {
+  animation: fundo-respira 14s ease-in-out infinite alternate;
+}
+
+@keyframes fundo-respira {
+  from { transform: scale(1.2) translate(0, 0); }
+  to   { transform: scale(1.3) translate(-2%, -1.5%); }
+}
+
+.st--entrando .st-foto-inteira img,
+.st--entrando .st-foto-inteira video {
+  animation: foto-pousa 700ms var(--suave) both;
+}
+
+@keyframes foto-pousa {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.st--entrando .st-legenda {
+  animation: surgir 600ms 180ms var(--suave) both;
+}
+
+.stories-palco--pausado .st-foto-fundo {
+  animation-play-state: paused;
+}
+
+/* ---------- rádio: a capa respira e o equalizador dança ---------- */
+.radio--tocando .radio-capa {
+  animation: capa-respira 3.6s ease-in-out infinite;
+}
+
+@keyframes capa-respira {
+  0%, 100% { transform: scale(1); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45); }
+  50%      { transform: scale(1.025); box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5); }
+}
+
+.radio-faixa-capa {
+  position: relative;
+}
+
+.radio-eq {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding-bottom: 13px;
+  background: rgba(16, 24, 43, 0.6);
+}
+
+.radio-faixa--atual .radio-eq {
+  display: flex;
+}
+
+.radio-eq i {
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--champanhe);
+  transform-origin: 50% 100%;
+}
+
+.radio-faixa--tocando .radio-eq i {
+  animation: eq 0.9s ease-in-out infinite alternate;
+}
+
+.radio-faixa--tocando .radio-eq i:nth-child(2) { animation-duration: 0.65s; animation-delay: -0.3s; }
+.radio-faixa--tocando .radio-eq i:nth-child(3) { animation-duration: 0.8s; animation-delay: -0.55s; }
+
+@keyframes eq {
+  from { transform: scaleY(0.6); }
+  to   { transform: scaleY(3.2); }
+}
+
+/* tocando agora: a capa encolhe quando pausa (e volta quando toca) */
+.tocando-capa {
+  transition: transform 520ms cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 520ms ease;
+}
+
+.tocando--pausado .tocando-capa {
+  transform: scale(0.88);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- presente: raios de luz atrás do presente aberto ---------- */
+.presente-aberto {
+  position: relative;
+  isolation: isolate;
+}
+
+.presente-aberto::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  z-index: -1;
+  width: 150vmax;
+  height: 150vmax;
+  margin: -75vmax 0 0 -75vmax;
+  background: repeating-conic-gradient(from 0deg, rgba(232, 211, 162, 0.07) 0deg 6deg, transparent 6deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 14%, transparent 34%);
+  mask-image: radial-gradient(circle, #000 0, rgba(0, 0, 0, 0.6) 14%, transparent 34%);
+  animation: raios 60s linear infinite, aparece-raios 1.6s 0.3s ease both;
+  pointer-events: none;
+}
+
+@keyframes raios {
+  to { rotate: 360deg; }
+}
+
+@keyframes aparece-raios {
+  from { opacity: 0; scale: 0.6; }
+  to   { opacity: 1; scale: 1; }
+}
+
+.presente-aberto--entrando .presente-nome {
+  animation: tinta-titulo 1.1s 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---------- vales: um brilho atravessa quando termina de raspar ---------- */
+.vale--acabou::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 240, 210, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: varre 1s 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none;
+}
+
+.vale--acabou .vale-premio {
+  animation: premio 700ms 0.1s cubic-bezier(0.34, 1.5, 0.64, 1) both;
+}
+
+@keyframes premio {
+  from { transform: scale(0.9); opacity: 0.4; }
+  to   { transform: none; opacity: 1; }
+}
+
+.vale-premio {
+  transform-origin: 0 50%;
+}
+
+/* ---------- lista: item novo entra, item feito comemora ---------- */
+.lista-item--novo {
+  animation: item-chega 560ms var(--suave) both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+@keyframes item-chega {
+  from { opacity: 0; transform: translateY(-10px) scale(0.97); background-color: rgba(232, 211, 162, 0.22); }
+  60%  { background-color: rgba(232, 211, 162, 0.12); }
+  to   { opacity: 1; transform: none; }
+}
+
+.lista-item--marcado {
+  animation: item-feito 900ms ease both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+.lista-item--marcado .lista-caixa {
+  animation: caixa-pop 500ms cubic-bezier(0.34, 1.6, 0.64, 1) both;
+  animation-delay: var(--atraso, 0ms);
+}
+
+.lista-item--marcado.lista-item--feito .lista-item-texto {
+  animation: risca 700ms 120ms ease both;
+  animation-delay: calc(var(--atraso, 0ms) + 120ms);
+}
+
+@keyframes item-feito {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 211, 162, 0.5); }
+  100% { box-shadow: 0 0 0 14px rgba(232, 211, 162, 0); }
+}
+
+@keyframes caixa-pop {
+  0%   { transform: scale(0.6); }
+  100% { transform: scale(1); }
+}
+
+@keyframes risca {
+  from { text-decoration-color: transparent; color: var(--marfim); }
+  to   { text-decoration-color: currentColor; color: var(--texto-3); }
+}
+
+.lista-numero {
+  display: inline-block;
+}
+
+/* ---------- recado enviado: o selo pula e uma onda se espalha ---------- */
+.recado-enviado:not([hidden]) .recado-selo {
+  position: relative;
+  animation: selo-pula 800ms 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.recado-enviado:not([hidden]) .recado-selo::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid var(--champanhe);
+  animation: selo-onda 1.4s 0.5s ease-out both;
+}
+
+@keyframes selo-pula {
+  from { transform: scale(0.4) rotate(-20deg); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+@keyframes selo-onda {
+  from { transform: scale(1); opacity: 0.9; }
+  to   { transform: scale(2.4); opacity: 0; }
+}
+
+/* ---------- cartão: o cartão flutua de leve na moldura ---------- */
+.cartao-canvas {
+  animation: flutua 6s ease-in-out infinite;
+}
+
+/* ---------- cantinho: os cartões reagem ao toque ---------- */
+@media (hover: hover) {
+  .cantinho > * {
+    transition: transform var(--rapido) var(--suave);
+  }
+  .cantinho > *:hover {
+    transform: translateX(3px);
+  }
+}
+
+/* os raios do presente não podem criar rolagem para o lado */
+.cena .presente {
+  overflow: hidden;
+}
+
+/* ---------- a voz da carta começa sozinha (aviso com anel contando) ---------- */
+.folha-voz {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 4;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 7px;
+  border-radius: 999px;
+  background: var(--vinho);
+  color: var(--marfim);
+  box-shadow: 0 10px 26px rgba(42, 30, 36, 0.35), inset 0 0 0 1px rgba(232, 211, 162, 0.25);
+  transform: translateX(-50%);
+}
+
+.folha-voz[hidden] {
+  display: none;
+}
+
+.folha-voz-anel {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  color: var(--champanhe);
+}
+
+.folha-voz-anel svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.folha-voz-anel circle {
+  fill: none;
+  stroke-width: 2.4;
+}
+
+.folha-voz-trilho {
+  stroke: rgba(232, 211, 162, 0.25);
+}
+
+.folha-voz-conta {
+  stroke: var(--champanhe);
+  stroke-linecap: round;
+  stroke-dasharray: 100.53;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.folha-voz[data-fase="tocando"] .folha-voz-conta,
+.folha-voz[data-fase="oferecendo"] .folha-voz-conta {
+  opacity: 0.45;
+}
+
+.folha-voz-nota {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.folha-voz[data-fase="tocando"] .folha-voz-nota {
+  animation: nota-pula 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes nota-pula {
+  from { transform: translateY(1px) rotate(-8deg); }
+  to   { transform: translateY(-2px) rotate(8deg); }
+}
+
+.folha-voz-texto {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.folha-voz-botao {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--champanhe);
+  color: var(--meia-noite);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.folha-voz-fechar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(232, 211, 162, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--marfim);
+}
+
+.folha-voz-fechar[hidden] {
+  display: none;
+}
+
+.folha--com-aviso .folha-conteudo {
+  padding-bottom: 84px;
+}
+
+@media (max-width: 359px) {
+  .folha-voz { gap: 5px; padding: 5px 5px 5px 6px; max-width: calc(100% - 12px); }
+  .folha-voz-anel,
+  .folha-voz-fechar { width: 30px; height: 30px; }
+  .folha-voz-nota { font-size: 15px; }
+  .folha-voz-texto { font-size: 12.5px; }
+  .folha-voz-botao { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
+}

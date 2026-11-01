@@ -8,6 +8,7 @@ import { texto, esperarClique } from "./dom.js";
 import { diasDesde, lerDataISO, hojeEmBrasilia } from "./datas.js";
 import { linkDaFoto } from "./fotos.js";
 import { mostrarTela } from "./telas.js";
+import { CONFIG } from "../config.js";
 
 const L = 1080;
 const A = 1920;
@@ -61,6 +62,11 @@ function escolherEstilo(i) {
   });
   el.baixarTexto.textContent = "Baixar imagem";
   desenhar();
+  // troca de estilo com um "flash" suave, como uma foto revelando
+  const tela = document.getElementById("cartao-canvas");
+  if (tela && typeof tela.animate === "function" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    tela.animate([{ opacity: 0.35, filter: "brightness(1.4)" }, { opacity: 1, filter: "brightness(1)" }], { duration: 420, easing: "ease-out" });
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -301,7 +307,7 @@ export async function tocarCartao(conteudo) {
     rodape: [autor ? `${nome} & ${autor}` : nome, inicio ? `desde ${dois(inicio.dia)}·${dois(inicio.mes)}·${inicio.ano}` : ""]
       .filter(Boolean)
       .join(" · "),
-    iniciais: autor ? `${nome[0]} & ${autor[0]}` : nome[0],
+    iniciais: Array.isArray(CONFIG.INICIAIS) ? `${CONFIG.INICIAIS[0]} & ${CONFIG.INICIAIS[1]}` : autor ? `${nome[0]} & ${autor[0]}` : nome[0],
   };
 
   el.baixarTexto.textContent = "Baixar imagem";

@@ -21,6 +21,9 @@ import { ehPrevia, lerConjunto, guardarConjunto } from "./memoria.js";
 import { linkDaFoto } from "./fotos.js";
 import { mostrarTela } from "./telas.js";
 import { registrarCarta } from "../supabase.js";
+import { sons, ligarLuz } from "./efeitos.js";
+import { CONFIG } from "../config.js";
+import { somDesligado } from "./som.js";
 
 const SUAVE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SOBE = "cubic-bezier(0.33, 1, 0.68, 1)";
@@ -111,6 +114,11 @@ function pegar() {
     responder: "carta-responder",
     fechar: "carta-fechar",
     fita: "carta-fita",
+    auto: "carta-auto",
+    autoTexto: "carta-auto-texto",
+    autoAnel: "carta-auto-anel",
+    autoSim: "carta-auto-sim",
+    autoNao: "carta-auto-nao",
     polegar: "carta-fita-polegar",
   };
   for (const [nome, id] of Object.entries(ids)) el[nome] = document.getElementById(id);
@@ -131,6 +139,11 @@ function pegar() {
   el.tocar.addEventListener("click", () => {
     if (aoTocarNoLacre) aoTocarNoLacre("abrir");
   });
+  // o lacre afunda sob o dedo antes de rachar
+  el.tocar.addEventListener("pointerdown", () => el.lacre.classList.add("env-lacre--apertando"));
+  for (const tipo of ["pointerleave", "pointercancel"]) {
+    el.tocar.addEventListener(tipo, () => el.lacre.classList.remove("env-lacre--apertando"));
+  }
 
   ligarFita();
 
@@ -143,7 +156,24 @@ function pegar() {
   });
   voz.addEventListener("pause", desenharVoz);
   voz.addEventListener("play", desenharVoz);
+  el.autoSim.addEventListener("click", () => {
+    if (vozAuto.fase === "tocando") {
+      voz.pause();
+      esconderAviso();
+    } else {
+      tocarVozJa();
+    }
+  });
+  el.autoNao.addEventListener("click", () => esconderAviso());
+  voz.addEventListener("ended", () => {
+    if (vozAuto.fase === "tocando") esconderAviso();
+  });
+  voz.addEventListener("pause", () => {
+    if (vozAuto.fase === "tocando" && !voz.ended) esconderAviso();
+  });
   el.vozBotao.addEventListener("click", () => {
+    // tocou no botão da carta: o aviso sai de cena
+    if (vozAuto.fase === "contando" || vozAuto.fase === "oferecendo") esconderAviso();
     if (voz.paused) {
       const p = voz.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
@@ -151,6 +181,82 @@ function pegar() {
       voz.pause();
     }
   });
+}
+
+// ---------------------------------------------------------------------
+// A voz começa sozinha: 5 s depois que a carta abre, com aviso e anel
+// contando. Ela pode ouvir já ou cancelar. Se o som estiver desligado
+// (botão dos stories), não toca sozinha: só oferece.
+// ---------------------------------------------------------------------
+const ESPERA_DA_VOZ = 5;
+const vozAuto = { fase: "parada", tempo: null, faltam: 0 };
+
+function temVoz() {
+  return !el.voz.hidden && Boolean(voz.getAttribute("src"));
+}
+
+function mostrarAviso(fase, textoAviso, botaoSim) {
+  vozAuto.fase = fase;
+  el.auto.dataset.fase = fase;
+  el.autoTexto.textContent = textoAviso;
+  el.autoSim.textContent = botaoSim;
+  el.autoNao.hidden = fase === "tocando";
+  el.folha.classList.add("folha--com-aviso");
+  if (el.auto.hidden) {
+    el.auto.hidden = false;
+    if (podeAnimar()) {
+      el.auto.animate(
+        [{ opacity: 0, transform: "translate(-50%, 16px) scale(0.96)" }, { opacity: 1, transform: "translate(-50%, 0) scale(1)" }],
+        { duration: 480, easing: SUAVE }
+      );
+    }
+  }
+}
+
+function esconderAviso() {
+  clearInterval(vozAuto.tempo);
+  vozAuto.tempo = null;
+  vozAuto.fase = "parada";
+  el.autoAnel.getAnimations().forEach((a) => a.cancel());
+  el.auto.hidden = true;
+  el.folha.classList.remove("folha--com-aviso");
+}
+
+function tocarVozJa() {
+  clearInterval(vozAuto.tempo);
+  vozAuto.tempo = null;
+  el.autoAnel.getAnimations().forEach((a) => a.cancel());
+  const p = voz.play();
+  mostrarAviso("tocando", "Tocando minha voz", "Pausar");
+  if (p && typeof p.catch === "function") {
+    p.catch(() => {
+      // o celular não deixou tocar sozinho: fica o convite para tocar
+      mostrarAviso("oferecendo", "Tem uma voz minha aqui", "Ouvir");
+    });
+  }
+}
+
+function comecarVozAutomatica() {
+  esconderAviso();
+  if (!temVoz()) return;
+  if (somDesligado()) {
+    mostrarAviso("oferecendo", "Tem uma voz minha aqui", "Ouvir");
+    return;
+  }
+  vozAuto.faltam = ESPERA_DA_VOZ;
+  mostrarAviso("contando", `Minha voz em ${vozAuto.faltam}s`, "Ouvir já");
+  if (typeof el.autoAnel.animate === "function") {
+    el.autoAnel.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 100.53 }], { duration: ESPERA_DA_VOZ * 1000, easing: "linear", fill: "forwards" });
+  }
+  vozAuto.tempo = setInterval(() => {
+    vozAuto.faltam -= 1;
+    if (vozAuto.fase !== "contando") return;
+    if (vozAuto.faltam <= 0) {
+      tocarVozJa();
+    } else {
+      el.autoTexto.textContent = `Minha voz em ${vozAuto.faltam}s`;
+    }
+  }, 1000);
 }
 
 // ---------------------------------------------------------------------
@@ -422,7 +528,7 @@ function zerarEnvelope() {
   el.mini.style.opacity = "";
   el.cera.style.opacity = "";
   el.metades.forEach((m) => { m.style.display = ""; });
-  el.lacre.classList.remove("env-lacre--chamando");
+  el.lacre.classList.remove("env-lacre--chamando", "env-lacre--apertando");
   el.tocar.hidden = true;
   el.dica.style.opacity = "";
   tirarEnfeites();
@@ -447,11 +553,22 @@ function prepararEnvelope(geo, carta, jaAberta) {
 }
 
 // Leva o envelope grande até o desenho do envelope na grade.
+// (os envelopes da grade ficam um pouquinho tortos, como em cima de uma
+// mesa: o envelope grande sai e volta com a mesma inclinação)
 function deOndeVeio(botao, geo) {
   const corpo = botao.querySelector(".envelope-corpo") || botao;
   const r = corpo.getBoundingClientRect();
-  const escala = r.width / geo.L;
-  return `translate(${r.left - geo.left}px, ${r.top - geo.top}px) scale(${escala})`;
+  const largura = corpo.offsetWidth || r.width;
+  const escala = largura / geo.L;
+  const graus = parseFloat(botao.dataset.inclina || "0") || 0;
+  const a = (graus * Math.PI) / 180;
+  const mx = (escala * geo.L) / 2;
+  const my = (escala * geo.H) / 2;
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const tx = cx - geo.left - (mx * Math.cos(a) - my * Math.sin(a));
+  const ty = cy - geo.top - (mx * Math.sin(a) + my * Math.cos(a));
+  return `translate(${tx}px, ${ty}px) rotate(${graus}deg) scale(${escala})`;
 }
 
 function prepararDobras(alturaFolha) {
@@ -497,7 +614,9 @@ async function quebrarLacre(geo) {
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
   animar(el.dica, [{ opacity: 1 }, { opacity: 0 }], 200);
+  el.lacre.classList.remove("env-lacre--apertando");
   vibrar([14, 40, 22]);
+  sons.estalo();
   // 1. a rachadura corre pelo meio
   animar(el.lacre, [{ transform: "translate(-50%, -58%) scale(1)" }, { transform: "translate(-50%, -58%) scale(0.94)" }, { transform: "translate(-50%, -58%) scale(1.02)" }], 220, { easing: "ease-out" });
   await animar(el.racha, [{ strokeDashoffset: 120 }, { strokeDashoffset: 0 }], 200, { easing: "ease-in" });
@@ -541,6 +660,7 @@ async function abrir(carta, botao, autor, jaAberta) {
     atualizarFita();
     el.titulo.focus({ preventScroll: true });
     if (pedidoDeFechar) fechar(pedidoDeFechar);
+    else comecarVozAutomatica();
     return;
   }
 
@@ -558,9 +678,10 @@ async function abrir(carta, botao, autor, jaAberta) {
     { transform: de, opacity: 0.85 },
     { offset: 0.55, transform: `translate(0, ${-geo.H * 0.1}px) rotate(-2.5deg) scale(1.03)`, opacity: 1 },
     { offset: 0.8, transform: "translate(0, 3px) rotate(0.6deg) scale(0.995)" },
-    { transform: "none", opacity: 1 },
+    { transform: "translate(0, 0) rotate(0deg) scale(1)", opacity: 1 },
   ], 720, { easing: "cubic-bezier(0.3, 0.7, 0.3, 1)" });
   if (!vivo()) return;
+  sons.pousa();
 
   if (pedidoDeFechar) {
     await voltarSemAbrir();
@@ -580,17 +701,21 @@ async function abrir(carta, botao, autor, jaAberta) {
     if (minha.aoAbrir) minha.aoAbrir();
     await quebrarLacre(geo);
     const abrindo = girarAba(0, ABA_ABERTA, 720, passaUmPouco, geo.L);
+    sons.aba();
     await esperar(300);
     brilhos(geo.left + geo.L / 2, geo.top + geo.H * 0.1, 26, geo.L);
+    sons.brilho();
     await abrindo;
   } else {
     estado = "abrindo";
     if (minha.aoAbrir) minha.aoAbrir();
     brilhos(geo.left + geo.L / 2, geo.top, 14, geo.L);
+    sons.brilho();
   }
 
   // 3. a carta sobe e sai do envelope
   const deY = jaAberta ? PAPEL_ESPIA * PAPEL_ALTURA * geo.H : 0;
+  sons.desliza();
   await animar(el.mini, [
     { transform: `translateY(${deY}px) rotate(0deg)` },
     { offset: 0.7, transform: `translateY(${-geo.subida * 1.04}px) rotate(-1.2deg)` },
@@ -622,14 +747,20 @@ async function abrir(carta, botao, autor, jaAberta) {
   ], 560);
   if (!vivo()) return;
 
-  // 5. desdobra: primeiro o meio, depois a parte de baixo (com sombra no papel)
-  const sombra = [{ filter: "brightness(0.7)" }, { filter: "brightness(1)" }];
-  animar(el.dobras[0], [{ transform: dobrada }, { transform: desdobrada }], 280, { easing: "ease-out" });
-  animar(el.dobras[0], sombra, 280, { easing: "ease-out" });
-  await animar(el.folha, [{ clipPath: `inset(0 0 ${alturaFolha - terco}px 0)` }, { clipPath: `inset(0 0 ${alturaFolha - terco * 2}px 0)` }], 280, { easing: "ease-out" });
-  animar(el.dobras[1], [{ transform: dobrada }, { transform: desdobrada }], 280, { easing: "ease-out" });
-  animar(el.dobras[1], sombra, 280, { easing: "ease-out" });
-  await animar(el.folha, [{ clipPath: `inset(0 0 ${alturaFolha - terco * 2}px 0)` }, { clipPath: "inset(0 0 0px 0)" }], 280, { easing: "ease-out" });
+  // 5. desdobra: primeiro o meio, depois a parte de baixo. O papel tem
+  // "mola": passa um pouquinho do ponto e volta, com sombra na dobra.
+  sons.desdobra();
+  const comMola = [
+    { transform: dobrada, filter: "brightness(0.66)" },
+    { offset: 0.66, transform: "perspective(900px) rotateX(-14deg)", filter: "brightness(1.04)" },
+    { offset: 0.85, transform: "perspective(900px) rotateX(5deg)", filter: "brightness(0.98)" },
+    { transform: desdobrada, filter: "brightness(1)" },
+  ];
+  const revela = (de, ate) => [{ clipPath: `inset(0 0 ${de}px 0)` }, { offset: 0.66, clipPath: `inset(0 0 ${ate}px 0)` }, { clipPath: `inset(0 0 ${ate}px 0)` }];
+  animar(el.dobras[0], comMola, 400, { easing: "ease-out" });
+  await animar(el.folha, revela(alturaFolha - terco, alturaFolha - terco * 2), 400, { easing: "ease-out" });
+  animar(el.dobras[1], comMola, 400, { easing: "ease-out" });
+  await animar(el.folha, revela(alturaFolha - terco * 2, 0), 400, { easing: "ease-out" });
   if (!vivo()) return;
 
   // 6. o texto aparece como tinta e a assinatura é escrita
@@ -648,6 +779,7 @@ async function abrir(carta, botao, autor, jaAberta) {
   estado = "aberta";
   el.titulo.focus({ preventScroll: true });
   if (pedidoDeFechar) fechar(pedidoDeFechar);
+  else comecarVozAutomatica();
 }
 
 // Ela desistiu antes de quebrar o lacre: o envelope só volta.
@@ -669,6 +801,7 @@ async function voltarSemAbrir() {
 async function fechar(motivo = "guardar") {
   if (estado !== "aberta") return;
   estado = "fechando";
+  esconderAviso();
   voz.pause();
   const minha = atual;
   const vivo = () => atual === minha && !el.fundo.hidden;
@@ -691,6 +824,7 @@ async function fechar(motivo = "guardar") {
   limpar(...el.vincos);
 
   // 2. dobra: primeiro a parte de baixo, depois o meio
+  sons.desdobra();
   const alturaFolha = el.folha.getBoundingClientRect().height;
   const terco = prepararDobras(alturaFolha);
   const sombra = [{ filter: "brightness(1)" }, { filter: "brightness(0.72)" }];
@@ -723,6 +857,7 @@ async function fechar(motivo = "guardar") {
   el.mini.style.opacity = "";
   const espia = voltaLacrada ? 0 : PAPEL_ESPIA * PAPEL_ALTURA * geo.H;
   limpar(el.mini);
+  sons.desliza();
   await animar(el.mini, [{ transform: `translateY(${-geo.subida}px)` }, { transform: `translateY(${espia}px)` }], 420, { easing: "cubic-bezier(0.55, 0, 0.3, 1)" });
   if (!vivo()) return;
 
@@ -749,6 +884,7 @@ async function fechar(motivo = "guardar") {
     { transform: deOndeVeio(botao, geo), opacity: 0.9 },
   ], 520, { easing: "cubic-bezier(0.5, 0, 0.3, 1)" });
   if (!vivo()) return;
+  sons.pousa();
 
   el.fundo.hidden = true;
   limpar(el.fundo);
@@ -767,6 +903,7 @@ function terminarDeFechar(motivo, abriu) {
 
 // Fecha na hora, sem animação (quando ela sai da tela).
 function fecharJa() {
+  esconderAviso();
   if (estado === "fechada") return;
   voz.pause();
   if (aoTocarNoLacre) aoTocarNoLacre("fechar");
@@ -788,11 +925,9 @@ function fecharJa() {
 // ---------------------------------------------------------------------
 let iniciaisAtuais = "♥";
 
-function iniciais(conteudo) {
-  const a = texto(conteudo && conteudo.nome);
-  const b = texto(conteudo && conteudo.autor);
-  if (a && b) return `${a[0]}♥${b[0]}`;
-  return (a || b || "♥")[0];
+function iniciais() {
+  const [dela, dele] = Array.isArray(CONFIG.INICIAIS) ? CONFIG.INICIAIS : ["M", "S"];
+  return `${dela}♥${dele}`;
 }
 
 const ICONE_CADEADO = "M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z";
@@ -839,6 +974,14 @@ function desenhoDoEnvelope({ aberto, trancado }) {
   );
 }
 
+// Cada envelope fica levemente torto (sempre igual para a mesma carta).
+function inclinacao(id) {
+  let n = 0;
+  const t = String(id);
+  for (let i = 0; i < t.length; i++) n = (n * 31 + t.charCodeAt(i)) % 997;
+  return Math.round(((n % 7) - 3) * 0.6 * 10) / 10;
+}
+
 function textoDaContagem(dias) {
   if (dias <= 1) return "Abre amanhã";
   return `Faltam ${dias} dias`;
@@ -856,7 +999,7 @@ export async function tocarCartas(conteudo, { deCantinho = false } = {}) {
 
   el.seguir.textContent = deCantinho ? "Voltar ao cantinho" : "Continuar";
   el.aviso.textContent = "";
-  iniciaisAtuais = iniciais(conteudo);
+  iniciaisAtuais = iniciais();
   el.responder.hidden = false;
 
   function avisar(mensagem) {
@@ -874,7 +1017,7 @@ export async function tocarCartas(conteudo, { deCantinho = false } = {}) {
 
   function desenhar() {
     el.lista.replaceChildren(
-      ...cartas.map((carta) => {
+      ...cartas.map((carta, ordem) => {
         const trancada = Boolean(carta.trancada);
         const lida = lidas.has(carta.id);
         const nova = !trancada && Boolean(carta.libera_em) && !lida;
@@ -907,6 +1050,10 @@ export async function tocarCartas(conteudo, { deCantinho = false } = {}) {
           h("span", { class: "envelope-titulo" }, texto(carta.titulo)),
           trancada ? h("span", { class: "envelope-data" }, `abre ${dataCurta(carta.libera_em, "/")}${previa ? " · prévia" : ""}`) : null
         );
+        const graus = inclinacao(carta.id);
+        botao.dataset.inclina = String(graus);
+        botao.style.setProperty("--inclina", `${graus}deg`);
+        botao.style.setProperty("--ordem", String(ordem));
         botao.addEventListener("animationend", (evento) => {
           if (evento.animationName === "envelope-treme") botao.classList.remove("envelope--tremendo");
         });
@@ -934,12 +1081,18 @@ export async function tocarCartas(conteudo, { deCantinho = false } = {}) {
   }
 
   desenhar();
+  ligarLuz();
+  // os envelopes chegam "jogados na mesa", um depois do outro
+  el.lista.classList.add("cartas--chegando");
+  const chegada = setTimeout(() => el.lista.classList.remove("cartas--chegando"), 900 + cartas.length * 90);
   await mostrarTela("tela-cartas");
 
   return new Promise((resolver) => {
     const sair = (resultado) => {
       el.seguir.removeEventListener("click", aoSeguir);
       aoTerminarDeFechar = null;
+      clearTimeout(chegada);
+      el.lista.classList.remove("cartas--chegando");
       clearTimeout(avisoTempo);
       fecharJa();
       resolver(resultado);

@@ -341,7 +341,12 @@ function desenharLista() {
               mostrarTela("tela-tocando");
             },
           },
-          h("span", { class: "radio-faixa-capa" }, imagem(capaDe(f), "", true)),
+          h(
+            "span",
+            { class: "radio-faixa-capa" },
+            imagem(capaDe(f), "", true),
+            h("span", { class: "radio-eq", "aria-hidden": "true" }, h("i"), h("i"), h("i"))
+          ),
           h(
             "span",
             { class: "radio-faixa-textos" },
@@ -357,6 +362,10 @@ function desenharLista() {
 
 function atualizarBotoes() {
   const tocando = !audio.paused && !acabou;
+  const telaRadio = document.getElementById("tela-radio");
+  const telaTocando = document.getElementById("tocando");
+  if (telaRadio) telaRadio.classList.toggle("radio--tocando", tocando);
+  if (telaTocando) telaTocando.classList.toggle("tocando--pausado", !tocando);
   for (const botao of [el.play, el.tocPlay, el.miniPlay]) {
     trocarIcone(botao, tocando ? "pausa" : "play");
     botao.setAttribute("aria-label", tocando ? "Pausar" : "Tocar");
